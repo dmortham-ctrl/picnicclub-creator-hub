@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CreatorCard } from "./components/creator-card";
 import { SiteNav } from "./components/site-nav";
+import { TrackedLink, TrackView } from "./components/analytics";
 import { getPublishedProfiles } from "@/lib/data";
 import { getSiteContent } from "@/lib/content";
 import { getActiveBrands } from "@/lib/brand-data";
@@ -33,9 +34,10 @@ export default async function Home() {
   const heroCreators = Array.from({ length: 20 }, (_, index) => ({ avatar: featured[index]?.avatar_url ?? `https://i.pravatar.cc/160?img=${index + 20}`, href: featured[index] ? `/@${featured[index].username}` : "/members" }));
 
   return <main className="site-shell">
+    <TrackView />
     <SiteNav />
     <section className="hero">
-      <div><div className="eyebrow">Creator commerce ecosystem / 001</div><h1>{content.hero_title}</h1><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><Link className="button-lime" href="https://forms.gle/yEmDWsFd1q5DHjjP8">Join as creator ↗</Link><Link className="button-outline" href="https://wa.me/62895364547187">Collaborate with us</Link></div></div>
+      <div><div className="eyebrow">Creator commerce ecosystem / 001</div><h1>{content.hero_title}</h1><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_creator" className="button-lime" href="https://forms.gle/yEmDWsFd1q5DHjjP8">Join as creator ↗</TrackedLink><TrackedLink ctaKey="collaborate" className="button-outline" href="https://wa.me/62895364547187">Collaborate with us</TrackedLink></div></div>
       <div className="orbit">{heroCreators.map((creator, index) => <Link className={`avatar ${index < 12 ? "avatar-outer" : "avatar-inner"}`} href={creator.href} key={index} aria-label="View creator profile"><img src={creator.avatar} alt="" /></Link>)}<div className="orbit-center">Top Creator<br />Picnic</div></div>
     </section>
     <div className="band">{content.marquee_text}</div>
@@ -51,11 +53,11 @@ export default async function Home() {
 
     <section id="about" className="section lime-section"><div className="eyebrow">Why Picnic Club / 005</div><h2>{content.about_title}</h2><p className="hero-copy lime-copy">Dari training, mentoring, networking, sampai peluang kolaborasi dengan brand. Picnic Club hadir untuk membantu creator tumbuh dengan support yang nyata.</p><div className="benefit-grid">{benefits.map(([number, title, text]) => <div className="benefit" key={number}><span>{number}</span><h3>{title}</h3><p>{text}</p></div>)}</div></section>
 
-    <section id="brands" className="section split-section"><div><div className="eyebrow">For brands / 006</div><h2>Make your<br />next move.</h2></div><div><p className="hero-copy">Berkolaborasi dengan komunitas creator affiliate yang terus berkembang untuk meningkatkan visibilitas, konversi, dan penjualan brand Anda.</p><Link className="button-dark" href="https://wa.me/62895364547187">Talk to our team ↗</Link></div></section>
+    <section id="brands" className="section split-section"><div><div className="eyebrow">For brands / 006</div><h2>Make your<br />next move.</h2></div><div><p className="hero-copy">Berkolaborasi dengan komunitas creator affiliate yang terus berkembang untuk meningkatkan visibilitas, konversi, dan penjualan brand Anda.</p><TrackedLink ctaKey="brand_contact" className="button-dark" href="https://wa.me/62895364547187">Talk to our team ↗</TrackedLink></div></section>
 
     <section id="faq" className="section faq-section"><div className="section-head"><div><div className="eyebrow">Good to know / 007</div><h2>Questions,<br />answered.</h2></div><p className="section-note">{content.faq_intro}</p></div><div className="faq-list">{faqs.map(([question, answer]) => <details key={question}><summary>{question}<span>+</span></summary><p>{answer}</p></details>)}</div></section>
 
-    <section className="final-cta"><div className="eyebrow">Your next chapter / 008</div><h2>Ready to grow<br /><i>together?</i></h2><div className="hero-actions"><Link className="button-lime" href="https://forms.gle/yEmDWsFd1q5DHjjP8">Join as creator ↗</Link><Link className="button-outline light-outline" href="https://wa.me/62895364547187">Work with us</Link></div></section>
+    <section className="final-cta"><div className="eyebrow">Your next chapter / 008</div><h2>Ready to grow<br /><i>together?</i></h2><div className="hero-actions"><TrackedLink ctaKey="join_creator" className="button-lime" href="https://forms.gle/yEmDWsFd1q5DHjjP8">Join as creator ↗</TrackedLink><TrackedLink ctaKey="collaborate" className="button-outline light-outline" href="https://wa.me/62895364547187">Work with us</TrackedLink></div></section>
     <footer className="footer"><div className="footer-top"><div className="footer-intro"><div className="brand"><span className="brand-mark" style={{ background: "var(--lime)", color: "var(--ink)" }}>P</span> picnic club</div><p>Indonesia&apos;s home for creators, affiliators, and brands that want to grow together.</p><div className="footer-socials"><Link href="https://www.tiktok.com/@picnicclub.id">TikTok ↗</Link><Link href="https://www.instagram.com/picnicclub.id/">Instagram ↗</Link></div></div><div className="footer-column"><span className="footer-label">Explore</span><Link href="/#about">About us</Link><Link href="/members">Creators</Link><Link href="/#faq">FAQ</Link></div><div className="footer-column"><span className="footer-label">For creators</span><Link href="https://forms.gle/yEmDWsFd1q5DHjjP8">Join Picnic Club ↗</Link><Link href="/admin?mode=login">Login</Link><Link href="/admin?mode=signup">Sign up</Link></div><div className="footer-column"><span className="footer-label">For brands</span><Link href="https://wa.me/62895364547187">Collaborate ↗</Link><Link href="mailto:hello@picnicclub.id">hello@picnicclub.id</Link><Link href="https://wa.me/62895364547187">WhatsApp ↗</Link></div></div><div className="footer-bottom"><span>© 2026 Picnic Club. All rights reserved.</span><div><Link href="#">Privacy policy</Link><Link href="#">Terms of use</Link><Link href="#">Report an issue</Link></div></div></footer>
   </main>;
 }

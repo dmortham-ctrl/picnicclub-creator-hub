@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink } from "lucide-react";
 import { getProfile, getPublishedProfiles } from "@/lib/data";
+import { TrackView } from "@/app/components/analytics";
+import { LinkIcon } from "@/app/components/link-icon";
 
 // Published minisites are largely static; refresh in the background hourly.
 // Publish/unpublish also calls revalidatePath("/@<username>") for an instant update.
@@ -41,8 +42,11 @@ export default async function ProfilePage({ params }: Params) {
   if (!data) notFound();
   const { profile, links } = data;
 
+  const hasAffiliate = links.some((link) => link.affiliate_disclosure);
+
   return (
     <main className="bio-page">
+      <TrackView profileId={profile.id} />
       <div className="bio-card">
         <div className="bio-brand">picnic club</div>
         {profile.avatar_url && (
@@ -54,12 +58,25 @@ export default async function ProfilePage({ params }: Params) {
         </div>
         {profile.bio && <p className="bio-copy">{profile.bio}</p>}
         {links.map((link) => (
-          <a className="bio-link" href={link.url} key={link.id} target="_blank" rel="noreferrer nofollow">
-            {link.label}
-            <ExternalLink size={15} style={{ position: "absolute", right: 17 }} />
+          <a
+            className="bio-link"
+            href={`/l/${link.id}`}
+            key={link.id}
+            target="_blank"
+            rel="noreferrer nofollow"
+          >
+            <LinkIcon linkType={link.link_type} />
+            <span className="bio-link-label">{link.label}</span>
             {link.affiliate_disclosure && <small>affiliate</small>}
           </a>
         ))}
+        {hasAffiliate && (
+          <p className="bio-disclosure">
+            Sebagian tautan di atas adalah tautan affiliasi. Picnic Club dapat memperoleh komisi
+            tanpa biaya tambahan untuk Anda.{" "}
+            <Link href="/affiliate-disclosure">Selengkapnya</Link>
+          </p>
+        )}
         <Link className="button-dark" href="/members" style={{ marginTop: 24, display: "inline-block" }}>
           Explore more creators ↗
         </Link>

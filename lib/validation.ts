@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LINK_TYPES } from "./link-types";
 
 // Keep this list in sync with the profiles_username_not_reserved CHECK
 // constraint in supabase/migrations/20260829090000_phase0_roles_and_rls.sql
@@ -48,9 +49,12 @@ export const profileSchema = z.object({
   avatar_url: z.union([linkUrlSchema, z.literal("")]).default(""),
 });
 
+const linkTypeValues = LINK_TYPES.map((t) => t.value) as [string, ...string[]];
+
 export const linkSchema = z.object({
   label: z.string().trim().min(1, "Label wajib diisi.").max(80),
   url: linkUrlSchema,
+  link_type: z.enum(linkTypeValues).default("link"),
   affiliate_disclosure: z.boolean().default(false),
 });
 
