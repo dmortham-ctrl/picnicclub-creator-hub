@@ -1,0 +1,5 @@
+import { notFound } from "next/navigation";
+import { getProfile } from "@/lib/data";
+import { ExternalLink } from "lucide-react";
+
+export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) { const { username } = await params; const data = await getProfile(username.replace(/^@/, "")); if (!data) notFound(); const { profile, links } = data; return <main className="bio-page"><div className="bio-card"><div className="bio-brand">picnic club</div><img className="bio-avatar" src={profile.avatar_url} alt={profile.display_name} /><h1>{profile.display_name}</h1><div className="bio-username">@{profile.username} · {profile.category}</div><p className="bio-copy">{profile.bio}</p>{links.map((link) => <a className="bio-link" href={link.url} key={link.id} target="_blank" rel="noreferrer" onClick={() => undefined}>{link.label}<ExternalLink size={15} style={{ position: "absolute", right: 17 }} />{link.affiliate_disclosure && <small>affiliate</small>}</a>)}<div className="bio-footer">Part of the Picnic Club community ↗</div></div></main>; }

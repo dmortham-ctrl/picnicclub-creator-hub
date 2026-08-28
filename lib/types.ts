@@ -1,0 +1,23 @@
+export type Profile = {
+  id: string;
+  username: string;
+  display_name: string;
+  bio: string;
+  avatar_url: string;
+  category: string;
+  status: "draft" | "published" | "suspended";
+  is_featured: boolean;
+  featured_order: number;
+};
+
+export type ProfileLink = {
+  id: string;
+  profile_id: string;
+  label: string;
+  url: string;
+  link_type: string;
+  icon_key: string;
+  sort_order: number;
+  is_active: boolean;
+  affiliate_disclosure: boolean;
+};
