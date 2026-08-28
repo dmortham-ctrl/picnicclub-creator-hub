@@ -12,6 +12,15 @@ export type Profile = {
   featured_order: number;
 };
 
+export type Brand = {
+  id: string;
+  name: string;
+  logo_url: string;
+  website_url: string;
+  is_active: boolean;
+  sort_order: number;
+};
+
 export type ProfileLink = {
   id: string;
   profile_id: string;

@@ -26,7 +26,9 @@ export default function SuperAdminPage() {
     if (!supabase) return;
     const client = supabase;
     client.auth.getUser().then(async ({ data }) => {
-      if (data.user?.email !== "dmortham@gmail.com") return setMessage("Akses superadmin hanya tersedia untuk admin utama.");
+      if (!data.user) return setMessage("Silakan login sebagai admin terlebih dahulu.");
+      const { data: isAdmin } = await client.rpc("is_admin");
+      if (isAdmin !== true) return setMessage("Akses superadmin hanya tersedia untuk admin.");
       setAuthorized(true);
       const [{ data: profileRows }, { data: contentRows }] = await Promise.all([
         client.from("profiles").select("*").order("featured_order"),

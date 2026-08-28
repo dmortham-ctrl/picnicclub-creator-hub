@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { CmsSection } from "../cms-section";
-import { Brand } from "@/lib/brand-data";
+import type { Brand } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
 
 const emptyBrand = { name: "", logo_url: "", website_url: "", sort_order: 0, is_active: true };
