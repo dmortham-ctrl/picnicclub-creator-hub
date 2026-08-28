@@ -5,6 +5,8 @@ import { getPublishedProfiles } from "@/lib/data";
 import { getSiteContent } from "@/lib/content";
 import { getActiveBrands } from "@/lib/brand-data";
 
+export const revalidate = 3600;
+
 const benefits = [
   ["01", "Training yang practical", "Strategi affiliate, content, dan live yang bisa langsung dipakai."],
   ["02", "Support yang nyata", "Mentor dan manager yang siap membantu creator tumbuh konsisten."],

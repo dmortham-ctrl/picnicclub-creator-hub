@@ -1,35 +1,70 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
-import { Profile, ProfileLink } from "@/lib/types";
+import { notFound } from "next/navigation";
+import { ExternalLink } from "lucide-react";
+import { getProfile, getPublishedProfiles } from "@/lib/data";
 
-export default function ProfilePage() {
-  const params = useParams<{ username: string }>();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [links, setLinks] = useState<ProfileLink[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+// Published minisites are largely static; refresh in the background hourly.
+// Publish/unpublish also calls revalidatePath("/@<username>") for an instant update.
+export const revalidate = 3600;
+export const dynamicParams = true;
 
-  useEffect(() => {
-    const username = decodeURIComponent(params.username).replace(/^@/, "").toLowerCase();
-    if (!supabase) return setLoading(false);
-    const client = supabase;
-    client.from("profiles").select("*").eq("username", username).eq("status", "published").maybeSingle().then(async ({ data, error: profileError }) => {
-      if (profileError) setError(profileError.message);
-      setProfile(data as Profile | null);
-      if (data) {
-        const { data: profileLinks } = await client.from("profile_links").select("*").eq("profile_id", data.id).eq("is_active", true).order("sort_order");
-        setLinks((profileLinks as ProfileLink[]) ?? []);
-      }
-      setLoading(false);
-    });
-  }, [params.username]);
+export async function generateStaticParams() {
+  const profiles = await getPublishedProfiles();
+  return profiles.map((profile) => ({ username: `@${profile.username}` }));
+}
 
-  if (loading) return <main className="bio-page"><div className="bio-card"><div className="bio-brand">picnic club</div><p className="bio-copy">Loading profile...</p></div></main>;
-  if (!profile) return <main className="bio-page"><div className="bio-card"><div className="bio-brand">picnic club</div><h1 style={{ marginTop: 100 }}>{error ? "Could not load profile." : "Page not found."}</h1><p className="bio-copy">{error || "Profile ini belum tersedia atau sudah tidak aktif."}</p><Link className="button-dark" href="/members">Back to creators</Link></div></main>;
-  return <main className="bio-page"><div className="bio-card"><div className="bio-brand">picnic club</div><img className="bio-avatar" src={profile.avatar_url} alt={profile.display_name} /><h1>{profile.display_name}</h1><div className="bio-username">@{profile.username} · {profile.category}</div><p className="bio-copy">{profile.bio}</p>{links.map((link) => <a className="bio-link" href={link.url} key={link.id} target="_blank" rel="noreferrer">{link.label}<ExternalLink size={15} style={{ position: "absolute", right: 17 }} />{link.affiliate_disclosure && <small>affiliate</small>}</a>)}<div className="bio-footer">Part of the Picnic Club community ↗</div></div></main>;
+type Params = { params: Promise<{ username: string }> };
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const { username } = await params;
+  const data = await getProfile(username);
+  if (!data) {
+    return { title: "Profile not found | Picnic Club", robots: { index: false, follow: false } };
+  }
+  const { profile } = data;
+  const title = `${profile.display_name} (@${profile.username}) | Picnic Club`;
+  const description = profile.bio || `${profile.display_name} di Picnic Club — ${profile.category}.`;
+  const images = profile.avatar_url ? [{ url: profile.avatar_url }] : undefined;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/@${profile.username}` },
+    openGraph: { title, description, type: "profile", url: `/@${profile.username}`, images },
+    twitter: { card: "summary", title, description, images: profile.avatar_url ? [profile.avatar_url] : undefined },
+  };
+}
+
+export default async function ProfilePage({ params }: Params) {
+  const { username } = await params;
+  const data = await getProfile(username);
+  if (!data) notFound();
+  const { profile, links } = data;
+
+  return (
+    <main className="bio-page">
+      <div className="bio-card">
+        <div className="bio-brand">picnic club</div>
+        {profile.avatar_url && (
+          <img className="bio-avatar" src={profile.avatar_url} alt={profile.display_name} />
+        )}
+        <h1>{profile.display_name}</h1>
+        <div className="bio-username">
+          @{profile.username} · {profile.category}
+        </div>
+        {profile.bio && <p className="bio-copy">{profile.bio}</p>}
+        {links.map((link) => (
+          <a className="bio-link" href={link.url} key={link.id} target="_blank" rel="noreferrer nofollow">
+            {link.label}
+            <ExternalLink size={15} style={{ position: "absolute", right: 17 }} />
+            {link.affiliate_disclosure && <small>affiliate</small>}
+          </a>
+        ))}
+        <Link className="button-dark" href="/members" style={{ marginTop: 24, display: "inline-block" }}>
+          Explore more creators ↗
+        </Link>
+        <div className="bio-footer">Part of the Picnic Club community ↗</div>
+      </div>
+    </main>
+  );
 }

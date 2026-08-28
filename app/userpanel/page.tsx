@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Profile, ProfileLink } from "@/lib/types";
+import { firstIssue, linkSchema } from "@/lib/validation";
 
 export default function UserPanelPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -32,9 +33,12 @@ export default function UserPanelPage() {
 
   async function addLink(event: React.FormEvent) {
     event.preventDefault();
-    if (!supabase || !profile || !newLink.label || !newLink.url) return;
+    if (!supabase || !profile) return;
+    const parsed = linkSchema.safeParse(newLink);
+    if (!parsed.success) return setError(firstIssue(parsed.error));
+    setError("");
     setSavingLink(true);
-    const { data, error: linkError } = await supabase.from("profile_links").insert({ profile_id: profile.id, ...newLink, link_type: "link", icon_key: "link", sort_order: links.length + 1, is_active: true }).select().single();
+    const { data, error: linkError } = await supabase.from("profile_links").insert({ profile_id: profile.id, ...parsed.data, link_type: "link", icon_key: "link", sort_order: links.length + 1, is_active: true }).select().single();
     if (linkError) setError(linkError.message);
     if (data) { setLinks([...links, data as ProfileLink]); setNewLink({ label: "", url: "", affiliate_disclosure: false }); }
     setSavingLink(false);
@@ -48,10 +52,16 @@ export default function UserPanelPage() {
   }
 
   async function togglePublished() {
-    if (!supabase || !profile) return;
+    if (!profile) return;
     const status = profile.status === "published" ? "draft" : "published";
-    const { error: updateError } = await supabase.from("profiles").update({ status, published_at: status === "published" ? new Date().toISOString() : null }).eq("id", profile.id);
-    if (updateError) return setError(updateError.message);
+    const response = await fetch("/api/profile-visibility", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: profile.id, status }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) return setError(result.error ?? "Gagal memperbarui status.");
+    setError("");
     setProfile({ ...profile, status });
   }
 
