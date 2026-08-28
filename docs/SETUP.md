@@ -14,21 +14,36 @@ Tanpa env Supabase, halaman publik menggunakan demo data agar UI tetap bisa dire
 
 ## 2. Create the database
 
-1. Buka Supabase Dashboard.
-2. Pilih `SQL Editor`.
-3. Jalankan seluruh isi `supabase/schema.sql`.
-4. Buat user admin di `Authentication > Users`.
-5. Set `app_metadata.is_admin` menjadi `true` untuk user admin melalui Supabase service role/API yang aman. Jangan expose service role key di browser atau commit ke repository.
+### Fresh project
 
-Contoh payload metadata:
+1. Buka Supabase Dashboard > `SQL Editor`.
+2. Jalankan seluruh isi `supabase/schema.sql`.
+3. Buat user admin di `Authentication > Users` (atau login lewat `/admin`).
+4. Jadikan user itu admin:
 
-```json
-{
-  "is_admin": true
-}
-```
+   ```sql
+   insert into public.admins (user_id, note)
+   select id, 'founder' from auth.users where email = 'you@example.com';
+   ```
 
-RLS hanya mengizinkan user authenticated dengan metadata tersebut untuk insert/update/delete profile dan link. Public hanya dapat membaca profile `published` serta link yang aktif.
+### Existing project
+
+Jalankan file di `supabase/migrations/` berurutan (nama file = timestamp). Untuk
+project ini yang belum punya tabel `admins`, jalankan
+`supabase/migrations/20260829090000_phase0_roles_and_rls.sql`, lalu tambahkan
+admin dengan query di atas.
+
+Dengan Supabase CLI: `supabase link --project-ref <ref>` lalu `supabase db push`.
+
+### Model akses
+
+- Publik hanya membaca profile `published` dan link aktifnya.
+- Creator authenticated mengelola **hanya** profile miliknya sendiri
+  (`owner_id = auth.uid()`) beserta linknya.
+- `is_featured`, `featured_order`, dan `level` hanya bisa diubah admin.
+- Admin (`public.admins`) mengelola semua profile, link, brand, dan site content.
+- `/userpanel` dan `/superadmin` dijaga di `middleware.ts`; `/superadmin`
+  memanggil RPC `is_admin()`.
 
 ## 3. Configure magic link
 
@@ -67,6 +82,10 @@ where username = 'username';
 
 ## Current MVP boundaries
 
-- Homepage, directory, dan public minisite sudah tersedia.
-- Supabase public read dan admin auth/create profile sudah tersedia.
-- Edit/delete profile, link management UI, media upload, click analytics, dan WordPress content migration masih merupakan pekerjaan lanjutan sebelum production launch.
+- Homepage, directory, dan public minisite sudah tersedia (SSG/ISR).
+- Minisite `/@username` dirender di server dengan metadata Open Graph.
+- Role model owner-based + admin allowlist, route diproteksi middleware.
+- Validasi input dengan Zod + reserved username (client dan DB constraint).
+- Belum ada: link management UI lengkap, media pakai `next/image`, click
+  analytics, halaman legal, testing, dan WordPress content migration.
+  Lihat roadmap Fase 1.
