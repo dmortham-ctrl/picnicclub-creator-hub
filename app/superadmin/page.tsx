@@ -13,6 +13,7 @@ const contentKeys = [
   ["about_title", "About title"],
   ["brands_title", "Brands title"],
   ["faq_intro", "FAQ intro"],
+  ["founder_usernames", "Founder usernames (pisahkan dengan koma, sesuai urutan)"],
 ];
 
 export default function SuperAdminPage() {

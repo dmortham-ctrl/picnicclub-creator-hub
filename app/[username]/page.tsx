@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getProfile, getPublishedProfiles } from "@/lib/data";
 import { TrackView } from "@/app/components/analytics";
 import { LinkIcon } from "@/app/components/link-icon";
+import { JsonLd, SITE_URL } from "@/app/components/json-ld";
 
 // Published minisites are largely static; refresh in the background hourly.
 // Publish/unpublish also calls revalidatePath("/@<username>") for an instant update.
@@ -43,9 +44,25 @@ export default async function ProfilePage({ params }: Params) {
   const { profile, links } = data;
 
   const hasAffiliate = links.some((link) => link.affiliate_disclosure);
+  const profileUrl = `${SITE_URL}/@${profile.username}`;
+  const personLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    dateModified: new Date().toISOString(),
+    mainEntity: {
+      "@type": "Person",
+      name: profile.display_name,
+      alternateName: `@${profile.username}`,
+      description: profile.bio || undefined,
+      image: profile.avatar_url || undefined,
+      url: profileUrl,
+      memberOf: { "@type": "Organization", name: "Picnic Club", url: SITE_URL },
+    },
+  };
 
   return (
     <main className="bio-page">
+      <JsonLd data={personLd} />
       <TrackView profileId={profile.id} />
       <div className="bio-card">
         <div className="bio-brand">picnic club</div>
