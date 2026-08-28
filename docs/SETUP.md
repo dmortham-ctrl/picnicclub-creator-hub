@@ -80,12 +80,20 @@ where username = 'username';
 4. Tambahkan domain `picnicclub.id` di Vercel dan arahkan DNS sesuai instruksi Vercel.
 5. Update Supabase Site URL dan redirect URL ke domain production.
 
-## Current MVP boundaries
+## Current status
 
-- Homepage, directory, dan public minisite sudah tersedia (SSG/ISR).
-- Minisite `/@username` dirender di server dengan metadata Open Graph.
+Fase 0 dan sebagian besar Fase 1 sudah jalan:
+
+- Homepage, directory, dan minisite `/@username` (SSG/ISR + Open Graph + JSON-LD).
 - Role model owner-based + admin allowlist, route diproteksi middleware.
-- Validasi input dengan Zod + reserved username (client dan DB constraint).
-- Belum ada: link management UI lengkap, media pakai `next/image`, click
-  analytics, halaman legal, testing, dan WordPress content migration.
-  Lihat roadmap Fase 1.
+- Validasi input Zod + reserved username (client + DB constraint).
+- Link management lengkap di `/userpanel` (edit, urutkan, aktif/nonaktif, tipe + ikon).
+- Analytics: tabel `analytics_events`, endpoint `/api/track`, redirect `/l/[id]`,
+  dashboard agregat di `/superadmin`.
+- SEO: `sitemap.xml`, `robots.txt`, canonical, structured data.
+- Halaman legal (`/privacy`, `/terms`, `/affiliate-disclosure`, `/report`) - masih draf.
+- CMS: editor FAQ, kontrol founder, filter kategori di direktori.
+
+Belum: media pakai `next/image` + migrasi avatar ke Storage, aksesibilitas
+audit, testing (Vitest/Playwright), monitoring (Sentry), rate limiting,
+dan migrasi konten WordPress. Lihat roadmap Fase 1 sisa + Fase 1.5.

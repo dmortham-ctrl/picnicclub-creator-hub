@@ -152,8 +152,90 @@ insert into public.site_content (key, value) values
   ('marquee_text', 'Indonesia''s largest affiliate community'),
   ('about_title', 'We make creator growth feel less lonely.'),
   ('brands_title', 'Brands we''ve worked with.'),
-  ('faq_intro', 'Masih ingin tahu lebih banyak? Tim Picnic Club siap membantu.')
+  ('faq_intro', 'Masih ingin tahu lebih banyak? Tim Picnic Club siap membantu.'),
+  ('founder_usernames', 'inproduk,bertosb1m,adli.hibatul,aditsur88,sobatkaryawan')
 on conflict (key) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- faqs (drives the homepage FAQ section)
+-- ---------------------------------------------------------------------------
+
+create table public.faqs (
+  id uuid primary key default gen_random_uuid(),
+  question text not null,
+  answer text not null,
+  sort_order integer not null default 0,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.faqs enable row level security;
+create policy "faqs readable when active or by admin"
+  on public.faqs for select using (is_active or public.is_admin());
+create policy "admins manage faqs"
+  on public.faqs for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- analytics_events (no PII, no raw affiliate query strings)
+-- ---------------------------------------------------------------------------
+
+create table public.analytics_events (
+  id bigint generated always as identity primary key,
+  event_name text not null check (event_name in ('page_view', 'profile_view', 'link_click', 'cta_click')),
+  path text,
+  profile_id uuid references public.profiles(id) on delete set null,
+  link_id uuid references public.profile_links(id) on delete set null,
+  cta_key text,
+  referrer_host text,
+  occurred_at timestamptz not null default now()
+);
+
+alter table public.analytics_events enable row level security;
+create policy "anyone can record an event"
+  on public.analytics_events for insert to anon, authenticated with check (true);
+create policy "admins read events"
+  on public.analytics_events for select to authenticated using (public.is_admin());
+
+create index analytics_events_name_time on public.analytics_events (event_name, occurred_at desc);
+create index analytics_events_profile_time on public.analytics_events (profile_id, occurred_at desc);
+create index analytics_events_link_time on public.analytics_events (link_id, occurred_at desc);
+
+create or replace function public.analytics_summary(days integer default 30)
+returns json language sql stable security invoker set search_path = public
+as $$
+  with window_events as (
+    select * from public.analytics_events where occurred_at > now() - make_interval(days => days)
+  )
+  select json_build_object(
+    'window_days', days,
+    'totals', (select coalesce(json_object_agg(event_name, c), '{}'::json)
+      from (select event_name, count(*) c from window_events group by event_name) t),
+    'daily', (select coalesce(json_agg(row_to_json(d) order by d.day), '[]'::json) from (
+      select date_trunc('day', occurred_at)::date as day,
+             count(*) filter (where event_name = 'page_view') as page_views,
+             count(*) filter (where event_name = 'profile_view') as profile_views,
+             count(*) filter (where event_name = 'link_click') as link_clicks,
+             count(*) filter (where event_name = 'cta_click') as cta_clicks
+      from window_events group by 1) d),
+    'top_links', (select coalesce(json_agg(row_to_json(l)), '[]'::json) from (
+      select pl.label, pl.url, p.username, count(*) as clicks
+      from window_events e join public.profile_links pl on pl.id = e.link_id
+      join public.profiles p on p.id = pl.profile_id
+      where e.event_name = 'link_click' group by pl.label, pl.url, p.username
+      order by clicks desc limit 10) l),
+    'top_profiles', (select coalesce(json_agg(row_to_json(pr)), '[]'::json) from (
+      select p.username, p.display_name, count(*) as views
+      from window_events e join public.profiles p on p.id = e.profile_id
+      where e.event_name = 'profile_view' group by p.username, p.display_name
+      order by views desc limit 10) pr),
+    'top_ctas', (select coalesce(json_object_agg(cta_key, c), '{}'::json) from (
+      select cta_key, count(*) c from window_events
+      where event_name = 'cta_click' and cta_key is not null group by cta_key) t)
+  );
+$$;
+
+grant execute on function public.analytics_summary(integer) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- brands
