@@ -1,11 +1,13 @@
 export type Profile = {
   id: string;
+  owner_id?: string;
   username: string;
   display_name: string;
   bio: string;
   avatar_url: string;
   category: string;
   status: "draft" | "published" | "suspended";
+  level?: "All Star" | "Featured" | "Rising";
   is_featured: boolean;
   featured_order: number;
 };

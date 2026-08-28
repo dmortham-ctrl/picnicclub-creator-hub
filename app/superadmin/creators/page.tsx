@@ -1,0 +1,3 @@
+import Link from "next/link";
+import { CmsSection } from "../cms-section";
+export default function CreatorsCmsPage() { return <CmsSection eyebrow="Creators / 003" title={<>Manage<br />creators.</>} description="Kelola seluruh directory creator dan buka pengaturan level All Star." ><section className="admin-card cms-empty"><div className="eyebrow">Creator workspace</div><h2>Creator directory</h2><p className="hero-copy">Gunakan Creator levels untuk mencari, memfilter, dan mengubah creator dalam jumlah besar.</p><Link className="button-dark" href="/superadmin/levels">Open creator levels ↗</Link></section></CmsSection>; }
