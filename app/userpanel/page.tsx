@@ -28,6 +28,8 @@ export default function UserPanelPage() {
   const [notice, setNotice] = useState("");
   const [profileDraft, setProfileDraft] = useState<ProfileDraft>({ display_name: "", bio: "", category: "", avatar_url: "", theme: "default" });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
@@ -149,6 +151,12 @@ export default function UserPanelPage() {
     window.location.href = "/";
   }
 
+  function revalidateIfPublished(current: Profile) {
+    if (current.status === "published") {
+      fetch("/api/profile-visibility", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: current.id, status: "published" }) });
+    }
+  }
+
   async function saveProfile(event: React.FormEvent) {
     event.preventDefault();
     if (!supabase || !profile) return;
@@ -157,27 +165,44 @@ export default function UserPanelPage() {
     setError("");
     setSavingProfile(true);
 
-    let avatarUrl = parsed.data.avatar_url;
-    if (avatarFile) {
-      if (!avatarFile.type.startsWith("image/")) { setError("Avatar harus berupa file gambar."); setSavingProfile(false); return; }
-      if (avatarFile.size > 5 * 1024 * 1024) { setError("Ukuran avatar maksimal 5 MB."); setSavingProfile(false); return; }
-      const path = `${crypto.randomUUID()}-${avatarFile.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
-      const { error: uploadError } = await supabase.storage.from("Avatar").upload(path, avatarFile, { contentType: avatarFile.type, upsert: false });
-      if (uploadError) { setError(uploadError.message); setSavingProfile(false); return; }
-      avatarUrl = supabase.storage.from("Avatar").getPublicUrl(path).data.publicUrl;
-    }
-
-    const patch = { ...parsed.data, avatar_url: avatarUrl };
+    const patch = { display_name: parsed.data.display_name, bio: parsed.data.bio, category: parsed.data.category };
     const { error: updateError } = await supabase.from("profiles").update(patch).eq("id", profile.id);
     if (updateError) { setError(updateError.message); setSavingProfile(false); return; }
 
     setProfile({ ...profile, ...patch } as Profile);
-    setAvatarFile(null);
     setSavingProfile(false);
     setNotice("Profil diperbarui.");
-    if (profile.status === "published") {
-      fetch("/api/profile-visibility", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: profile.id, status: "published" }) });
-    }
+    revalidateIfPublished(profile);
+  }
+
+  async function uploadAvatar(event: React.FormEvent) {
+    event.preventDefault();
+    if (!supabase || !profile || !avatarFile) return;
+    if (!avatarFile.type.startsWith("image/")) return setError("Avatar harus berupa file gambar.");
+    if (avatarFile.size > 5 * 1024 * 1024) return setError("Ukuran avatar maksimal 5 MB.");
+    setError("");
+    setUploadingAvatar(true);
+
+    const path = `${crypto.randomUUID()}-${avatarFile.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+    const { error: uploadError } = await supabase.storage.from("Avatar").upload(path, avatarFile, { contentType: avatarFile.type, upsert: false });
+    if (uploadError) { setError(uploadError.message); setUploadingAvatar(false); return; }
+    const avatarUrl = supabase.storage.from("Avatar").getPublicUrl(path).data.publicUrl;
+
+    const { error: updateError } = await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("id", profile.id);
+    if (updateError) { setError(updateError.message); setUploadingAvatar(false); return; }
+
+    setProfile({ ...profile, avatar_url: avatarUrl } as Profile);
+    setProfileDraft((prev) => ({ ...prev, avatar_url: avatarUrl }));
+    setAvatarFile(null);
+    setUploadingAvatar(false);
+    setAvatarModalOpen(false);
+    setNotice("Foto profil diperbarui.");
+    revalidateIfPublished(profile);
+  }
+
+  function closeAvatarModal() {
+    setAvatarFile(null);
+    setAvatarModalOpen(false);
   }
 
   async function setTheme(theme: string) {
@@ -186,9 +211,7 @@ export default function UserPanelPage() {
     if (updateError) return setError(updateError.message);
     setProfile({ ...profile, theme: theme as Profile["theme"] });
     setNotice("Tema minisite diperbarui.");
-    if (profile.status === "published") {
-      fetch("/api/profile-visibility", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: profile.id, status: "published" }) });
-    }
+    revalidateIfPublished(profile);
   }
 
   const ordered = resortState(links);
@@ -209,11 +232,14 @@ export default function UserPanelPage() {
           <div className="panel-grid">
             <form className="admin-card admin-form panel-profile-editor" onSubmit={saveProfile}>
               <div className="panel-profile-head">
-                {profileDraft.avatar_url ? (
-                  <Image className="panel-profile-avatar" src={profileDraft.avatar_url} alt={profile.display_name} width={140} height={140} />
-                ) : (
-                  <span className="panel-profile-avatar panel-profile-avatar--empty" aria-hidden="true" />
-                )}
+                <button type="button" className="avatar-picker" onClick={() => setAvatarModalOpen(true)} aria-label="Ganti foto profil">
+                  {profileDraft.avatar_url ? (
+                    <Image className="panel-profile-avatar" src={profileDraft.avatar_url} alt={profile.display_name} width={140} height={140} />
+                  ) : (
+                    <span className="panel-profile-avatar panel-profile-avatar--empty" aria-hidden="true" />
+                  )}
+                  <span className="avatar-picker-hint">Ganti foto</span>
+                </button>
                 <div className="panel-profile-info">
                   <p className="bio-username">
                     @{profile.username}
@@ -224,7 +250,6 @@ export default function UserPanelPage() {
               </div>
               <label>Category<input value={profileDraft.category} onChange={(e) => setProfileDraft({ ...profileDraft, category: e.target.value })} /></label>
               <label>Bio<textarea rows={3} maxLength={280} value={profileDraft.bio} onChange={(e) => setProfileDraft({ ...profileDraft, bio: e.target.value })} /></label>
-              <label>Upload avatar<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} /></label>
               <div className="form-actions">
                 <button className="button-dark" type="submit" disabled={savingProfile}>{savingProfile ? "Menyimpan..." : "Simpan profil"}</button>
               </div>
@@ -323,6 +348,29 @@ export default function UserPanelPage() {
         <div className="admin-card"><p>{username ? "Loading profile..." : "Profile belum dipilih."}</p></div>
       )}
       <Link href="/" className="panel-back">← Back to homepage</Link>
+
+      {avatarModalOpen && profile && (
+        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Ganti foto profil" onClick={closeAvatarModal}>
+          <form className="modal-card" onClick={(e) => e.stopPropagation()} onSubmit={uploadAvatar}>
+            <h2>Ganti foto profil</h2>
+            <div className="modal-avatar-preview">
+              {avatarFile ? (
+                <Image src={URL.createObjectURL(avatarFile)} alt="Pratinjau" width={160} height={160} unoptimized />
+              ) : profileDraft.avatar_url ? (
+                <Image src={profileDraft.avatar_url} alt={profile.display_name} width={160} height={160} />
+              ) : (
+                <span className="panel-profile-avatar panel-profile-avatar--empty" aria-hidden="true" />
+              )}
+            </div>
+            <label>Pilih foto<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} /></label>
+            <p className="hero-copy">PNG, JPG, atau WebP. Maksimal 5 MB.</p>
+            <div className="form-actions">
+              <button className="button-dark" type="submit" disabled={!avatarFile || uploadingAvatar}>{uploadingAvatar ? "Mengunggah..." : "Unggah foto"}</button>
+              <button className="button-outline" type="button" onClick={closeAvatarModal}>Batal</button>
+            </div>
+          </form>
+        </div>
+      )}
     </main>
   );
 }
