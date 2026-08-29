@@ -13,8 +13,8 @@ import { BrandLogo } from "@/app/components/brand-logo";
 import { Menu, X, ChevronRight } from "lucide-react";
 
 const SECTIONS = [
-  { id: "profile", label: "Profil" },
   { id: "links", label: "Link minisite" },
+  { id: "profile", label: "Profil" },
   { id: "theme", label: "Tema minisite" },
   { id: "minisite", label: "Halaman & publikasi" },
 ] as const;
@@ -41,7 +41,7 @@ export default function UserPanelPage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [section, setSection] = useState<SectionId>("profile");
+  const [section, setSection] = useState<SectionId>("links");
 
   useEffect(() => {
     const search = new URLSearchParams(window.location.search);
