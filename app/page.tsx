@@ -10,7 +10,18 @@ import { JsonLd, organizationLd } from "./components/json-ld";
 
 export const revalidate = 3600;
 
-export const metadata = { alternates: { canonical: "/" } };
+export const metadata = {
+  title: "Picnic Club — More Than an Agency",
+  description:
+    "Rumah bagi para creator dan affiliator terbaik Indonesia. Komunitas creator commerce: training, mentoring, networking, dan kolaborasi brand.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Picnic Club — More Than an Agency",
+    description: "Rumah bagi para creator dan affiliator terbaik Indonesia.",
+    url: "/",
+    type: "website",
+  },
+};
 
 const benefits = [
   ["01", "Training yang practical", "Strategi affiliate, content, dan live yang bisa langsung dipakai."],

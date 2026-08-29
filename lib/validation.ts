@@ -11,6 +11,7 @@ export const RESERVED_USERNAMES = new Set([
   "terms", "legal", "report", "reports", "static", "assets", "public", "www",
   "mail", "blog", "news", "home", "index", "null", "undefined", "next",
   "_next", "vercel", "supabase", "picnic", "picnicclub",
+  "l", "r", "go", "track", "sitemap", "robots", "pelanggaran",
 ]);
 
 export function isReservedUsername(username: string) {
