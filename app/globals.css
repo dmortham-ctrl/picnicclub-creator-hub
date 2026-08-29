@@ -5,9 +5,11 @@
 body { margin: 0; color: var(--ink); background: var(--cream); font-family: Poppins, sans-serif; }
 a { color: inherit; text-decoration: none; }
 .brand-link { display: inline-flex; align-items: center; }
-.brand-logo { display: block; width: 96px; height: 40px; object-fit: contain; }
-.brand-logo--dark { filter: brightness(0); }
-.brand-logo--light { filter: brightness(0) invert(1); }
+.brand-logo { display: block; width: 96px; height: 40px; object-fit: contain; filter: brightness(0) invert(1); }
+.admin-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--ink); border-radius: 12px; padding: 14px 20px; margin-bottom: 22px; }
+.admin-topbar .button-outline { color: white; border-color: #ffffff40; }
+.admin-topbar .button-outline:hover { border-color: #ffffff80; }
+.admin-topbar .button-dark { background: var(--lime); color: var(--ink); }
 .cms-sidebar .brand-link { margin-bottom: 4px; }
 
 .skip-link { position: fixed; top: 8px; left: 8px; z-index: 100; background: var(--ink); color: white; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; transform: translateY(-150%); transition: transform .15s; }

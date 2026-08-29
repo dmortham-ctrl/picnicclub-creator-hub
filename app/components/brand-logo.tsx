@@ -1,26 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 
-/**
- * The Picnic Club wordmark, rendered as a single-colour treatment of
- * /picnic-logo.png (same asset as the site nav).
- *   theme="dark"  -> ink logo, for light backgrounds (admin / dashboard)
- *   theme="light" -> white logo, for dark backgrounds (CMS sidebar)
- */
-export function BrandLogo({
-  href = "/",
-  theme = "dark",
-}: {
-  href?: string | null;
-  theme?: "dark" | "light";
-}) {
+/** The Picnic Club wordmark (same asset + white monochrome treatment as the
+ *  public site nav and footer). Always rendered on a dark surface. */
+export function BrandLogo({ href = "/" }: { href?: string | null }) {
   const img = (
     <Image
       src="/picnic-logo.png"
       alt="Picnic Club"
       width={96}
       height={40}
-      className={`brand-logo brand-logo--${theme}`}
+      className="brand-logo"
       priority
     />
   );

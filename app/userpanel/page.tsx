@@ -131,7 +131,7 @@ export default function UserPanelPage() {
 
   return (
     <main className="admin-wrap">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div className="admin-topbar">
         <BrandLogo href="/" />
         <Link href="/admin" className="button-outline">Edit profile</Link>
       </div>
