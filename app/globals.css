@@ -120,6 +120,13 @@ body, body * { font-family: Poppins, sans-serif !important; }
 .link-edit input, .link-edit select { border: 1px solid var(--line); padding: 10px; background: white; border-radius: 4px; }
 @media (max-width: 760px) { .link-row { grid-template-columns: 28px 1fr; }.link-row-actions { grid-column: 1 / -1; justify-content: flex-start; } }
 
+.skeleton { background: linear-gradient(90deg, #e0e7dc 25%, #eef2ea 50%, #e0e7dc 75%); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; border-radius: 6px; }
+.skeleton-avatar { width: 104px; height: 104px; border-radius: 50%; margin: 50px auto 18px; }
+.skeleton-line { height: 14px; }
+.skeleton-link { height: 58px; margin: 12px 0; border-radius: 5px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+
 @keyframes rise-in { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes soft-in { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
 @keyframes reveal { from { opacity: 0; } to { opacity: 1; } }

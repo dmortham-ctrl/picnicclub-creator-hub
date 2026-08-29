@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getPublicSupabase } from "@/lib/supabase-server";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 // Records a single analytics event. Deliberately permissive and quiet:
 // invalid payloads and DB errors return 204 so the caller's beacon never
@@ -15,6 +16,11 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
+  // ~120 events/minute per IP is plenty for a real visitor.
+  if (!rateLimit(`track:${clientIp(request)}`, 120, 60_000)) {
+    return new NextResponse(null, { status: 429 });
+  }
+
   const supabase = getPublicSupabase();
   if (!supabase) return new NextResponse(null, { status: 204 });
 
