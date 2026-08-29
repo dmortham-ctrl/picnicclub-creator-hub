@@ -10,6 +10,16 @@ a { color: inherit; text-decoration: none; }
 .admin-topbar .button-outline:hover { border-color: #ffffff80; background: #ffffff1a; }
 .admin-topbar .button-dark { background: var(--lime); color: var(--ink); }
 .admin-topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.panel-menu { position: relative; }
+.panel-menu-toggle { display: inline-flex; align-items: center; justify-content: center; padding: 11px 12px; }
+.panel-menu-backdrop { position: fixed; inset: 0; z-index: 40; }
+.panel-menu-list { position: absolute; top: calc(100% + 8px); right: 0; z-index: 50; min-width: 232px; display: grid; gap: 2px; padding: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 40px rgba(22, 42, 36, .16); }
+.panel-menu-heading { padding: 8px 12px 6px; font: 10px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.panel-menu-list button, .panel-menu-list a { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 11px 12px; border: none; background: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--ink); text-align: left; cursor: pointer; }
+.panel-menu-list button:hover, .panel-menu-list a:hover { background: var(--cream); }
+.panel-menu-list button.active { background: var(--ink); color: #fff; }
+.panel-menu-list .panel-menu-logout { margin-top: 4px; border-top: 1px solid var(--line); border-radius: 0 0 8px 8px; color: var(--accent-text); justify-content: flex-start; }
+.panel-menu-list .panel-menu-logout:hover { background: #f7ddd6; }
 .cms-sidebar .brand-link { margin-bottom: 4px; }
 
 .skip-link { position: fixed; top: 8px; left: 8px; z-index: 100; background: var(--ink); color: white; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; transform: translateY(-150%); transition: transform .15s; }

@@ -10,6 +10,15 @@ import { guessLinkType, LINK_TYPES } from "@/lib/link-types";
 import { MINISITE_THEMES } from "@/lib/themes";
 import { LinkIcon } from "@/app/components/link-icon";
 import { BrandLogo } from "@/app/components/brand-logo";
+import { Menu, X, ChevronRight } from "lucide-react";
+
+const SECTIONS = [
+  { id: "profile", label: "Profil" },
+  { id: "links", label: "Link minisite" },
+  { id: "theme", label: "Tema minisite" },
+  { id: "minisite", label: "Halaman & publikasi" },
+] as const;
+type SectionId = (typeof SECTIONS)[number]["id"];
 
 type ProfileDraft = { display_name: string; bio: string; category: string; avatar_url: string; theme: string };
 
@@ -31,6 +40,8 @@ export default function UserPanelPage() {
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [section, setSection] = useState<SectionId>("profile");
 
   useEffect(() => {
     const search = new URLSearchParams(window.location.search);
@@ -48,6 +59,17 @@ export default function UserPanelPage() {
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen && !avatarModalOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      setMenuOpen(false);
+      setAvatarModalOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen, avatarModalOpen]);
 
   useEffect(() => {
     if (!profile) return;
@@ -223,13 +245,49 @@ export default function UserPanelPage() {
         <div className="admin-topbar-actions">
           <Link href="/" className="button-outline">View website ↗</Link>
           <button type="button" className="button-outline" onClick={logout}>Logout</button>
+          <div className="panel-menu">
+            <button
+              type="button"
+              className="button-outline panel-menu-toggle"
+              aria-label="Menu editor"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              {menuOpen ? <X size={16} /> : <Menu size={16} />}
+            </button>
+            {menuOpen && (
+              <>
+                <div className="panel-menu-backdrop" onClick={() => setMenuOpen(false)} />
+                <nav className="panel-menu-list" aria-label="Panel editor">
+                  <span className="panel-menu-heading">Editor minisite</span>
+                  {SECTIONS.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={section === item.id ? "active" : ""}
+                      onClick={() => { setSection(item.id); setMenuOpen(false); }}
+                    >
+                      {item.label}
+                      <ChevronRight size={15} />
+                    </button>
+                  ))}
+                  {profile && (
+                    <a href={`/@${profile.username}`} target="_blank" rel="noreferrer">
+                      Lihat halaman publik ↗
+                    </a>
+                  )}
+                  <button type="button" className="panel-menu-logout" onClick={logout}>Logout</button>
+                </nav>
+              </>
+            )}
+          </div>
         </div>
       </div>
       {error && <p className="error">{error}</p>}
       {notice && !error && <p className="cms-message">{notice}</p>}
       {profile ? (
         <>
-          <div className="panel-grid">
+          {section === "profile" && (
             <form className="admin-card admin-form panel-profile-editor" onSubmit={saveProfile}>
               <div className="panel-profile-head">
                 <button type="button" className="avatar-picker" onClick={() => setAvatarModalOpen(true)} aria-label="Ganti foto profil">
@@ -254,8 +312,11 @@ export default function UserPanelPage() {
                 <button className="button-dark" type="submit" disabled={savingProfile}>{savingProfile ? "Menyimpan..." : "Simpan profil"}</button>
               </div>
             </form>
+          )}
+
+          {section === "minisite" && (
             <div className="admin-card panel-actions">
-              <div className="eyebrow">Your minisite</div>
+              <div className="eyebrow">Halaman minisite</div>
               <strong>picnicclub.id/@{profile.username}</strong>
               <Link className="button-dark" href={`/@${profile.username}`}>View public page ↗</Link>
               <button className="button-outline" type="button" onClick={() => { navigator.clipboard?.writeText(`${window.location.origin}/@${profile.username}`); setNotice("Link disalin."); }}>Copy profile link</button>
@@ -265,8 +326,9 @@ export default function UserPanelPage() {
                 <button className="button-dark" type="button" onClick={() => setStatus("published")}>Publish page</button>
               )}
             </div>
-          </div>
+          )}
 
+          {section === "theme" && (
           <div className="admin-card">
             <div className="eyebrow">Minisite theme</div>
             <div className="theme-picker">
@@ -284,7 +346,9 @@ export default function UserPanelPage() {
               ))}
             </div>
           </div>
+          )}
 
+          {section === "links" && (
           <div className="admin-card link-manager">
             <div className="eyebrow">Minisite links / 002</div>
             <h2>Build your link stack.</h2>
@@ -343,6 +407,7 @@ export default function UserPanelPage() {
               <button className="button-dark" type="submit" disabled={savingLink}>{savingLink ? "Menambahkan..." : "Tambah link"}</button>
             </form>
           </div>
+          )}
         </>
       ) : (
         <div className="admin-card"><p>{username ? "Loading profile..." : "Profile belum dipilih."}</p></div>
