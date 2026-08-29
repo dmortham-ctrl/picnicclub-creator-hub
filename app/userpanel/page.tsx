@@ -135,11 +135,6 @@ export default function UserPanelPage() {
         <BrandLogo href="/" />
         <Link href="/admin" className="button-outline">Edit profile</Link>
       </div>
-      <section className="panel-hero">
-        <div className="eyebrow">Creator dashboard / 001</div>
-        <h1>Your space<br />is live.</h1>
-        <p className="hero-copy">Kelola profil dan bagikan halaman creator Anda dari satu tempat.</p>
-      </section>
       {error && <p className="error">{error}</p>}
       {notice && !error && <p className="cms-message">{notice}</p>}
       {profile ? (
