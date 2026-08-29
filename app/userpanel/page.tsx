@@ -13,7 +13,7 @@ import { BrandLogo } from "@/app/components/brand-logo";
 import { Menu, X, ChevronRight } from "lucide-react";
 
 const SECTIONS = [
-  { id: "links", label: "Link minisite" },
+  { id: "links", label: "Minisite Kamu" },
   { id: "profile", label: "Profil" },
   { id: "theme", label: "Tema minisite" },
   { id: "minisite", label: "Halaman & publikasi" },
