@@ -228,13 +228,13 @@ export default function UserPanelPage() {
                   )}
                   <div className="panel-profile-info">
                     <h2>{profile.display_name}</h2>
-                    <p className="bio-username">@{profile.username} · {profile.category}</p>
+                    <p className="bio-username">
+                      @{profile.username} · {profile.category}
+                      <span className={`status-pill status-${profile.status}`}>{profile.status}</span>
+                    </p>
                     {profile.bio && <p className="hero-copy">{profile.bio}</p>}
                   </div>
-                  <div className="panel-profile-meta">
-                    <span className={`status-pill status-${profile.status}`}>{profile.status}</span>
-                    <button className="button-outline" type="button" onClick={startEditProfile}>Edit profile</button>
-                  </div>
+                  <button className="button-outline panel-profile-edit" type="button" onClick={startEditProfile}>Edit profile</button>
                 </>
               )}
             </div>
