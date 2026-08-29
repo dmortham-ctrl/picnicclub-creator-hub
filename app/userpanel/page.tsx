@@ -26,7 +26,6 @@ export default function UserPanelPage() {
   const [savingLink, setSavingLink] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [editingProfile, setEditingProfile] = useState(false);
   const [profileDraft, setProfileDraft] = useState<ProfileDraft>({ display_name: "", bio: "", category: "", avatar_url: "", theme: "default" });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -47,6 +46,17 @@ export default function UserPanelPage() {
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (!profile) return;
+    setProfileDraft({
+      display_name: profile.display_name,
+      bio: profile.bio,
+      category: profile.category,
+      avatar_url: profile.avatar_url,
+      theme: profile.theme ?? "default",
+    });
+  }, [profile]);
 
   function resortState(rows: ProfileLink[]) {
     return [...rows].sort((a, b) => a.sort_order - b.sort_order);
@@ -134,17 +144,9 @@ export default function UserPanelPage() {
     setNotice(status === "published" ? "Halaman dipublikasikan." : "Halaman disembunyikan.");
   }
 
-  function startEditProfile() {
-    if (!profile) return;
-    setProfileDraft({
-      display_name: profile.display_name,
-      bio: profile.bio,
-      category: profile.category,
-      avatar_url: profile.avatar_url,
-      theme: profile.theme ?? "default",
-    });
-    setAvatarFile(null);
-    setEditingProfile(true);
+  async function logout() {
+    await supabase?.auth.signOut();
+    window.location.href = "/";
   }
 
   async function saveProfile(event: React.FormEvent) {
@@ -170,7 +172,7 @@ export default function UserPanelPage() {
     if (updateError) { setError(updateError.message); setSavingProfile(false); return; }
 
     setProfile({ ...profile, ...patch } as Profile);
-    setEditingProfile(false);
+    setAvatarFile(null);
     setSavingProfile(false);
     setNotice("Profil diperbarui.");
     if (profile.status === "published") {
@@ -195,49 +197,41 @@ export default function UserPanelPage() {
     <main className="admin-wrap">
       <div className="admin-topbar">
         <BrandLogo href="/" />
-        <Link href="/" className="button-outline">View website ↗</Link>
+        <div className="admin-topbar-actions">
+          <Link href="/" className="button-outline">View website ↗</Link>
+          <button type="button" className="button-outline" onClick={logout}>Logout</button>
+        </div>
       </div>
       {error && <p className="error">{error}</p>}
       {notice && !error && <p className="cms-message">{notice}</p>}
       {profile ? (
         <>
           <div className="panel-grid">
-            <div className="admin-card panel-profile">
-              {editingProfile ? (
-                <form className="admin-form" onSubmit={saveProfile} style={{ flex: 1 }}>
-                  <div className="admin-row">
-                    <label>Display name<input required value={profileDraft.display_name} onChange={(e) => setProfileDraft({ ...profileDraft, display_name: e.target.value })} /></label>
-                    <label>Category<input value={profileDraft.category} onChange={(e) => setProfileDraft({ ...profileDraft, category: e.target.value })} /></label>
-                  </div>
-                  <label>Bio<textarea rows={3} maxLength={280} value={profileDraft.bio} onChange={(e) => setProfileDraft({ ...profileDraft, bio: e.target.value })} /></label>
-                  <div className="admin-row">
-                    <label>Upload avatar<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} /></label>
-                    <label>Avatar URL<input type="url" value={profileDraft.avatar_url} onChange={(e) => setProfileDraft({ ...profileDraft, avatar_url: e.target.value })} placeholder="https://..." /></label>
-                  </div>
-                  <div className="form-actions">
-                    <button className="button-dark" type="submit" disabled={savingProfile}>{savingProfile ? "Menyimpan..." : "Simpan profil"}</button>
-                    <button className="button-outline" type="button" onClick={() => setEditingProfile(false)}>Batal</button>
-                  </div>
-                </form>
-              ) : (
-                <>
-                  {profile.avatar_url ? (
-                    <Image className="panel-profile-avatar" src={profile.avatar_url} alt={profile.display_name} width={140} height={140} />
-                  ) : (
-                    <span className="panel-profile-avatar panel-profile-avatar--empty" aria-hidden="true" />
-                  )}
-                  <div className="panel-profile-info">
-                    <h2>{profile.display_name}</h2>
-                    <p className="bio-username">
-                      @{profile.username} · {profile.category}
-                      <span className={`status-pill status-${profile.status}`}>{profile.status}</span>
-                    </p>
-                    {profile.bio && <p className="hero-copy">{profile.bio}</p>}
-                  </div>
-                  <button className="button-outline panel-profile-edit" type="button" onClick={startEditProfile}>Edit profile</button>
-                </>
-              )}
-            </div>
+            <form className="admin-card admin-form panel-profile-editor" onSubmit={saveProfile}>
+              <div className="panel-profile-head">
+                {profileDraft.avatar_url ? (
+                  <Image className="panel-profile-avatar" src={profileDraft.avatar_url} alt={profile.display_name} width={140} height={140} />
+                ) : (
+                  <span className="panel-profile-avatar panel-profile-avatar--empty" aria-hidden="true" />
+                )}
+                <div className="panel-profile-info">
+                  <p className="bio-username">
+                    @{profile.username}
+                    <span className={`status-pill status-${profile.status}`}>{profile.status}</span>
+                  </p>
+                  <label>Display name<input required value={profileDraft.display_name} onChange={(e) => setProfileDraft({ ...profileDraft, display_name: e.target.value })} /></label>
+                </div>
+              </div>
+              <div className="admin-row">
+                <label>Category<input value={profileDraft.category} onChange={(e) => setProfileDraft({ ...profileDraft, category: e.target.value })} /></label>
+                <label>Avatar URL<input type="url" value={profileDraft.avatar_url} onChange={(e) => setProfileDraft({ ...profileDraft, avatar_url: e.target.value })} placeholder="https://..." /></label>
+              </div>
+              <label>Bio<textarea rows={3} maxLength={280} value={profileDraft.bio} onChange={(e) => setProfileDraft({ ...profileDraft, bio: e.target.value })} /></label>
+              <label>Upload avatar<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} /></label>
+              <div className="form-actions">
+                <button className="button-dark" type="submit" disabled={savingProfile}>{savingProfile ? "Menyimpan..." : "Simpan profil"}</button>
+              </div>
+            </form>
             <div className="admin-card panel-actions">
               <div className="eyebrow">Your minisite</div>
               <strong>picnicclub.id/@{profile.username}</strong>
