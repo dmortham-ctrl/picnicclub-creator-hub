@@ -1,7 +1,40 @@
 # WordPress → Next.js Migration Runbook
 
-Status: **prepared, not yet executed.** Cutover needs a Vercel deployment,
-DNS access, and content sign-off from the Picnic Club team.
+Status: **cutover executed 29 Aug 2026.** `picnicclub.id` now serves the
+Next.js app on Vercel over HTTPS. Global DNS propagation and Search Console
+re-indexing were still settling at handover; WordPress stays online (frozen)
+until indexing is confirmed.
+
+## 0. What was actually done
+
+- **Vercel project**: `picnicclub-creator-hub` (team `dmortham`, Hobby),
+  linked to `github.com/dmortham-ctrl/picnicclub-creator-hub`, auto-deploys on
+  push to `main`. Env: `NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY` (the publishable key).
+- **Domains on Vercel**: `picnicclub.id` (Production, canonical) and
+  `www.picnicclub.id` (308 redirect to apex).
+- **DNS**: nameservers moved from Domosquare (`*.dns-ds.com` /
+  `freedns*.domosquare.com`) to **Cloudflare** (`gannon`/`paityn.ns.cloudflare.com`),
+  because the Domosquare/Berdu record editor was not reliably authoritative.
+  Cloudflare records, **DNS only (not proxied)**:
+  - `A  picnicclub.id  → 76.76.21.21`
+  - `CNAME  www  → cname.vercel-dns.com`
+- **Registrar** (Berdu / sb1mofficial.com): nameserver change made under the
+  domain's EPP tab; "Theft Protection" was toggled off for the change and
+  should be turned back on.
+- **TLS**: issued automatically by Vercel (Let's Encrypt) once DNS resolved
+  to `76.76.21.21`.
+- **Supabase Auth**: Site URL set to `https://picnicclub.id`; redirect URLs
+  include `https://picnicclub.id/**`, `https://picnicclub-creator-hub.vercel.app/**`,
+  `https://picnicclub-creator-hub-*.vercel.app/**`, and localhost.
+
+### Rollback
+
+DNS is the switch. To revert: in Cloudflare DNS set
+`A picnicclub.id → 103.139.175.28` (the old WordPress server, PT Cybertechtonic),
+and `www` back to a CNAME to the apex. Or, at the registrar, point nameservers
+back to `freedns1.domosquare.com` / `freedns2.domosquare.com`. Supabase data is
+untouched by a rollback.
 
 ## 1. What the old site actually contains
 
@@ -69,59 +102,43 @@ blockers, but the team owns the copy (PRD §5.1).
   New homepage title set to "Picnic Club — More Than an Agency" to preserve
   search intent.
 
-## 3. Pre-cutover checklist
+## 3. Cutover verification (done)
 
-- [ ] Content audit above signed off by the team.
-- [x] **Media** moved to Supabase Storage (§2a).
-- [ ] `npm run db:backup` — fresh data snapshot right before cutover.
-- [ ] Verify Supabase RLS with a non-admin creator account end to end.
-- [ ] Deploy to a Vercel **preview / temporary domain**. Set
-      `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in
-      Production + Preview.
-- [ ] QA on the temp domain:
-  - [ ] `/`, `/members`, `/@<username>`, `/admin`, `/superadmin`, `/pelanggaran`,
-        `/privacy`, `/terms`, `/affiliate-disclosure`, `/report`
-  - [ ] Redirects: hit `/sample-page`, `/feed/`, `/wp-sitemap.xml`,
-        `/category/uncategorized/`, `/wp-admin` → expect 301 to the mapped URL
-  - [ ] A real `/wp-content/uploads/...` image URL still returns the image
-  - [ ] `/sitemap.xml` and `/robots.txt` correct, draft/suspended profiles
-        excluded and `noindex`
-  - [ ] OG/Twitter cards render (paste a `/@username` URL into a link preview)
-  - [ ] Google Forms + WhatsApp links open correctly
-  - [ ] Analytics events land (`/superadmin#analytics` shows traffic)
-  - [ ] Mobile + `npm run test:e2e` (includes axe) green
-  - [ ] Lighthouse mobile ≥ 90 on `/`
+Checked against Vercel (forced-resolve to `76.76.21.21`) right after the cert
+issued:
 
-## 4. Cutover
+- [x] `npm run db:backup` snapshots taken before and after.
+- [x] Valid TLS cert, `CN=picnicclub.id`.
+- [x] `/`, `/members`, `/@inproduk`, `/pelanggaran`, `/privacy`, `/terms`,
+      `/affiliate-disclosure`, `/report` → 200.
+- [x] `/sample-page` → 301 → `/`; `/wp-admin` → 301 → `/admin`;
+      `/category/uncategorized` → 301 → `/members`; old sitemaps → `/sitemap.xml`.
+- [x] `www.picnicclub.id` → 308 → `https://picnicclub.id/`.
+- [x] `/sitemap.xml`, `/robots.txt` serve correctly.
+- [x] Images load from Supabase Storage (no `wp-content` references anywhere).
+- [x] `npm run test:e2e` (11 E2E + axe) and `npm test` (11 unit) green pre-push.
 
-1. Freeze WordPress content edits.
-2. Add `picnicclub.id` (and `www`) as domains on the Vercel project.
-3. Update DNS per Vercel's instructions (A / CNAME). Lower TTL a day before.
-4. Wait for propagation + TLS certificate.
-5. In Supabase → Authentication → URL Configuration, set Site URL to
-   `https://picnicclub.id` and add redirect URL `https://picnicclub.id/admin`.
-6. Smoke-test production immediately (checklist in §3).
-7. Submit `https://picnicclub.id/sitemap.xml` in Google Search Console;
-   use "Change of Address" only if the domain itself changes (it does not).
+## 4. Remaining owner tasks (browser-only)
+
+- [ ] Re-enable **Theft Protection** in Berdu → `picnicclub.id` → EPP tab.
+- [ ] **Google Search Console**: add `https://picnicclub.id` property, verify
+      (HTML tag or Cloudflare DNS TXT), submit `sitemap.xml`. No "Change of
+      Address" — the domain itself did not change.
+- [ ] Team sign-off on the content-audit items in §2 (edit copy/FAQ/founders
+      via `/superadmin`).
 
 ## 5. Post-launch (first 2 weeks)
 
 - Watch Search Console Coverage + Crawl stats for new 404s.
 - Watch Vercel runtime logs/errors and Supabase logs (no external monitoring
   by design — see the error-monitoring note).
-- Keep WordPress **online but frozen** until Search Console shows the new URLs
-  indexed and redirects verified. Only then decommission.
+- Keep WordPress **online but frozen** at `103.139.175.28` until Search Console
+  shows the new URLs indexed and redirects verified. Only then decommission.
 - Schedule `npm run db:backup` (or a Supabase scheduled backup).
 
-## 6. Rollback
+## 6. Follow-ups (not required for launch)
 
-Because DNS is the switch, rollback = point DNS back at the WordPress host.
-Keep the old A/CNAME records noted before changing them. Supabase data is
-unaffected by a rollback.
-
-## 7. Follow-ups (not required for launch)
-
-- If the proxy safety net (§2a option 2) was used, finish moving media into
-  Supabase Storage and remove `LEGACY_MEDIA_ORIGIN`.
-- Add uptime monitoring against the production URL.
-- Decide the fate of `picnic.web.id`.
+- Add uptime monitoring against `https://picnicclub.id`.
+- Decide the fate of `picnic.web.id` (old nav "Our Services" / "Support").
+- The dormant `LEGACY_MEDIA_ORIGIN` rewrite in `next.config.ts` can be removed
+  once you're sure no stale `wp-content` URL exists.

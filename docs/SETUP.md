@@ -82,6 +82,10 @@ where username = 'username';
 
 ## Current status
 
+**Live at `https://picnicclub.id`** (Vercel, auto-deploy on push to `main`).
+DNS on Cloudflare, WordPress kept frozen until Search Console re-indexes.
+See `docs/MIGRATION.md` for the cutover record.
+
 Fase 0 dan sebagian besar Fase 1 sudah jalan:
 
 - Homepage, directory, dan minisite `/@username` (SSG/ISR + Open Graph + JSON-LD).
