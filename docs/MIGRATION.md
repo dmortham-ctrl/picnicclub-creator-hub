@@ -18,29 +18,25 @@ via `wp-sitemap.xml` + page crawl):
 | `/feed/`, `/comments/feed/` | RSS (only the junk post) | 301 → `/` |
 | `/wp-sitemap.xml` + Yoast sub-sitemaps, `/sitemaps.xml` | Old sitemaps | 301 → `/sitemap.xml` |
 | `/wp-admin/*`, `/wp-login.php` | WordPress admin | 301 → `/admin` |
-| `/wp-content/uploads/**` | Media (avatars, brand logos) | **Cutover blocker** — see §2a |
+| `/wp-content/uploads/**` | Media (avatars, brand logos) | **Done** — moved to Supabase Storage (§2a) |
 
 The full 301 map lives in `lib/redirects.ts` (`statusCode: 301`) and is wired
 through `next.config.ts` `redirects()`.
 
-## 2a. Media — must be handled before cutover
+## 2a. Media — DONE
 
-Avatar and brand-logo URLs in the database point at
-`https://picnicclub.id/wp-content/uploads/...`. Today those are served by
-WordPress. The moment DNS points `picnicclub.id` at Vercel, that path hits
-this app and 404s — **every hot-linked image breaks**.
+All 24 hot-linked images (18 avatars + 6 brand logos) were pulled from
+`picnicclub.id/wp-content` into the Supabase `Avatar` bucket and the database
+URLs rewritten. Run again if new WordPress-hosted URLs ever get added:
 
-Two ways to handle it, in order of preference:
+```
+npm run db:media --dry-run   # list
+npm run db:media             # migrate + rewrite DB
+```
 
-1. **Move media into Supabase Storage (real fix).** Download each referenced
-   file, upload to the `Avatar` bucket, rewrite `profiles.avatar_url` and
-   `brands.logo_url` to the Supabase public URL. Needs the Supabase
-   `service_role` key (Storage uploads are not allowed with the anon key).
-   After this, the app no longer depends on WordPress hosting at all.
-2. **Proxy during transition (safety net).** Keep the old server reachable at
-   a preserved hostname and set `LEGACY_MEDIA_ORIGIN` on Vercel; the
-   `rewrites()` in `next.config.ts` then proxies `/wp-content/**` to it.
-   Buys time but keeps a WordPress dependency — do the real fix soon after.
+The app no longer depends on WordPress hosting for media. The optional
+`LEGACY_MEDIA_ORIGIN` proxy in `next.config.ts` is now just a dormant safety
+net — leave it unset.
 
 ## 2. Content audit — needs team sign-off before launch
 
@@ -76,10 +72,8 @@ blockers, but the team owns the copy (PRD §5.1).
 ## 3. Pre-cutover checklist
 
 - [ ] Content audit above signed off by the team.
-- [ ] **Media handled** (§2a) — either moved to Supabase Storage, or
-      `LEGACY_MEDIA_ORIGIN` set and the `/wp-content` proxy verified.
-- [ ] `npm run db:backup` — data snapshot saved (also back up the `Avatar`
-      storage bucket from the Supabase dashboard).
+- [x] **Media** moved to Supabase Storage (§2a).
+- [ ] `npm run db:backup` — fresh data snapshot right before cutover.
 - [ ] Verify Supabase RLS with a non-admin creator account end to end.
 - [ ] Deploy to a Vercel **preview / temporary domain**. Set
       `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in

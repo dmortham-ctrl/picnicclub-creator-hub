@@ -13,7 +13,8 @@
     "db:migrate": "node scripts/supabase-migrate.mjs",
     "db:status": "node scripts/supabase-migrate.mjs --status",
     "db:sql": "node scripts/supabase-sql.mjs",
-    "db:backup": "node scripts/supabase-backup.mjs"
+    "db:backup": "node scripts/supabase-backup.mjs",
+    "db:media": "node scripts/migrate-media.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
