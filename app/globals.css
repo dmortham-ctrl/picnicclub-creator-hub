@@ -154,4 +154,9 @@ body, body * { font-family: Poppins, sans-serif !important; }
 @media (max-width: 760px) { .level-intro { display: block; }.level-row { grid-template-columns: 1fr 1fr; gap: 10px; }.level-identity { grid-column: 1 / -1; }.level-row select { width: 100%; } }
 @media (max-width: 760px) { .creator-toolbar { grid-template-columns: 1fr; }.bulk-toolbar { flex-wrap: wrap; gap: 12px; }.bulk-toolbar > div { width: 100%; margin-left: 0; overflow-x: auto; }.level-row { grid-template-columns: 24px 1fr 1fr; }.row-check { grid-row: 1; }.level-identity { grid-column: 2 / -1; grid-row: 1; }.level-row select:nth-of-type(1) { grid-column: 2; }.level-row select:nth-of-type(2) { grid-column: 3; }.pagination { gap: 8px; }.pagination button { padding: 9px 10px; } }
 @media (max-width: 760px) { .band { font-size: 13px; padding: 16px 18px; letter-spacing: .04em; white-space: normal; line-height: 1.5; } }
+@media (max-width: 760px) {
+  .founder-grid { display: flex; grid-template-columns: none; gap: 12px; overflow-x: auto; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; margin: 0 -20px; padding: 0 20px 12px; scrollbar-width: none; }
+  .founder-grid::-webkit-scrollbar { display: none; }
+  .founder-grid > .creator-card { flex: 0 0 43%; scroll-snap-align: start; }
+}
 @media (max-width: 760px) { .brand-admin-row { grid-template-columns: 44px 1fr; }.brand-admin-row img { width: 44px; height: 44px; }.brand-admin-row button { padding: 9px 11px; }.form-actions { flex-wrap: wrap; } }
