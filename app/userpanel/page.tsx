@@ -351,7 +351,7 @@ export default function UserPanelPage() {
           {section === "links" && (
           <div className="admin-card link-manager">
             <div className="eyebrow">Minisite links / 002</div>
-            <h2>Build your link stack.</h2>
+            <h2>Masukan link kamu</h2>
             <div className="admin-list">
               {ordered.map((link, index) => (
                 <div className="link-row" key={link.id}>
