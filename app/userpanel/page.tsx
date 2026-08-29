@@ -221,12 +221,18 @@ export default function UserPanelPage() {
                 </form>
               ) : (
                 <>
-                  {profile.avatar_url && <Image src={profile.avatar_url} alt={profile.display_name} width={120} height={120} />}
-                  <div>
-                    <div className="eyebrow">{profile.status}</div>
+                  {profile.avatar_url ? (
+                    <Image className="panel-profile-avatar" src={profile.avatar_url} alt={profile.display_name} width={140} height={140} />
+                  ) : (
+                    <span className="panel-profile-avatar panel-profile-avatar--empty" aria-hidden="true" />
+                  )}
+                  <div className="panel-profile-info">
                     <h2>{profile.display_name}</h2>
                     <p className="bio-username">@{profile.username} · {profile.category}</p>
-                    <p className="hero-copy">{profile.bio}</p>
+                    {profile.bio && <p className="hero-copy">{profile.bio}</p>}
+                  </div>
+                  <div className="panel-profile-meta">
+                    <span className={`status-pill status-${profile.status}`}>{profile.status}</span>
                     <button className="button-outline" type="button" onClick={startEditProfile}>Edit profile</button>
                   </div>
                 </>
