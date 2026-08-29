@@ -144,8 +144,15 @@ body, body * { font-family: Poppins, sans-serif !important; }
 .theme-swatch.selected { border-color: var(--ink); }
 @media (max-width: 760px) { .theme-swatch { flex: 1; } }
 
-.link-row { border: 1px solid var(--line); padding: 14px; display: grid; grid-template-columns: 32px 1fr auto; gap: 12px; align-items: center; background: white; }
+.link-row { border: 1px solid var(--line); padding: 14px; display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; background: white; }
 .link-row-icon { color: var(--ink); display: grid; place-items: center; }
+.link-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.link-thumb--empty { display: block; background: var(--line); border: 1px dashed #c3ccbe; }
+.link-image-field { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.link-image-field .link-thumb { width: 48px; height: 48px; }
+.link-image-pick { flex: 1; min-width: 160px; }
+.link-image-field .button-outline { padding: 8px 11px; font-size: 11px; }
+.link-delete-confirm { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 13px; }
 .link-row-main { min-width: 0; }
 .link-row-main strong { font-size: 13px; display: block; }
 .link-row-main small { display: block; color: var(--muted); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -158,7 +165,25 @@ body, body * { font-family: Poppins, sans-serif !important; }
 .link-edit { grid-column: 1 / -1; display: grid; gap: 12px; }
 .link-edit label { display: grid; gap: 6px; font-size: 12px; font-weight: 700; }
 .link-edit input, .link-edit select { border: 1px solid var(--line); padding: 10px; background: white; border-radius: 4px; }
-@media (max-width: 760px) { .link-row { grid-template-columns: 28px 1fr; }.link-row-actions { grid-column: 1 / -1; justify-content: flex-start; } }
+@media (max-width: 760px) { .link-row { grid-template-columns: 40px 1fr; }.link-row-actions { grid-column: 1 / -1; justify-content: flex-start; } }
+
+/* Minisite preview drawer */
+.preview-fab { position: fixed; right: 18px; bottom: 18px; z-index: 55; display: inline-flex; align-items: center; gap: 7px; padding: 12px 18px; border: none; border-radius: 999px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px rgba(22, 42, 36, .28); }
+.preview-backdrop { position: fixed; inset: 0; z-index: 60; background: rgba(22, 42, 36, .5); display: flex; justify-content: flex-end; }
+.preview-drawer { width: min(430px, 100%); background: var(--cream); height: 100%; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.preview-drawer-head { display: flex; align-items: center; justify-content: space-between; }
+.preview-drawer-head .button-outline { padding: 8px 10px; display: inline-flex; }
+.preview-phone { border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: #fff; }
+.preview-phone .bio-page { min-height: auto; padding: 24px 16px 36px; }
+.preview-phone .bio-avatar { margin-top: 12px; animation: none; }
+.preview-phone .bio-link { cursor: default; }
+.stat-row--3 { grid-template-columns: repeat(3, 1fr); }
+.analytics-subhead { font: 11px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 22px 0 6px; }
+@media (max-width: 760px) { .stat-row--3 { grid-template-columns: repeat(3, 1fr); } }
+
+/* Minisite link thumbnails on the public page */
+.bio-link-thumb { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
+.bio-link:has(.bio-link-thumb) { padding-left: 68px; padding-right: 24px; justify-content: flex-start; }
 
 .skeleton { background: linear-gradient(90deg, #e0e7dc 25%, #eef2ea 50%, #e0e7dc 75%); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; border-radius: 6px; }
 .skeleton-avatar { width: 104px; height: 104px; border-radius: 50%; margin: 50px auto 18px; }

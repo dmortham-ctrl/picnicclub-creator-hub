@@ -71,6 +71,7 @@ export const linkSchema = z.object({
   label: z.string().trim().min(1, "Label wajib diisi.").max(80),
   url: linkUrlSchema,
   link_type: z.enum(linkTypeValues).default("link"),
+  image_url: avatarUrlField,
   affiliate_disclosure: z.boolean().default(false),
 });
 

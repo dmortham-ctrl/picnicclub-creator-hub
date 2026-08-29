@@ -10,14 +10,24 @@ import { guessLinkType, LINK_TYPES } from "@/lib/link-types";
 import { MINISITE_THEMES } from "@/lib/themes";
 import { LinkIcon } from "@/app/components/link-icon";
 import { BrandLogo } from "@/app/components/brand-logo";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { MinisiteView } from "@/app/components/minisite-view";
+import { Menu, X, ChevronRight, Eye } from "lucide-react";
 
 const SECTIONS = [
   { id: "links", label: "Minisite Kamu" },
   { id: "profile", label: "Profil" },
   { id: "theme", label: "Tema minisite" },
+  { id: "analytics", label: "Analitik" },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
+
+type CreatorAnalytics = {
+  window_days: number;
+  profile_views: number;
+  link_clicks: number;
+  daily: { day: string; profile_views: number; link_clicks: number }[];
+  top_links: { id: string; label: string; clicks: number }[];
+};
 
 type ProfileDraft = { display_name: string; bio: string; category: string; avatar_url: string; theme: string };
 
@@ -32,6 +42,13 @@ export default function UserPanelPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<LinkDraft>(emptyDraft);
   const [savingLink, setSavingLink] = useState(false);
+  const [newLinkImage, setNewLinkImage] = useState<File | null>(null);
+  const [editImage, setEditImage] = useState<File | null>(null);
+  const [editImageCleared, setEditImageCleared] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [analytics, setAnalytics] = useState<CreatorAnalytics | null>(null);
+  const [analyticsDays, setAnalyticsDays] = useState(30);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [profileDraft, setProfileDraft] = useState<ProfileDraft>({ display_name: "", bio: "", category: "", avatar_url: "", theme: "default" });
@@ -81,8 +98,27 @@ export default function UserPanelPage() {
     });
   }, [profile]);
 
+  useEffect(() => {
+    if (!supabase || !profile || section !== "analytics") return;
+    setAnalytics(null);
+    supabase.rpc("creator_analytics", { target: profile.id, days: analyticsDays }).then(({ data, error: rpcError }) => {
+      if (rpcError) return setError(rpcError.message);
+      setAnalytics(data as CreatorAnalytics);
+    });
+  }, [profile, section, analyticsDays]);
+
   function resortState(rows: ProfileLink[]) {
     return [...rows].sort((a, b) => a.sort_order - b.sort_order);
+  }
+
+  async function uploadLinkImage(file: File): Promise<string | null> {
+    if (!supabase) return null;
+    if (!file.type.startsWith("image/")) { setError("Gambar link harus berupa file gambar."); return null; }
+    if (file.size > 5 * 1024 * 1024) { setError("Ukuran gambar maksimal 5 MB."); return null; }
+    const path = `links/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+    const { error: uploadError } = await supabase.storage.from("Avatar").upload(path, file, { contentType: file.type, upsert: false });
+    if (uploadError) { setError(uploadError.message); return null; }
+    return supabase.storage.from("Avatar").getPublicUrl(path).data.publicUrl;
   }
 
   async function addLink(event: React.FormEvent) {
@@ -92,34 +128,60 @@ export default function UserPanelPage() {
     if (!parsed.success) return setError(firstIssue(parsed.error));
     setError("");
     setSavingLink(true);
+
+    let image_url = parsed.data.image_url;
+    if (newLinkImage) {
+      const uploaded = await uploadLinkImage(newLinkImage);
+      if (uploaded === null) { setSavingLink(false); return; }
+      image_url = uploaded;
+    }
+
     const nextOrder = links.length ? Math.max(...links.map((l) => l.sort_order)) + 1 : 1;
     const { data, error: linkError } = await supabase
       .from("profile_links")
-      .insert({ profile_id: profile.id, ...parsed.data, icon_key: parsed.data.link_type, sort_order: nextOrder, is_active: true })
+      .insert({ profile_id: profile.id, ...parsed.data, image_url, icon_key: parsed.data.link_type, sort_order: nextOrder, is_active: true })
       .select()
       .single();
     if (linkError) setError(linkError.message);
     if (data) {
       setLinks(resortState([...links, data as ProfileLink]));
       setNewLink(emptyDraft);
+      setNewLinkImage(null);
       setNotice("Link ditambahkan.");
+      revalidateIfPublished(profile);
     }
     setSavingLink(false);
   }
 
   async function saveEdit(id: string) {
-    if (!supabase) return;
+    if (!supabase || !profile) return;
     const parsed = linkSchema.safeParse(editDraft);
     if (!parsed.success) return setError(firstIssue(parsed.error));
     setError("");
-    const { error: updateError } = await supabase
-      .from("profile_links")
-      .update({ ...parsed.data, icon_key: parsed.data.link_type })
-      .eq("id", id);
+
+    const patch: Record<string, unknown> = {
+      label: parsed.data.label,
+      url: parsed.data.url,
+      link_type: parsed.data.link_type,
+      affiliate_disclosure: parsed.data.affiliate_disclosure,
+      icon_key: parsed.data.link_type,
+    };
+    if (editImage) {
+      const uploaded = await uploadLinkImage(editImage);
+      if (uploaded === null) return;
+      patch.image_url = uploaded;
+    } else if (editImageCleared) {
+      patch.image_url = "";
+    }
+
+    const { error: updateError } = await supabase.from("profile_links").update(patch).eq("id", id);
     if (updateError) return setError(updateError.message);
-    setLinks(links.map((link) => (link.id === id ? { ...link, ...parsed.data } : link)));
+    setLinks(links.map((link) => (link.id === id ? ({ ...link, ...patch } as ProfileLink) : link)));
     setEditingId(null);
+    setEditImage(null);
+    setEditImageCleared(false);
     setNotice("Link diperbarui.");
+    revalidateIfPublished(profile);
   }
 
   async function toggleActive(link: ProfileLink) {
@@ -127,6 +189,7 @@ export default function UserPanelPage() {
     const { error: updateError } = await supabase.from("profile_links").update({ is_active: !link.is_active }).eq("id", link.id);
     if (updateError) return setError(updateError.message);
     setLinks(links.map((l) => (l.id === link.id ? { ...l, is_active: !l.is_active } : l)));
+    if (profile) revalidateIfPublished(profile);
   }
 
   async function move(link: ProfileLink, direction: -1 | 1) {
@@ -143,14 +206,17 @@ export default function UserPanelPage() {
       supabase.from("profile_links").update({ sort_order: b.sort_order }).eq("id", b.id),
     ]);
     if (r1.error || r2.error) setError((r1.error ?? r2.error)!.message);
+    else if (profile) revalidateIfPublished(profile);
   }
 
   async function removeLink(id: string) {
-    if (!supabase) return;
+    if (!supabase || !profile) return;
     const { error: linkError } = await supabase.from("profile_links").delete().eq("id", id);
     if (linkError) return setError(linkError.message);
     setLinks(links.filter((link) => link.id !== id));
+    setConfirmDeleteId(null);
     setNotice("Link dihapus.");
+    revalidateIfPublished(profile);
   }
 
   async function setStatus(status: Profile["status"]) {
@@ -236,6 +302,15 @@ export default function UserPanelPage() {
   }
 
   const ordered = resortState(links);
+  const previewProfile = profile && {
+    username: profile.username,
+    display_name: profileDraft.display_name || profile.display_name,
+    category: profileDraft.category || profile.category,
+    bio: profileDraft.bio || profile.bio,
+    avatar_url: profileDraft.avatar_url || profile.avatar_url,
+    theme: profile.theme ?? "default",
+  };
+  const showPreviewFab = !!profile && (section === "links" || section === "profile" || section === "theme");
 
   return (
     <main className="admin-wrap">
@@ -333,6 +408,45 @@ export default function UserPanelPage() {
           </div>
           )}
 
+          {section === "analytics" && (
+          <div className="admin-card">
+            <div className="cms-section-head">
+              <div>
+                <h2>Analitik minisite</h2>
+                <p className="hero-copy">Kunjungan halaman dan klik link kamu.</p>
+              </div>
+              <div className="range-tabs">
+                {[7, 30, 90].map((r) => (
+                  <button key={r} type="button" className={analyticsDays === r ? "active" : ""} onClick={() => setAnalyticsDays(r)}>{r}h</button>
+                ))}
+              </div>
+            </div>
+            {!analytics ? (
+              <p className="hero-copy">Memuat data...</p>
+            ) : (
+              <>
+                <div className="stat-row stat-row--3">
+                  <div><strong>{analytics.profile_views}</strong><small>Kunjungan halaman</small></div>
+                  <div><strong>{analytics.link_clicks}</strong><small>Klik link</small></div>
+                  <div><strong>{analytics.profile_views ? Math.round((analytics.link_clicks / analytics.profile_views) * 100) : 0}%</strong><small>Rasio klik</small></div>
+                </div>
+                <h3 className="analytics-subhead">Klik per link</h3>
+                {analytics.top_links.length === 0 ? (
+                  <p className="hero-copy">Belum ada klik pada rentang ini.</p>
+                ) : (
+                  analytics.top_links.map((l) => (
+                    <div className="analytics-line" key={l.id}>
+                      <span><strong>{l.label}</strong></span>
+                      <span className="analytics-count">{l.clicks}</span>
+                    </div>
+                  ))
+                )}
+                <p className="analytics-note">Agregat {analytics.window_days} hari terakhir. Tanpa data pribadi, IP, atau query string affiliate mentah.</p>
+              </>
+            )}
+          </div>
+          )}
+
           {section === "links" && (
           <div className="admin-card link-manager">
             <h2>Masukan link kamu</h2>
@@ -350,15 +464,40 @@ export default function UserPanelPage() {
                         </label>
                       </div>
                       <label>URL<input required type="url" value={editDraft.url} onChange={(e) => setEditDraft({ ...editDraft, url: e.target.value })} /></label>
+                      <div className="link-image-field">
+                        {editImage ? (
+                          <Image className="link-thumb" src={URL.createObjectURL(editImage)} alt="" width={48} height={48} unoptimized />
+                        ) : (!editImageCleared && link.image_url) ? (
+                          <Image className="link-thumb" src={link.image_url} alt="" width={48} height={48} />
+                        ) : (
+                          <span className="link-thumb link-thumb--empty" aria-hidden="true" />
+                        )}
+                        <label className="link-image-pick">Gambar (opsional)<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => { setEditImage(e.target.files?.[0] ?? null); setEditImageCleared(false); }} /></label>
+                        {((!editImageCleared && link.image_url) || editImage) && (
+                          <button type="button" className="button-outline" onClick={() => { setEditImage(null); setEditImageCleared(true); }}>Hapus gambar</button>
+                        )}
+                      </div>
                       <label className="checkbox-label"><input type="checkbox" checked={editDraft.affiliate_disclosure} onChange={(e) => setEditDraft({ ...editDraft, affiliate_disclosure: e.target.checked })} /> Tautan affiliasi / berbayar</label>
                       <div className="form-actions">
                         <button className="button-dark" type="submit">Simpan</button>
-                        <button className="button-outline" type="button" onClick={() => setEditingId(null)}>Batal</button>
+                        <button className="button-outline" type="button" onClick={() => { setEditingId(null); setEditImage(null); setEditImageCleared(false); }}>Batal</button>
                       </div>
                     </form>
+                  ) : confirmDeleteId === link.id ? (
+                    <div className="link-delete-confirm">
+                      <span>Hapus link <strong>{link.label}</strong>?</span>
+                      <div className="link-row-actions">
+                        <button className="button-dark" type="button" onClick={() => removeLink(link.id)}>Ya, hapus</button>
+                        <button className="button-outline" type="button" onClick={() => setConfirmDeleteId(null)}>Batal</button>
+                      </div>
+                    </div>
                   ) : (
                     <>
-                      <span className="link-row-icon"><LinkIcon linkType={link.link_type} /></span>
+                      <span className="link-row-icon">
+                        {link.image_url
+                          ? <Image className="link-thumb" src={link.image_url} alt="" width={48} height={48} />
+                          : <LinkIcon linkType={link.link_type} />}
+                      </span>
                       <div className="link-row-main">
                         <strong>{link.label}{!link.is_active && <em className="link-off"> · nonaktif</em>}{link.affiliate_disclosure && <em className="link-aff"> · affiliate</em>}</strong>
                         <small>{link.url}</small>
@@ -367,8 +506,8 @@ export default function UserPanelPage() {
                         <button className="icon-button" type="button" aria-label="Naikkan" disabled={index === 0} onClick={() => move(link, -1)}>↑</button>
                         <button className="icon-button" type="button" aria-label="Turunkan" disabled={index === ordered.length - 1} onClick={() => move(link, 1)}>↓</button>
                         <button className="button-outline" type="button" onClick={() => toggleActive(link)}>{link.is_active ? "Sembunyikan" : "Aktifkan"}</button>
-                        <button className="button-outline" type="button" onClick={() => { setEditingId(link.id); setEditDraft({ label: link.label, url: link.url, link_type: link.link_type, affiliate_disclosure: link.affiliate_disclosure }); }}>Edit</button>
-                        <button className="button-outline" type="button" onClick={() => removeLink(link.id)}>Hapus</button>
+                        <button className="button-outline" type="button" onClick={() => { setEditingId(link.id); setEditImage(null); setEditImageCleared(false); setEditDraft({ label: link.label, url: link.url, link_type: link.link_type, affiliate_disclosure: link.affiliate_disclosure }); }}>Edit</button>
+                        <button className="button-outline" type="button" onClick={() => setConfirmDeleteId(link.id)}>Hapus</button>
                       </div>
                     </>
                   )}
@@ -387,6 +526,13 @@ export default function UserPanelPage() {
                 </label>
               </div>
               <label>URL<input required type="url" value={newLink.url} onChange={(e) => { const url = e.target.value; setNewLink((prev) => ({ ...prev, url, link_type: prev.link_type === "link" ? guessLinkType(url) : prev.link_type })); }} placeholder="https://..." /></label>
+              <div className="link-image-field">
+                {newLinkImage
+                  ? <Image className="link-thumb" src={URL.createObjectURL(newLinkImage)} alt="" width={48} height={48} unoptimized />
+                  : <span className="link-thumb link-thumb--empty" aria-hidden="true" />}
+                <label className="link-image-pick">Gambar / foto produk (opsional)<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setNewLinkImage(e.target.files?.[0] ?? null)} /></label>
+                {newLinkImage && <button type="button" className="button-outline" onClick={() => setNewLinkImage(null)}>Hapus</button>}
+              </div>
               <label className="checkbox-label"><input type="checkbox" checked={newLink.affiliate_disclosure} onChange={(e) => setNewLink({ ...newLink, affiliate_disclosure: e.target.checked })} /> Tautan affiliasi / berbayar</label>
               <button className="button-dark" type="submit" disabled={savingLink}>{savingLink ? "Menambahkan..." : "Tambah link"}</button>
             </form>
@@ -411,6 +557,27 @@ export default function UserPanelPage() {
         <div className="admin-card"><p>{username ? "Loading profile..." : "Profile belum dipilih."}</p></div>
       )}
       <Link href="/" className="panel-back">← Back to homepage</Link>
+
+      {showPreviewFab && (
+        <button type="button" className="preview-fab" onClick={() => setPreviewOpen(true)}>
+          <Eye size={16} /> Preview
+        </button>
+      )}
+
+      {previewOpen && previewProfile && (
+        <div className="preview-backdrop" onClick={() => setPreviewOpen(false)}>
+          <aside className="preview-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-drawer-head">
+              <strong>Preview minisite</strong>
+              <button type="button" className="button-outline" onClick={() => setPreviewOpen(false)} aria-label="Tutup preview"><X size={16} /></button>
+            </div>
+            <div className="preview-phone">
+              <MinisiteView profile={previewProfile} links={ordered} />
+            </div>
+            <p className="analytics-note">Tampilan untuk pengunjung. Link nonaktif tidak ditampilkan.</p>
+          </aside>
+        </div>
+      )}
 
       {avatarModalOpen && profile && (
         <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Ganti foto profil" onClick={closeAvatarModal}>

@@ -29,6 +29,7 @@ export type ProfileLink = {
   url: string;
   link_type: string;
   icon_key: string;
+  image_url?: string;
   sort_order: number;
   is_active: boolean;
   affiliate_disclosure: boolean;

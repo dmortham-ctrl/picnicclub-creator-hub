@@ -59,6 +59,7 @@ create table public.profile_links (
   url text not null check (url ~* '^https?://'),
   link_type text not null default 'link',
   icon_key text not null default 'link',
+  image_url text not null default '' check (image_url = '' or image_url ~* '^https?://'),
   sort_order integer not null default 0,
   is_active boolean not null default true,
   affiliate_disclosure boolean not null default false,
@@ -237,6 +238,44 @@ as $$
 $$;
 
 grant execute on function public.analytics_summary(integer) to authenticated;
+
+-- Per-profile analytics a creator can read for a profile they own.
+create or replace function public.creator_analytics(target uuid, days integer default 30)
+returns json language plpgsql stable security definer set search_path = public
+as $$
+declare
+  allowed boolean;
+begin
+  select (owner_id = auth.uid()) or public.is_admin() into allowed
+  from public.profiles where id = target;
+  if not coalesce(allowed, false) then
+    raise exception 'not allowed to read analytics for this profile';
+  end if;
+  return (
+    with ev as (
+      select * from public.analytics_events
+      where profile_id = target and occurred_at > now() - make_interval(days => days)
+    )
+    select json_build_object(
+      'window_days', days,
+      'profile_views', (select count(*) from ev where event_name = 'profile_view'),
+      'link_clicks', (select count(*) from ev where event_name = 'link_click'),
+      'daily', (select coalesce(json_agg(row_to_json(d) order by d.day), '[]'::json) from (
+        select date_trunc('day', occurred_at)::date as day,
+               count(*) filter (where event_name = 'profile_view') as profile_views,
+               count(*) filter (where event_name = 'link_click') as link_clicks
+        from ev group by 1) d),
+      'top_links', (select coalesce(json_agg(row_to_json(l) order by l.clicks desc, l.label), '[]'::json) from (
+        select pl.id, pl.label, count(e.*) as clicks
+        from public.profile_links pl
+        left join ev e on e.link_id = pl.id and e.event_name = 'link_click'
+        where pl.profile_id = target
+        group by pl.id, pl.label) l)
+    )
+  );
+end;
+$$;
+grant execute on function public.creator_analytics(uuid, integer) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- brands
