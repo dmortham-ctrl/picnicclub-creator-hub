@@ -14,9 +14,20 @@ const matches = (path: string, prefixes: string[]) =>
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const path = request.nextUrl.pathname;
 
-  // Demo mode (no Supabase env): nothing to protect.
-  if (!supabaseUrl || !supabaseAnonKey) return response;
+  // Demo mode (no Supabase env): no one can be signed in, so send every
+  // protected route to the login screen.
+  if (!supabaseUrl || !supabaseAnonKey) {
+    if (matches(path, AUTH_PREFIXES)) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/admin";
+      loginUrl.search = "";
+      loginUrl.searchParams.set("redirectedFrom", path);
+      return NextResponse.redirect(loginUrl);
+    }
+    return response;
+  }
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -34,7 +45,6 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const path = request.nextUrl.pathname;
 
   if (matches(path, AUTH_PREFIXES) && !user) {
     const loginUrl = request.nextUrl.clone();

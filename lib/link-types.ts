@@ -20,7 +20,7 @@ export function linkTypeMeta(value: string) {
 /** Best-effort guess of link type from a URL, for a friendlier add form. */
 export function guessLinkType(url: string): LinkTypeValue {
   const u = url.toLowerCase();
-  if (u.startsWith("mailto:") || u.includes("@")) return "email";
+  if (u.startsWith("mailto:")) return "email";
   if (u.includes("tiktok.com")) return "tiktok";
   if (u.includes("instagram.com")) return "instagram";
   if (u.includes("youtube.com") || u.includes("youtu.be")) return "youtube";
