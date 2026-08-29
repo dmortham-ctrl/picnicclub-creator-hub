@@ -4,6 +4,12 @@
 * { box-sizing: border-box; }
 body { margin: 0; color: var(--ink); background: var(--cream); font-family: Poppins, sans-serif; }
 a { color: inherit; text-decoration: none; }
+.brand-link { display: inline-flex; align-items: center; }
+.brand-logo { display: block; width: 96px; height: 40px; object-fit: contain; }
+.brand-logo--dark { filter: brightness(0); }
+.brand-logo--light { filter: brightness(0) invert(1); }
+.cms-sidebar .brand-link { margin-bottom: 4px; }
+
 .skip-link { position: fixed; top: 8px; left: 8px; z-index: 100; background: var(--ink); color: white; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; transform: translateY(-150%); transition: transform .15s; }
 .skip-link:focus-visible { transform: translateY(0); }
 :focus-visible { outline: 3px solid var(--accent-text); outline-offset: 2px; border-radius: 2px; }

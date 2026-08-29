@@ -8,6 +8,7 @@ import { Profile, ProfileLink } from "@/lib/types";
 import { firstIssue, linkSchema } from "@/lib/validation";
 import { guessLinkType, LINK_TYPES } from "@/lib/link-types";
 import { LinkIcon } from "@/app/components/link-icon";
+import { BrandLogo } from "@/app/components/brand-logo";
 
 type LinkDraft = { label: string; url: string; link_type: string; affiliate_disclosure: boolean };
 const emptyDraft: LinkDraft = { label: "", url: "", link_type: "link", affiliate_disclosure: false };
@@ -131,7 +132,7 @@ export default function UserPanelPage() {
   return (
     <main className="admin-wrap">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Link href="/" className="brand"><span className="brand-mark">P</span> picnic club</Link>
+        <BrandLogo href="/" />
         <Link href="/admin" className="button-outline">Edit profile</Link>
       </div>
       <section className="panel-hero">
