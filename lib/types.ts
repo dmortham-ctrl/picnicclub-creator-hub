@@ -7,6 +7,7 @@ export type Profile = {
   avatar_url: string;
   category: string;
   status: "draft" | "published" | "suspended";
+  theme?: "default" | "midnight" | "lime" | "coral";
   level?: "All Star" | "Featured" | "Rising";
   is_featured: boolean;
   featured_order: number;

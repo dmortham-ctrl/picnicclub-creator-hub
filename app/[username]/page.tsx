@@ -62,7 +62,7 @@ export default async function ProfilePage({ params }: Params) {
   };
 
   return (
-    <main className="bio-page">
+    <main className="bio-page" data-theme={profile.theme ?? "default"}>
       <JsonLd data={personLd} />
       <TrackView profileId={profile.id} />
       <div className="bio-card">

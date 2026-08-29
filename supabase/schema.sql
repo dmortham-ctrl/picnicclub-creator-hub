@@ -40,6 +40,7 @@ create table public.profiles (
   avatar_url text not null default '',
   category text not null default 'Lifestyle',
   level text not null default 'Rising' check (level in ('All Star', 'Featured', 'Rising')),
+  theme text not null default 'default' check (theme in ('default', 'midnight', 'lime', 'coral')),
   status public.profile_status not null default 'draft',
   is_featured boolean not null default false,
   featured_order integer not null default 0,

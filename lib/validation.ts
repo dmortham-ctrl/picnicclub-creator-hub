@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { LINK_TYPES } from "./link-types";
+import { MINISITE_THEME_VALUES } from "./themes";
 
 // Keep this list in sync with the profiles_username_not_reserved CHECK
 // constraint in supabase/migrations/20260829090000_phase0_roles_and_rls.sql
@@ -42,12 +43,26 @@ export const linkUrlSchema = z
     }
   }, "Masukkan URL http(s) yang valid.");
 
+const displayNameField = z.string().trim().min(1, "Nama tampilan wajib diisi.").max(60);
+const bioField = z.string().trim().max(280, "Bio maksimal 280 karakter.").default("");
+const categoryField = z.string().trim().min(1).max(40).default("Lifestyle");
+const avatarUrlField = z.union([linkUrlSchema, z.literal("")]).default("");
+
 export const profileSchema = z.object({
   username: usernameSchema,
-  display_name: z.string().trim().min(1, "Nama tampilan wajib diisi.").max(60),
-  bio: z.string().trim().max(280, "Bio maksimal 280 karakter.").default(""),
-  category: z.string().trim().min(1).max(40).default("Lifestyle"),
-  avatar_url: z.union([linkUrlSchema, z.literal("")]).default(""),
+  display_name: displayNameField,
+  bio: bioField,
+  category: categoryField,
+  avatar_url: avatarUrlField,
+});
+
+/** Fields a creator can edit themselves from /userpanel (username is fixed). */
+export const profileSettingsSchema = z.object({
+  display_name: displayNameField,
+  bio: bioField,
+  category: categoryField,
+  avatar_url: avatarUrlField,
+  theme: z.enum(MINISITE_THEME_VALUES).default("default"),
 });
 
 const linkTypeValues = LINK_TYPES.map((t) => t.value) as [string, ...string[]];

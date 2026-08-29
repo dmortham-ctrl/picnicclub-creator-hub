@@ -5,10 +5,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Profile, ProfileLink } from "@/lib/types";
-import { firstIssue, linkSchema } from "@/lib/validation";
+import { firstIssue, linkSchema, profileSettingsSchema } from "@/lib/validation";
 import { guessLinkType, LINK_TYPES } from "@/lib/link-types";
+import { MINISITE_THEMES } from "@/lib/themes";
 import { LinkIcon } from "@/app/components/link-icon";
 import { BrandLogo } from "@/app/components/brand-logo";
+
+type ProfileDraft = { display_name: string; bio: string; category: string; avatar_url: string; theme: string };
 
 type LinkDraft = { label: string; url: string; link_type: string; affiliate_disclosure: boolean };
 const emptyDraft: LinkDraft = { label: "", url: "", link_type: "link", affiliate_disclosure: false };
@@ -23,6 +26,10 @@ export default function UserPanelPage() {
   const [savingLink, setSavingLink] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileDraft, setProfileDraft] = useState<ProfileDraft>({ display_name: "", bio: "", category: "", avatar_url: "", theme: "default" });
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
     const search = new URLSearchParams(window.location.search);
@@ -127,13 +134,68 @@ export default function UserPanelPage() {
     setNotice(status === "published" ? "Halaman dipublikasikan." : "Halaman disembunyikan.");
   }
 
+  function startEditProfile() {
+    if (!profile) return;
+    setProfileDraft({
+      display_name: profile.display_name,
+      bio: profile.bio,
+      category: profile.category,
+      avatar_url: profile.avatar_url,
+      theme: profile.theme ?? "default",
+    });
+    setAvatarFile(null);
+    setEditingProfile(true);
+  }
+
+  async function saveProfile(event: React.FormEvent) {
+    event.preventDefault();
+    if (!supabase || !profile) return;
+    const parsed = profileSettingsSchema.safeParse(profileDraft);
+    if (!parsed.success) return setError(firstIssue(parsed.error));
+    setError("");
+    setSavingProfile(true);
+
+    let avatarUrl = parsed.data.avatar_url;
+    if (avatarFile) {
+      if (!avatarFile.type.startsWith("image/")) { setError("Avatar harus berupa file gambar."); setSavingProfile(false); return; }
+      if (avatarFile.size > 5 * 1024 * 1024) { setError("Ukuran avatar maksimal 5 MB."); setSavingProfile(false); return; }
+      const path = `${crypto.randomUUID()}-${avatarFile.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+      const { error: uploadError } = await supabase.storage.from("Avatar").upload(path, avatarFile, { contentType: avatarFile.type, upsert: false });
+      if (uploadError) { setError(uploadError.message); setSavingProfile(false); return; }
+      avatarUrl = supabase.storage.from("Avatar").getPublicUrl(path).data.publicUrl;
+    }
+
+    const patch = { ...parsed.data, avatar_url: avatarUrl };
+    const { error: updateError } = await supabase.from("profiles").update(patch).eq("id", profile.id);
+    if (updateError) { setError(updateError.message); setSavingProfile(false); return; }
+
+    setProfile({ ...profile, ...patch } as Profile);
+    setEditingProfile(false);
+    setSavingProfile(false);
+    setNotice("Profil diperbarui.");
+    if (profile.status === "published") {
+      fetch("/api/profile-visibility", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: profile.id, status: "published" }) });
+    }
+  }
+
+  async function setTheme(theme: string) {
+    if (!supabase || !profile) return;
+    const { error: updateError } = await supabase.from("profiles").update({ theme }).eq("id", profile.id);
+    if (updateError) return setError(updateError.message);
+    setProfile({ ...profile, theme: theme as Profile["theme"] });
+    setNotice("Tema minisite diperbarui.");
+    if (profile.status === "published") {
+      fetch("/api/profile-visibility", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: profile.id, status: "published" }) });
+    }
+  }
+
   const ordered = resortState(links);
 
   return (
     <main className="admin-wrap">
       <div className="admin-topbar">
         <BrandLogo href="/" />
-        <Link href="/admin" className="button-outline">Edit profile</Link>
+        <Link href="/" className="button-outline">View website ↗</Link>
       </div>
       {error && <p className="error">{error}</p>}
       {notice && !error && <p className="cms-message">{notice}</p>}
@@ -141,13 +203,34 @@ export default function UserPanelPage() {
         <>
           <div className="panel-grid">
             <div className="admin-card panel-profile">
-              {profile.avatar_url && <Image src={profile.avatar_url} alt={profile.display_name} width={120} height={120} />}
-              <div>
-                <div className="eyebrow">{profile.status}</div>
-                <h2>{profile.display_name}</h2>
-                <p className="bio-username">@{profile.username} · {profile.category}</p>
-                <p className="hero-copy">{profile.bio}</p>
-              </div>
+              {editingProfile ? (
+                <form className="admin-form" onSubmit={saveProfile} style={{ flex: 1 }}>
+                  <div className="admin-row">
+                    <label>Display name<input required value={profileDraft.display_name} onChange={(e) => setProfileDraft({ ...profileDraft, display_name: e.target.value })} /></label>
+                    <label>Category<input value={profileDraft.category} onChange={(e) => setProfileDraft({ ...profileDraft, category: e.target.value })} /></label>
+                  </div>
+                  <label>Bio<textarea rows={3} maxLength={280} value={profileDraft.bio} onChange={(e) => setProfileDraft({ ...profileDraft, bio: e.target.value })} /></label>
+                  <div className="admin-row">
+                    <label>Upload avatar<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} /></label>
+                    <label>Avatar URL<input type="url" value={profileDraft.avatar_url} onChange={(e) => setProfileDraft({ ...profileDraft, avatar_url: e.target.value })} placeholder="https://..." /></label>
+                  </div>
+                  <div className="form-actions">
+                    <button className="button-dark" type="submit" disabled={savingProfile}>{savingProfile ? "Menyimpan..." : "Simpan profil"}</button>
+                    <button className="button-outline" type="button" onClick={() => setEditingProfile(false)}>Batal</button>
+                  </div>
+                </form>
+              ) : (
+                <>
+                  {profile.avatar_url && <Image src={profile.avatar_url} alt={profile.display_name} width={120} height={120} />}
+                  <div>
+                    <div className="eyebrow">{profile.status}</div>
+                    <h2>{profile.display_name}</h2>
+                    <p className="bio-username">@{profile.username} · {profile.category}</p>
+                    <p className="hero-copy">{profile.bio}</p>
+                    <button className="button-outline" type="button" onClick={startEditProfile}>Edit profile</button>
+                  </div>
+                </>
+              )}
             </div>
             <div className="admin-card panel-actions">
               <div className="eyebrow">Your minisite</div>
@@ -159,6 +242,24 @@ export default function UserPanelPage() {
               ) : (
                 <button className="button-dark" type="button" onClick={() => setStatus("published")}>Publish page</button>
               )}
+            </div>
+          </div>
+
+          <div className="admin-card">
+            <div className="eyebrow">Minisite theme</div>
+            <div className="theme-picker">
+              {MINISITE_THEMES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  className={`theme-swatch ${(profile.theme ?? "default") === t.value ? "selected" : ""}`}
+                  onClick={() => setTheme(t.value)}
+                  style={{ background: t.swatch, color: t.ink }}
+                  aria-pressed={(profile.theme ?? "default") === t.value}
+                >
+                  {t.label}
+                </button>
+              ))}
             </div>
           </div>
 
