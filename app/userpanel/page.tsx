@@ -222,10 +222,7 @@ export default function UserPanelPage() {
                   <label>Display name<input required value={profileDraft.display_name} onChange={(e) => setProfileDraft({ ...profileDraft, display_name: e.target.value })} /></label>
                 </div>
               </div>
-              <div className="admin-row">
-                <label>Category<input value={profileDraft.category} onChange={(e) => setProfileDraft({ ...profileDraft, category: e.target.value })} /></label>
-                <label>Avatar URL<input type="url" value={profileDraft.avatar_url} onChange={(e) => setProfileDraft({ ...profileDraft, avatar_url: e.target.value })} placeholder="https://..." /></label>
-              </div>
+              <label>Category<input value={profileDraft.category} onChange={(e) => setProfileDraft({ ...profileDraft, category: e.target.value })} /></label>
               <label>Bio<textarea rows={3} maxLength={280} value={profileDraft.bio} onChange={(e) => setProfileDraft({ ...profileDraft, bio: e.target.value })} /></label>
               <label>Upload avatar<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} /></label>
               <div className="form-actions">
