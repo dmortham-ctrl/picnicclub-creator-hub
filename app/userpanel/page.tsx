@@ -5,12 +5,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Profile, ProfileLink } from "@/lib/types";
-import { firstIssue, linkSchema, profileSettingsSchema } from "@/lib/validation";
-import { guessLinkType, LINK_TYPES } from "@/lib/link-types";
+import { firstIssue, profileSettingsSchema } from "@/lib/validation";
 import { MINISITE_THEMES } from "@/lib/themes";
-import { LinkIcon } from "@/app/components/link-icon";
 import { BrandLogo } from "@/app/components/brand-logo";
 import { MinisiteView } from "@/app/components/minisite-view";
+import { BlockManager } from "@/app/userpanel/block-manager";
 import { Menu, X, ChevronRight, Eye } from "lucide-react";
 
 const SECTIONS = [
@@ -31,21 +30,10 @@ type CreatorAnalytics = {
 
 type ProfileDraft = { display_name: string; bio: string; category: string; avatar_url: string; theme: string };
 
-type LinkDraft = { label: string; url: string; link_type: string; affiliate_disclosure: boolean };
-const emptyDraft: LinkDraft = { label: "", url: "", link_type: "link", affiliate_disclosure: false };
-
 export default function UserPanelPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [username, setUsername] = useState("");
   const [links, setLinks] = useState<ProfileLink[]>([]);
-  const [newLink, setNewLink] = useState<LinkDraft>(emptyDraft);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDraft, setEditDraft] = useState<LinkDraft>(emptyDraft);
-  const [savingLink, setSavingLink] = useState(false);
-  const [newLinkImage, setNewLinkImage] = useState<File | null>(null);
-  const [editImage, setEditImage] = useState<File | null>(null);
-  const [editImageCleared, setEditImageCleared] = useState(false);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [analytics, setAnalytics] = useState<CreatorAnalytics | null>(null);
   const [analyticsDays, setAnalyticsDays] = useState(30);
@@ -106,118 +94,6 @@ export default function UserPanelPage() {
       setAnalytics(data as CreatorAnalytics);
     });
   }, [profile, section, analyticsDays]);
-
-  function resortState(rows: ProfileLink[]) {
-    return [...rows].sort((a, b) => a.sort_order - b.sort_order);
-  }
-
-  async function uploadLinkImage(file: File): Promise<string | null> {
-    if (!supabase) return null;
-    if (!file.type.startsWith("image/")) { setError("Gambar link harus berupa file gambar."); return null; }
-    if (file.size > 5 * 1024 * 1024) { setError("Ukuran gambar maksimal 5 MB."); return null; }
-    const path = `links/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
-    const { error: uploadError } = await supabase.storage.from("Avatar").upload(path, file, { contentType: file.type, upsert: false });
-    if (uploadError) { setError(uploadError.message); return null; }
-    return supabase.storage.from("Avatar").getPublicUrl(path).data.publicUrl;
-  }
-
-  async function addLink(event: React.FormEvent) {
-    event.preventDefault();
-    if (!supabase || !profile) return;
-    const parsed = linkSchema.safeParse(newLink);
-    if (!parsed.success) return setError(firstIssue(parsed.error));
-    setError("");
-    setSavingLink(true);
-
-    let image_url = parsed.data.image_url;
-    if (newLinkImage) {
-      const uploaded = await uploadLinkImage(newLinkImage);
-      if (uploaded === null) { setSavingLink(false); return; }
-      image_url = uploaded;
-    }
-
-    const nextOrder = links.length ? Math.max(...links.map((l) => l.sort_order)) + 1 : 1;
-    const { data, error: linkError } = await supabase
-      .from("profile_links")
-      .insert({ profile_id: profile.id, ...parsed.data, image_url, icon_key: parsed.data.link_type, sort_order: nextOrder, is_active: true })
-      .select()
-      .single();
-    if (linkError) setError(linkError.message);
-    if (data) {
-      setLinks(resortState([...links, data as ProfileLink]));
-      setNewLink(emptyDraft);
-      setNewLinkImage(null);
-      setNotice("Link ditambahkan.");
-      revalidateIfPublished(profile);
-    }
-    setSavingLink(false);
-  }
-
-  async function saveEdit(id: string) {
-    if (!supabase || !profile) return;
-    const parsed = linkSchema.safeParse(editDraft);
-    if (!parsed.success) return setError(firstIssue(parsed.error));
-    setError("");
-
-    const patch: Record<string, unknown> = {
-      label: parsed.data.label,
-      url: parsed.data.url,
-      link_type: parsed.data.link_type,
-      affiliate_disclosure: parsed.data.affiliate_disclosure,
-      icon_key: parsed.data.link_type,
-    };
-    if (editImage) {
-      const uploaded = await uploadLinkImage(editImage);
-      if (uploaded === null) return;
-      patch.image_url = uploaded;
-    } else if (editImageCleared) {
-      patch.image_url = "";
-    }
-
-    const { error: updateError } = await supabase.from("profile_links").update(patch).eq("id", id);
-    if (updateError) return setError(updateError.message);
-    setLinks(links.map((link) => (link.id === id ? ({ ...link, ...patch } as ProfileLink) : link)));
-    setEditingId(null);
-    setEditImage(null);
-    setEditImageCleared(false);
-    setNotice("Link diperbarui.");
-    revalidateIfPublished(profile);
-  }
-
-  async function toggleActive(link: ProfileLink) {
-    if (!supabase) return;
-    const { error: updateError } = await supabase.from("profile_links").update({ is_active: !link.is_active }).eq("id", link.id);
-    if (updateError) return setError(updateError.message);
-    setLinks(links.map((l) => (l.id === link.id ? { ...l, is_active: !l.is_active } : l)));
-    if (profile) revalidateIfPublished(profile);
-  }
-
-  async function move(link: ProfileLink, direction: -1 | 1) {
-    if (!supabase) return;
-    const ordered = resortState(links);
-    const index = ordered.findIndex((l) => l.id === link.id);
-    const swapWith = ordered[index + direction];
-    if (!swapWith) return;
-    const a = { ...link, sort_order: swapWith.sort_order };
-    const b = { ...swapWith, sort_order: link.sort_order };
-    setLinks(resortState(links.map((l) => (l.id === a.id ? a : l.id === b.id ? b : l))));
-    const [r1, r2] = await Promise.all([
-      supabase.from("profile_links").update({ sort_order: a.sort_order }).eq("id", a.id),
-      supabase.from("profile_links").update({ sort_order: b.sort_order }).eq("id", b.id),
-    ]);
-    if (r1.error || r2.error) setError((r1.error ?? r2.error)!.message);
-    else if (profile) revalidateIfPublished(profile);
-  }
-
-  async function removeLink(id: string) {
-    if (!supabase || !profile) return;
-    const { error: linkError } = await supabase.from("profile_links").delete().eq("id", id);
-    if (linkError) return setError(linkError.message);
-    setLinks(links.filter((link) => link.id !== id));
-    setConfirmDeleteId(null);
-    setNotice("Link dihapus.");
-    revalidateIfPublished(profile);
-  }
 
   async function setStatus(status: Profile["status"]) {
     if (!profile) return;
@@ -301,7 +177,7 @@ export default function UserPanelPage() {
     revalidateIfPublished(profile);
   }
 
-  const ordered = resortState(links);
+  const ordered = [...links].sort((a, b) => a.sort_order - b.sort_order);
   const previewProfile = profile && {
     username: profile.username,
     display_name: profileDraft.display_name || profile.display_name,
@@ -448,95 +324,14 @@ export default function UserPanelPage() {
           )}
 
           {section === "links" && (
-          <div className="admin-card link-manager">
-            <h2>Masukan link kamu</h2>
-            <div className="admin-list">
-              {ordered.map((link, index) => (
-                <div className="link-row" key={link.id}>
-                  {editingId === link.id ? (
-                    <form className="link-edit" onSubmit={(e) => { e.preventDefault(); saveEdit(link.id); }}>
-                      <div className="admin-row">
-                        <label>Label<input required value={editDraft.label} onChange={(e) => setEditDraft({ ...editDraft, label: e.target.value })} /></label>
-                        <label>Tipe
-                          <select value={editDraft.link_type} onChange={(e) => setEditDraft({ ...editDraft, link_type: e.target.value })}>
-                            {LINK_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                          </select>
-                        </label>
-                      </div>
-                      <label>URL<input required type="url" value={editDraft.url} onChange={(e) => setEditDraft({ ...editDraft, url: e.target.value })} /></label>
-                      <div className="link-image-field">
-                        {editImage ? (
-                          <Image className="link-thumb" src={URL.createObjectURL(editImage)} alt="" width={48} height={48} unoptimized />
-                        ) : (!editImageCleared && link.image_url) ? (
-                          <Image className="link-thumb" src={link.image_url} alt="" width={48} height={48} />
-                        ) : (
-                          <span className="link-thumb link-thumb--empty" aria-hidden="true" />
-                        )}
-                        <label className="link-image-pick">Gambar (opsional)<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => { setEditImage(e.target.files?.[0] ?? null); setEditImageCleared(false); }} /></label>
-                        {((!editImageCleared && link.image_url) || editImage) && (
-                          <button type="button" className="button-outline" onClick={() => { setEditImage(null); setEditImageCleared(true); }}>Hapus gambar</button>
-                        )}
-                      </div>
-                      <label className="checkbox-label"><input type="checkbox" checked={editDraft.affiliate_disclosure} onChange={(e) => setEditDraft({ ...editDraft, affiliate_disclosure: e.target.checked })} /> Tautan affiliasi / berbayar</label>
-                      <div className="form-actions">
-                        <button className="button-dark" type="submit">Simpan</button>
-                        <button className="button-outline" type="button" onClick={() => { setEditingId(null); setEditImage(null); setEditImageCleared(false); }}>Batal</button>
-                      </div>
-                    </form>
-                  ) : confirmDeleteId === link.id ? (
-                    <div className="link-delete-confirm">
-                      <span>Hapus link <strong>{link.label}</strong>?</span>
-                      <div className="link-row-actions">
-                        <button className="button-dark" type="button" onClick={() => removeLink(link.id)}>Ya, hapus</button>
-                        <button className="button-outline" type="button" onClick={() => setConfirmDeleteId(null)}>Batal</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <span className="link-row-icon">
-                        {link.image_url
-                          ? <Image className="link-thumb" src={link.image_url} alt="" width={48} height={48} />
-                          : <LinkIcon linkType={link.link_type} />}
-                      </span>
-                      <div className="link-row-main">
-                        <strong>{link.label}{!link.is_active && <em className="link-off"> · nonaktif</em>}{link.affiliate_disclosure && <em className="link-aff"> · affiliate</em>}</strong>
-                        <small>{link.url}</small>
-                      </div>
-                      <div className="link-row-actions">
-                        <button className="icon-button" type="button" aria-label="Naikkan" disabled={index === 0} onClick={() => move(link, -1)}>↑</button>
-                        <button className="icon-button" type="button" aria-label="Turunkan" disabled={index === ordered.length - 1} onClick={() => move(link, 1)}>↓</button>
-                        <button className="button-outline" type="button" onClick={() => toggleActive(link)}>{link.is_active ? "Sembunyikan" : "Aktifkan"}</button>
-                        <button className="button-outline" type="button" onClick={() => { setEditingId(link.id); setEditImage(null); setEditImageCleared(false); setEditDraft({ label: link.label, url: link.url, link_type: link.link_type, affiliate_disclosure: link.affiliate_disclosure }); }}>Edit</button>
-                        <button className="button-outline" type="button" onClick={() => setConfirmDeleteId(link.id)}>Hapus</button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-              {links.length === 0 && <p className="hero-copy">Belum ada link. Tambahkan link pertama Anda.</p>}
-            </div>
-
-            <form className="admin-form link-form" onSubmit={addLink}>
-              <div className="admin-row">
-                <label>Label<input required value={newLink.label} onChange={(e) => setNewLink({ ...newLink, label: e.target.value })} placeholder="My favorite finds" /></label>
-                <label>Tipe
-                  <select value={newLink.link_type} onChange={(e) => setNewLink({ ...newLink, link_type: e.target.value })}>
-                    {LINK_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                  </select>
-                </label>
-              </div>
-              <label>URL<input required type="url" value={newLink.url} onChange={(e) => { const url = e.target.value; setNewLink((prev) => ({ ...prev, url, link_type: prev.link_type === "link" ? guessLinkType(url) : prev.link_type })); }} placeholder="https://..." /></label>
-              <div className="link-image-field">
-                {newLinkImage
-                  ? <Image className="link-thumb" src={URL.createObjectURL(newLinkImage)} alt="" width={48} height={48} unoptimized />
-                  : <span className="link-thumb link-thumb--empty" aria-hidden="true" />}
-                <label className="link-image-pick">Gambar / foto produk (opsional)<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setNewLinkImage(e.target.files?.[0] ?? null)} /></label>
-                {newLinkImage && <button type="button" className="button-outline" onClick={() => setNewLinkImage(null)}>Hapus</button>}
-              </div>
-              <label className="checkbox-label"><input type="checkbox" checked={newLink.affiliate_disclosure} onChange={(e) => setNewLink({ ...newLink, affiliate_disclosure: e.target.checked })} /> Tautan affiliasi / berbayar</label>
-              <button className="button-dark" type="submit" disabled={savingLink}>{savingLink ? "Menambahkan..." : "Tambah link"}</button>
-            </form>
-          </div>
+            <BlockManager
+              profile={profile}
+              links={links}
+              setLinks={setLinks}
+              onError={setError}
+              onNotice={setNotice}
+              onMutated={() => revalidateIfPublished(profile)}
+            />
           )}
 
           {section === "links" && (

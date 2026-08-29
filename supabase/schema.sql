@@ -55,9 +55,11 @@ create table public.profiles (
 create table public.profile_links (
   id uuid primary key default gen_random_uuid(),
   profile_id uuid not null references public.profiles(id) on delete cascade,
-  label text not null,
-  url text not null check (url ~* '^https?://'),
+  label text not null default '',
+  url text not null default '' check (url = '' or url ~* '^https?://'),
   link_type text not null default 'link',
+  block_type text not null default 'link' check (block_type in ('link', 'text', 'social', 'photo')),
+  content jsonb not null default '{}'::jsonb,
   icon_key text not null default 'link',
   image_url text not null default '' check (image_url = '' or image_url ~* '^https?://'),
   sort_order integer not null default 0,

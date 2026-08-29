@@ -28,9 +28,21 @@ export type ProfileLink = {
   label: string;
   url: string;
   link_type: string;
+  block_type?: BlockType;
+  content?: BlockContent;
   icon_key: string;
   image_url?: string;
   sort_order: number;
   is_active: boolean;
   affiliate_disclosure: boolean;
+};
+
+export type BlockType = "link" | "text" | "social" | "photo";
+
+export type SocialItem = { platform: string; url: string };
+
+export type BlockContent = {
+  html?: string;
+  items?: SocialItem[];
+  caption?: string;
 };

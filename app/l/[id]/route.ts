@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     .eq("is_active", true)
     .maybeSingle();
 
-  if (!data) return NextResponse.redirect(home);
+  if (!data || !data.url) return NextResponse.redirect(home);
 
   await supabase
     .from("analytics_events")

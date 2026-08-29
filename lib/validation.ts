@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { LINK_TYPES } from "./link-types";
 import { MINISITE_THEME_VALUES } from "./themes";
+import { SOCIAL_PLATFORMS, sanitizeRichText, richTextIsEmpty } from "./blocks";
 
 // Keep this list in sync with the profiles_username_not_reserved CHECK
 // constraint in supabase/migrations/20260829090000_phase0_roles_and_rls.sql
@@ -73,6 +74,49 @@ export const linkSchema = z.object({
   link_type: z.enum(linkTypeValues).default("link"),
   image_url: avatarUrlField,
   affiliate_disclosure: z.boolean().default(false),
+});
+
+const socialPlatformValues = SOCIAL_PLATFORMS.map((p) => p.key) as [string, ...string[]];
+
+const socialUrlSchema = z
+  .string()
+  .trim()
+  .min(1, "URL wajib diisi.")
+  .max(2048, "URL terlalu panjang.")
+  .refine((value) => {
+    if (/^mailto:/i.test(value)) return true;
+    try {
+      const parsed = new URL(value);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+      return false;
+    }
+  }, "Masukkan URL yang valid.");
+
+export const textBlockSchema = z.object({
+  html: z
+    .string()
+    .max(4000, "Teks terlalu panjang.")
+    .transform((value) => sanitizeRichText(value))
+    .refine((value) => !richTextIsEmpty(value), "Teks tidak boleh kosong."),
+});
+
+export const socialBlockSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        platform: z.enum(socialPlatformValues),
+        url: socialUrlSchema,
+      }),
+    )
+    .min(1, "Tambahkan minimal satu akun.")
+    .max(12, "Maksimal 12 akun."),
+});
+
+export const photoBlockSchema = z.object({
+  image_url: linkUrlSchema,
+  url: z.union([linkUrlSchema, z.literal("")]).default(""),
+  caption: z.string().trim().max(120, "Caption maksimal 120 karakter.").default(""),
 });
 
 export type ProfileInput = z.infer<typeof profileSchema>;
