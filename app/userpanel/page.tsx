@@ -14,8 +14,8 @@ import { MinisiteView } from "@/app/components/minisite-view";
 import { Menu, X, ChevronRight, Eye } from "lucide-react";
 
 const SECTIONS = [
-  { id: "links", label: "Minisite Kamu" },
   { id: "profile", label: "Profil" },
+  { id: "links", label: "Minisite Kamu" },
   { id: "theme", label: "Tema minisite" },
   { id: "analytics", label: "Analitik" },
 ] as const;
