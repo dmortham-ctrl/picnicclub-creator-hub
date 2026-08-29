@@ -243,8 +243,6 @@ export default function UserPanelPage() {
       <div className="admin-topbar">
         <BrandLogo href="/" />
         <div className="admin-topbar-actions">
-          <Link href="/" className="button-outline">View website ↗</Link>
-          <button type="button" className="button-outline" onClick={logout}>Logout</button>
           <div className="panel-menu">
             <button
               type="button"
@@ -271,11 +269,13 @@ export default function UserPanelPage() {
                       <ChevronRight size={15} />
                     </button>
                   ))}
+                  <span className="panel-menu-heading">Lainnya</span>
                   {profile && (
                     <a href={`/@${profile.username}`} target="_blank" rel="noreferrer">
                       Lihat halaman publik ↗
                     </a>
                   )}
+                  <Link href="/" onClick={() => setMenuOpen(false)}>View website ↗</Link>
                   <button type="button" className="panel-menu-logout" onClick={logout}>Logout</button>
                 </nav>
               </>
