@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProfile, getPublishedProfiles } from "@/lib/data";
@@ -67,7 +68,14 @@ export default async function ProfilePage({ params }: Params) {
       <div className="bio-card">
         <div className="bio-brand">picnic club</div>
         {profile.avatar_url && (
-          <img className="bio-avatar" src={profile.avatar_url} alt={profile.display_name} />
+          <Image
+            className="bio-avatar"
+            src={profile.avatar_url}
+            alt={profile.display_name}
+            width={104}
+            height={104}
+            priority
+          />
         )}
         <h1>{profile.display_name}</h1>
         <div className="bio-username">

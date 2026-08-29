@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -22,5 +23,5 @@ export function SiteNav() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  return <nav className="nav site-nav"><Link href="/" className="brand"><img className="site-logo" src="https://picnicclub.id/wp-content/uploads/2026/06/picnictrans-150x150.png" alt="Picnic Club" /></Link><div className="nav-links"><Link href="/#about">About us</Link><Link href="/members">Creators</Link><Link href="/#brands">For brands</Link></div><div className="nav-auth"><Link href={profileUrl} className="nav-login">{isLoggedIn ? "My profile" : "Login"}</Link><Link href="/admin?mode=signup" className="nav-cta">Sign up</Link></div></nav>;
+  return <nav className="nav site-nav"><Link href="/" className="brand"><Image className="site-logo" src="https://picnicclub.id/wp-content/uploads/2026/06/picnictrans-150x150.png" alt="Picnic Club" width={92} height={42} priority /></Link><div className="nav-links"><Link href="/#about">About us</Link><Link href="/members">Creators</Link><Link href="/#brands">For brands</Link></div><div className="nav-auth"><Link href={profileUrl} className="nav-login">{isLoggedIn ? "My profile" : "Login"}</Link><Link href="/admin?mode=signup" className="nav-cta">Sign up</Link></div></nav>;
 }

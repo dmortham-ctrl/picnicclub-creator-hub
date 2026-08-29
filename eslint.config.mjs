@@ -7,4 +7,9 @@ const filename = fileURLToPath(import.meta.url);
 const directory = dirname(filename);
 const compat = new FlatCompat({ baseDirectory: directory });
 
-export default [globalIgnores([".next/**", "node_modules/**"]), ...compat.extends("next/core-web-vitals")];
+const config = [
+  globalIgnores([".next/**", "node_modules/**", "playwright-report/**", "test-results/**"]),
+  ...compat.extends("next/core-web-vitals"),
+];
+
+export default config;

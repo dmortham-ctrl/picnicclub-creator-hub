@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { CreatorCard } from "./components/creator-card";
 import { SiteNav } from "./components/site-nav";
@@ -34,7 +35,7 @@ export default async function Home() {
     <SiteNav />
     <section className="hero">
       <div><div className="eyebrow">Creator commerce ecosystem / 001</div><h1>{content.hero_title}</h1><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_creator" className="button-lime" href="https://forms.gle/yEmDWsFd1q5DHjjP8">Join as creator ↗</TrackedLink><TrackedLink ctaKey="collaborate" className="button-outline" href="https://wa.me/62895364547187">Collaborate with us</TrackedLink></div></div>
-      <div className="orbit">{heroCreators.map((creator, index) => <Link className={`avatar ${index < 12 ? "avatar-outer" : "avatar-inner"}`} href={creator.href} key={index} aria-label="View creator profile"><img src={creator.avatar} alt="" /></Link>)}<div className="orbit-center">Top Creator<br />Picnic</div></div>
+      <div className="orbit">{heroCreators.map((creator, index) => <Link className={`avatar ${index < 12 ? "avatar-outer" : "avatar-inner"}`} href={creator.href} key={index} aria-label="View creator profile"><Image src={creator.avatar} alt="" width={58} height={58} loading={index < 8 ? "eager" : "lazy"} /></Link>)}<div className="orbit-center">Top Creator<br />Picnic</div></div>
     </section>
     <div className="band">{content.marquee_text}</div>
 
@@ -45,7 +46,7 @@ export default async function Home() {
 
     <section className="stats-section"><div className="section stats-inner"><div><div className="eyebrow">A growing movement / 003</div><h2>Small team.<br />Big energy.</h2></div><div className="stats-grid"><div><strong>2K<span>+</span></strong><small>Creators</small></div><div><strong>100<span>+</span></strong><small>Brand collaborations</small></div><div><strong>100K<span>+</span></strong><small>Videos / month</small></div><div><strong>100M<span>+</span></strong><small>Views / month</small></div></div></div></section>
 
-    <section className="brands-section"><div className="section brands-heading"><div className="eyebrow">The good company / 004</div><h2>{content.brands_title}</h2><p className="section-note">Partner dengan brand yang percaya pada creator-led commerce.</p></div><div className="brand-marquee" aria-label="Partner brands"><div className="brand-track">{[...brands, ...brands].map((brand, index) => <div className="brand-logo" key={`${brand.name}-${index}`}><img src={brand.logo_url} alt={brand.name} /></div>)}</div></div></section>
+    <section className="brands-section"><div className="section brands-heading"><div className="eyebrow">The good company / 004</div><h2>{content.brands_title}</h2><p className="section-note">Partner dengan brand yang percaya pada creator-led commerce.</p></div><div className="brand-marquee" aria-label="Partner brands"><div className="brand-track">{[...brands, ...brands].map((brand, index) => <div className="brand-logo" key={`${brand.name}-${index}`}><Image src={brand.logo_url} alt={brand.name} width={78} height={78} /></div>)}</div></div></section>
 
     <section id="about" className="section lime-section"><div className="eyebrow">Why Picnic Club / 005</div><h2>{content.about_title}</h2><p className="hero-copy lime-copy">Dari training, mentoring, networking, sampai peluang kolaborasi dengan brand. Picnic Club hadir untuk membantu creator tumbuh dengan support yang nyata.</p><div className="benefit-grid">{benefits.map(([number, title, text]) => <div className="benefit" key={number}><span>{number}</span><h3>{title}</h3><p>{text}</p></div>)}</div></section>
 

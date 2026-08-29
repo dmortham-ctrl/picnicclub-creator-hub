@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -144,7 +145,7 @@ export default function UserPanelPage() {
         <>
           <div className="panel-grid">
             <div className="admin-card panel-profile">
-              {profile.avatar_url && <img src={profile.avatar_url} alt={profile.display_name} />}
+              {profile.avatar_url && <Image src={profile.avatar_url} alt={profile.display_name} width={120} height={120} />}
               <div>
                 <div className="eyebrow">{profile.status}</div>
                 <h2>{profile.display_name}</h2>
