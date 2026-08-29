@@ -16,7 +16,6 @@ const SECTIONS = [
   { id: "links", label: "Minisite Kamu" },
   { id: "profile", label: "Profil" },
   { id: "theme", label: "Tema minisite" },
-  { id: "minisite", label: "Halaman & publikasi" },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
 
@@ -314,20 +313,6 @@ export default function UserPanelPage() {
             </form>
           )}
 
-          {section === "minisite" && (
-            <div className="admin-card panel-actions">
-              <div className="eyebrow">Halaman minisite</div>
-              <strong>picnicclub.id/@{profile.username}</strong>
-              <Link className="button-dark" href={`/@${profile.username}`}>View public page ↗</Link>
-              <button className="button-outline" type="button" onClick={() => { navigator.clipboard?.writeText(`${window.location.origin}/@${profile.username}`); setNotice("Link disalin."); }}>Copy profile link</button>
-              {profile.status === "published" ? (
-                <button className="button-outline" type="button" onClick={() => setStatus("draft")}>Unpublish page</button>
-              ) : (
-                <button className="button-dark" type="button" onClick={() => setStatus("published")}>Publish page</button>
-              )}
-            </div>
-          )}
-
           {section === "theme" && (
           <div className="admin-card">
             <div className="eyebrow">Minisite theme</div>
@@ -405,6 +390,20 @@ export default function UserPanelPage() {
               <label className="checkbox-label"><input type="checkbox" checked={newLink.affiliate_disclosure} onChange={(e) => setNewLink({ ...newLink, affiliate_disclosure: e.target.checked })} /> Tautan affiliasi / berbayar</label>
               <button className="button-dark" type="submit" disabled={savingLink}>{savingLink ? "Menambahkan..." : "Tambah link"}</button>
             </form>
+          </div>
+          )}
+
+          {section === "links" && (
+          <div className="admin-card panel-actions">
+            <div className="eyebrow">Halaman &amp; publikasi</div>
+            <strong>picnicclub.id/@{profile.username}</strong>
+            <Link className="button-dark" href={`/@${profile.username}`}>View public page ↗</Link>
+            <button className="button-outline" type="button" onClick={() => { navigator.clipboard?.writeText(`${window.location.origin}/@${profile.username}`); setNotice("Link disalin."); }}>Copy profile link</button>
+            {profile.status === "published" ? (
+              <button className="button-outline" type="button" onClick={() => setStatus("draft")}>Unpublish page</button>
+            ) : (
+              <button className="button-dark" type="button" onClick={() => setStatus("published")}>Publish page</button>
+            )}
           </div>
           )}
         </>
