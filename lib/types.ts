@@ -7,7 +7,12 @@ export type Profile = {
   avatar_url: string;
   category: string;
   status: "draft" | "published" | "suspended";
-  theme?: "default" | "midnight" | "lime" | "coral";
+  theme?: "default" | "midnight" | "lime" | "coral" | "blossom" | "ocean";
+  accent_color?: string;
+  button_style?: "fill" | "outline" | "shadow";
+  button_shape?: "sharp" | "rounded" | "pill";
+  banner_url?: string;
+  layout?: "classic" | "full";
   level?: "All Star" | "Featured" | "Rising";
   is_featured: boolean;
   featured_order: number;

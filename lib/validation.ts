@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { LINK_TYPES } from "./link-types";
-import { MINISITE_THEME_VALUES } from "./themes";
+import { MINISITE_THEME_VALUES, BUTTON_STYLE_VALUES, BUTTON_SHAPE_VALUES, LAYOUT_VALUES } from "./themes";
 import { SOCIAL_PLATFORMS, sanitizeRichText, richTextIsEmpty } from "./blocks";
 
 // Keep this list in sync with the profiles_username_not_reserved CHECK
@@ -55,6 +55,15 @@ export const profileSchema = z.object({
   bio: bioField,
   category: categoryField,
   avatar_url: avatarUrlField,
+});
+
+/** Minisite appearance settings (the "Tema minisite" panel). */
+export const appearanceSchema = z.object({
+  theme: z.enum(MINISITE_THEME_VALUES).default("default"),
+  accent_color: z.union([z.string().regex(/^#[0-9a-fA-F]{6}$/), z.literal("")]).default(""),
+  button_style: z.enum(BUTTON_STYLE_VALUES).default("fill"),
+  button_shape: z.enum(BUTTON_SHAPE_VALUES).default("rounded"),
+  layout: z.enum(LAYOUT_VALUES).default("classic"),
 });
 
 /** Fields a creator can edit themselves from /userpanel (username is fixed). */

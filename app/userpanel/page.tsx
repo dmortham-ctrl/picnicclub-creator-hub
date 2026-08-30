@@ -6,10 +6,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
 import { Profile, ProfileLink } from "@/lib/types";
 import { firstIssue, profileSettingsSchema } from "@/lib/validation";
-import { MINISITE_THEMES } from "@/lib/themes";
 import { BrandLogo } from "@/app/components/brand-logo";
 import { MinisiteView } from "@/app/components/minisite-view";
 import { BlockManager } from "@/app/userpanel/block-manager";
+import { AppearancePanel } from "@/app/userpanel/appearance-panel";
 import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOut } from "lucide-react";
 
 const SECTIONS = [
@@ -176,15 +176,6 @@ export default function UserPanelPage() {
     setAvatarModalOpen(false);
   }
 
-  async function setTheme(theme: string) {
-    if (!supabase || !profile) return;
-    const { error: updateError } = await supabase.from("profiles").update({ theme }).eq("id", profile.id);
-    if (updateError) return setError(updateError.message);
-    setProfile({ ...profile, theme: theme as Profile["theme"] });
-    setNotice("Tema minisite diperbarui.");
-    revalidateIfPublished(profile);
-  }
-
   const ordered = [...links].sort((a, b) => a.sort_order - b.sort_order);
   const previewProfile = profile && {
     username: profile.username,
@@ -193,6 +184,11 @@ export default function UserPanelPage() {
     bio: profileDraft.bio || profile.bio,
     avatar_url: profileDraft.avatar_url || profile.avatar_url,
     theme: profile.theme ?? "default",
+    accent_color: profile.accent_color ?? "",
+    button_style: profile.button_style ?? "fill",
+    button_shape: profile.button_shape ?? "rounded",
+    banner_url: profile.banner_url ?? "",
+    layout: profile.layout ?? "classic",
   };
   return (
     <>
@@ -287,23 +283,13 @@ export default function UserPanelPage() {
           )}
 
           {section === "theme" && (
-          <div className="admin-card">
-            <div className="eyebrow">Minisite theme</div>
-            <div className="theme-picker">
-              {MINISITE_THEMES.map((t) => (
-                <button
-                  key={t.value}
-                  type="button"
-                  className={`theme-swatch ${(profile.theme ?? "default") === t.value ? "selected" : ""}`}
-                  onClick={() => setTheme(t.value)}
-                  style={{ background: t.swatch, color: t.ink }}
-                  aria-pressed={(profile.theme ?? "default") === t.value}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
+            <AppearancePanel
+              profile={profile}
+              setProfile={setProfile}
+              onError={setError}
+              onNotice={setNotice}
+              onMutated={() => revalidateIfPublished(profile)}
+            />
           )}
 
           {section === "analytics" && (
