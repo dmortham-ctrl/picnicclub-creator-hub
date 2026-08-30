@@ -95,7 +95,7 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
 
   return (
     <div className="tools-panel">
-      <form className="admin-card tools-form" onSubmit={generate}>
+      <form className="admin-card admin-form tools-form" onSubmit={generate}>
         <div className="appear-head">
           <h3>{isHook ? "Ide Hook" : "Ide Script"}</h3>
           <p>
