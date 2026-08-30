@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { X } from "lucide-react";
+import { PelanggaranGuide } from "@/app/components/pelanggaran-guide";
 
 const FORM_SRC =
   "https://docs.google.com/forms/d/e/1FAIpQLSe9UGLP3rRubXW-lE_fH7WXQdaYcfHEagurM_RDZ3QEXMgtQQ/viewform?embedded=true";
@@ -27,11 +28,20 @@ export function SupportPanel({ username }: { username: string }) {
     <div className="support-panel">
       <div className="admin-card">
         <div className="appear-head">
-          <h3>Banding Pelanggaran</h3>
+          <h3>Kena Pelanggaran? Gak Usah Panik</h3>
           <p>
-            Isi formulir di bawah kalau minisite atau akun kamu kena pembatasan dan kamu merasa itu
-            keliru. Setelah submit, konfirmasi ke admin lewat WhatsApp supaya diproses lebih cepat.
+            Ikuti langkah di bawah kalau minisite atau akun kamu kena pembatasan dan kamu merasa itu
+            keliru.
           </p>
+        </div>
+
+        <PelanggaranGuide />
+
+        <hr className="support-divider" />
+
+        <div className="support-formhead">
+          <h3>Formulir Banding Pelanggaran</h3>
+          <p>Isi formulir di bawah, lalu konfirmasi ke admin lewat WhatsApp supaya diproses lebih cepat.</p>
         </div>
 
         <div className="support-frame">
