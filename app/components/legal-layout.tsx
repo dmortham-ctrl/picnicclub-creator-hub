@@ -16,10 +16,7 @@ export function LegalPage({
       <article className="legal">
         <div className="eyebrow">Picnic Club</div>
         <h1>{title}</h1>
-        <p className="legal-meta">
-          Terakhir diperbarui {updated} · <strong>Draf</strong> — teks ini masih perlu ditinjau tim
-          dan penasihat hukum sebelum dianggap final.
-        </p>
+        <p className="legal-meta">Terakhir diperbarui {updated}.</p>
         {children}
         <hr />
         <p className="legal-contact">
