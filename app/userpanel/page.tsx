@@ -11,13 +11,16 @@ import { MinisiteView } from "@/app/components/minisite-view";
 import { BlockManager } from "@/app/userpanel/block-manager";
 import { AppearancePanel } from "@/app/userpanel/appearance-panel";
 import { AccountPanel } from "@/app/userpanel/account-panel";
-import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOut, Share2, EyeOff, Globe, Link2 as LinkIconLucide } from "lucide-react";
+import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOut, Share2, EyeOff, Globe, Link2 as LinkIconLucide, Sparkles, FileText } from "lucide-react";
+import { ToolsPanel } from "@/app/userpanel/tools-panel";
 
 const SECTIONS = [
-  { id: "profile", label: "Profil" },
-  { id: "links", label: "Minisite Kamu" },
-  { id: "theme", label: "Tema minisite" },
-  { id: "analytics", label: "Analitik" },
+  { id: "profile", label: "Profil", group: "" },
+  { id: "links", label: "Minisite Kamu", group: "" },
+  { id: "theme", label: "Tema minisite", group: "" },
+  { id: "analytics", label: "Analitik", group: "" },
+  { id: "hook", label: "Ide Hook", group: "Picnic Tools" },
+  { id: "script", label: "Ide Script", group: "Picnic Tools" },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
 
@@ -26,6 +29,8 @@ const SECTION_ICON: Record<SectionId, ReactNode> = {
   links: <LayoutGrid size={17} />,
   theme: <Palette size={17} />,
   analytics: <BarChart3 size={17} />,
+  hook: <Sparkles size={17} />,
+  script: <FileText size={17} />,
 };
 
 type CreatorAnalytics = {
@@ -193,9 +198,10 @@ export default function UserPanelPage() {
     banner_url: profile.banner_url ?? "",
     layout: profile.layout ?? "classic",
   };
+  const isToolsSection = section === "hook" || section === "script";
   return (
     <>
-    <div className="panel-shell">
+    <div className={`panel-shell ${isToolsSection ? "no-preview" : ""}`}>
       <header className="panel-mobilebar">
         <BrandLogo href="/" />
         <button type="button" className="panel-mobilebar-toggle" aria-label="Buka menu" onClick={() => setSidebarOpen(true)}>
@@ -229,16 +235,20 @@ export default function UserPanelPage() {
         )}
 
         <nav className="panel-sidebar-nav">
-          {SECTIONS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={section === item.id ? "is-active" : ""}
-              onClick={() => { setSection(item.id); setSidebarOpen(false); }}
-            >
-              {SECTION_ICON[item.id]}
-              <span>{item.label}</span>
-            </button>
+          {SECTIONS.map((item, i) => (
+            <div key={item.id} className="panel-sidebar-navitem">
+              {item.group && SECTIONS[i - 1]?.group !== item.group && (
+                <span className="panel-sidebar-group">{item.group}</span>
+              )}
+              <button
+                type="button"
+                className={section === item.id ? "is-active" : ""}
+                onClick={() => { setSection(item.id); setSidebarOpen(false); }}
+              >
+                {SECTION_ICON[item.id]}
+                <span>{item.label}</span>
+              </button>
+            </div>
           ))}
         </nav>
 
@@ -383,6 +393,9 @@ export default function UserPanelPage() {
             />
           )}
 
+          {section === "hook" && <ToolsPanel tool="hook" />}
+          {section === "script" && <ToolsPanel tool="script" />}
+
         </>
       ) : (
         <div className="admin-card"><p>{username ? "Memuat profil..." : "Profil belum dipilih."}</p></div>
@@ -390,7 +403,7 @@ export default function UserPanelPage() {
       </main>
     </div>
 
-      {previewProfile && (
+      {previewProfile && !isToolsSection && (
         <aside className="panel-preview">
           <div className="panel-preview-head">Pratinjau halaman</div>
           <div className="preview-phone">
