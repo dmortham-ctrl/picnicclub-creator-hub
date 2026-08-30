@@ -9,7 +9,39 @@ import { getServerSupabase } from "@/lib/supabase-server";
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
+// Marketplaces often serve full SEO markup (with OG tags) to crawlers but a
+// stripped JS shell to plain clients. Link-unfurlers (Slack/WhatsApp/Discord)
+// all identify as bots for this reason.
+const BOT_UA =
+  "Mozilla/5.0 (compatible; facebookexternalhit/1.1; +http://www.facebook.com/externalhit_uatext.php)";
 const MAX_HTML = 900_000;
+
+async function fetchHtml(url: URL | string, ua: string): Promise<{ html: string; finalUrl: string }> {
+  const res = await fetch(url, {
+    headers: {
+      "user-agent": ua,
+      "accept-language": "id-ID,id;q=0.9,en;q=0.8",
+      accept: "text/html,application/xhtml+xml,*/*;q=0.8",
+    },
+    redirect: "follow",
+    signal: AbortSignal.timeout(8000),
+  });
+  const finalUrl = res.url || String(url);
+  if (!res.ok || !res.body) return { html: res.ok ? await res.text() : "", finalUrl };
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done || !value) break;
+    chunks.push(value);
+    size += value.length;
+    if (size >= MAX_HTML) break;
+    if (Buffer.concat(chunks).toString("utf8").includes("</head>")) break;
+  }
+  reader.cancel().catch(() => {});
+  return { html: Buffer.concat(chunks).toString("utf8"), finalUrl };
+}
 
 function sourceFromHost(host: string): string {
   const h = host.toLowerCase();
@@ -109,30 +141,14 @@ export async function POST(request: Request) {
   let html = "";
   let finalUrl = target.toString();
   try {
-    const res = await fetch(target, {
-      headers: { "user-agent": UA, "accept-language": "id-ID,id;q=0.9,en;q=0.8", accept: "text/html,*/*" },
-      redirect: "follow",
-      signal: AbortSignal.timeout(8000),
-    });
-    finalUrl = res.url || finalUrl;
-    if (res.ok) {
-      const reader = res.body?.getReader();
-      if (reader) {
-        const chunks: Uint8Array[] = [];
-        let size = 0;
-        // Read only the <head> region — enough for meta tags, avoids huge bodies.
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done || !value) break;
-          chunks.push(value);
-          size += value.length;
-          if (size >= MAX_HTML) break;
-          if (Buffer.concat(chunks).toString("utf8").includes("</head>")) break;
-        }
-        reader.cancel().catch(() => {});
-        html = Buffer.concat(chunks).toString("utf8");
-      } else {
-        html = await res.text();
+    ({ html, finalUrl } = await fetchHtml(target, UA));
+    // Retry as a crawler if the first pass had no OpenGraph (common for
+    // Tokopedia/Shopee, which gate the SEO markup behind a bot UA).
+    if (!/property=["']og:(title|image)/i.test(html)) {
+      const bot = await fetchHtml(finalUrl, BOT_UA).catch(() => null);
+      if (bot && /property=["']og:(title|image)/i.test(bot.html)) {
+        html = bot.html;
+        finalUrl = bot.finalUrl;
       }
     }
   } catch {
