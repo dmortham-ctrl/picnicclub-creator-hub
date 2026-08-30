@@ -10,6 +10,7 @@ import {
   TOOL_COUNT_MAX,
   TOOL_PLATFORM_VALUES,
   toolPlatformLabel,
+  hasBannedUrgency,
   HOOK_SYSTEM,
   SCRIPT_SYSTEM,
 } from "@/lib/picnic-tools";
@@ -93,11 +94,16 @@ export async function POST(request: Request) {
   const prompt = `Buat tepat ${count} ${noun}.\nProduk: ${product_name}\nJenis produk: ${product_type}\nPlatform: ${toolPlatformLabel(platform)}`;
   let output: unknown;
   try {
+    const noStock = (v: string) => !hasBannedUrgency(v);
+    const stockMsg = "Jangan sebut stok / persediaan / kelangkaan barang. Ganti dengan CTA santai atau urgensi berbasis waktu.";
     if (tool === "hook") {
       const { object } = await generateObject({
         model: google(MODEL),
-        schema: z.object({ hooks: z.array(z.string().min(3).max(200)).length(count) }),
+        schema: z.object({
+          hooks: z.array(z.string().min(3).max(200).refine(noStock, stockMsg)).length(count),
+        }),
         temperature: 1,
+        maxRetries: 3,
         system: HOOK_SYSTEM,
         prompt,
       });
@@ -107,10 +113,11 @@ export async function POST(request: Request) {
         model: google(MODEL),
         schema: z.object({
           scripts: z
-            .array(z.object({ angle: z.string().max(40), script: z.string().min(30).max(1200) }))
+            .array(z.object({ angle: z.string().max(40), script: z.string().min(30).max(1200).refine(noStock, stockMsg) }))
             .length(count),
         }),
         temperature: 1,
+        maxRetries: 3,
         system: SCRIPT_SYSTEM,
         prompt,
       });
