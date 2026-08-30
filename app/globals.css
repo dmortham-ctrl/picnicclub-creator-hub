@@ -83,6 +83,10 @@ h2 { font-size: clamp(34px, 5vw, 62px); letter-spacing: -.07em; line-height: .98
 .bio-page[data-theme="coral"] { --bio-bg: #ff7957; --bio-fg: #2b0f07; --bio-muted: #5a2417; --bio-avatar-ring: #ffd9cd; --bio-link-bg: #fff4f0; --bio-link-bg-hover: #ffffff; --bio-link-border: #e8946f; --bio-link-fg: #2b0f07; --bio-accent: #8f2e0e; }
 .bio-page[data-theme="blossom"] { --bio-bg: linear-gradient(165deg,#fdeef4,#f6d9e7); --bio-fg: #55263f; --bio-muted: #8a5d72; --bio-avatar-ring: #ffffff; --bio-link-bg: #fffafc; --bio-link-bg-hover: #ffffff; --bio-link-border: #f0cede; --bio-link-fg: #55263f; --bio-accent: #db2777; }
 .bio-page[data-theme="ocean"] { --bio-bg: linear-gradient(165deg,#c3e2f0,#8fbdd4); --bio-fg: #0d2a3c; --bio-muted: #355b70; --bio-avatar-ring: #eaf6fc; --bio-link-bg: #f6fbfe; --bio-link-bg-hover: #ffffff; --bio-link-border: #b6dcef; --bio-link-fg: #0d2a3c; --bio-accent: #0c3652; }
+.bio-page[data-theme="sunset"] { --bio-bg: linear-gradient(165deg,#ffdcb0,#ff8f6f); --bio-fg: #3d1c10; --bio-muted: #7a3c26; --bio-avatar-ring: #fff2e6; --bio-link-bg: #fff7f1; --bio-link-bg-hover: #ffffff; --bio-link-border: #f2b58e; --bio-link-fg: #3d1c10; --bio-accent: #c2410c; }
+.bio-page[data-theme="grape"] { --bio-bg: linear-gradient(165deg,#efe4fb,#dcc5f5); --bio-fg: #3a1d5c; --bio-muted: #6b4a8e; --bio-avatar-ring: #ffffff; --bio-link-bg: #fdfaff; --bio-link-bg-hover: #ffffff; --bio-link-border: #e2cef5; --bio-link-fg: #3a1d5c; --bio-accent: #7c3aed; }
+.bio-page[data-theme="mint"] { --bio-bg: linear-gradient(165deg,#e0f5ea,#c3ead4); --bio-fg: #163a2a; --bio-muted: #3d6b54; --bio-avatar-ring: #ffffff; --bio-link-bg: #fbfffc; --bio-link-bg-hover: #ffffff; --bio-link-border: #c2e3ce; --bio-link-fg: #163a2a; --bio-accent: #0d9488; }
+.bio-page[data-theme="mono"] { --bio-bg: #f0f0ee; --bio-fg: #1a1a1a; --bio-muted: #666666; --bio-avatar-ring: #ffffff; --bio-link-bg: #ffffff; --bio-link-bg-hover: #fafafa; --bio-link-border: #dddddd; --bio-link-fg: #1a1a1a; --bio-accent: #1a1a1a; }
 
 /* Button style + shape */
 .bio-page[data-shape="sharp"] .bio-link { border-radius: 0; }

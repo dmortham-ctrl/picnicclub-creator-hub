@@ -40,7 +40,7 @@ create table public.profiles (
   avatar_url text not null default '',
   category text not null default 'Lifestyle',
   level text not null default 'Rising' check (level in ('All Star', 'Featured', 'Rising')),
-  theme text not null default 'default' check (theme in ('default', 'midnight', 'lime', 'coral', 'blossom', 'ocean')),
+  theme text not null default 'default' check (theme in ('default', 'midnight', 'lime', 'coral', 'blossom', 'ocean', 'sunset', 'grape', 'mint', 'mono')),
   accent_color text not null default '' check (accent_color = '' or accent_color ~* '^#[0-9a-f]{6}$'),
   button_style text not null default 'fill' check (button_style in ('fill', 'outline', 'shadow')),
   button_shape text not null default 'rounded' check (button_shape in ('sharp', 'rounded', 'pill')),

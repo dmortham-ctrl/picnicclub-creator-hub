@@ -7,6 +7,10 @@ export const MINISITE_THEMES = [
   { value: "coral", label: "Coral", swatch: "#ff7957", ink: "#2b0f07", dot: "#8f2e0e" },
   { value: "blossom", label: "Blossom", swatch: "linear-gradient(160deg,#fdeef4,#f7d9e6)", ink: "#4a2233", dot: "#db2777" },
   { value: "ocean", label: "Ocean", swatch: "linear-gradient(160deg,#6abce0,#274a63)", ink: "#0c2233", dot: "#0c2233" },
+  { value: "sunset", label: "Sunset", swatch: "linear-gradient(160deg,#ffd8a8,#ff8c6b)", ink: "#3d1c10", dot: "#c2410c" },
+  { value: "grape", label: "Grape", swatch: "linear-gradient(160deg,#efe4fb,#dcc5f5)", ink: "#3a1d5c", dot: "#7c3aed" },
+  { value: "mint", label: "Mint", swatch: "linear-gradient(160deg,#e0f5ea,#c3ead4)", ink: "#163a2a", dot: "#0d9488" },
+  { value: "mono", label: "Mono", swatch: "#f0f0ee", ink: "#1a1a1a", dot: "#1a1a1a" },
 ] as const;
 
 export type MinisiteTheme = (typeof MINISITE_THEMES)[number]["value"];

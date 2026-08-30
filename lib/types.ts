@@ -7,7 +7,7 @@ export type Profile = {
   avatar_url: string;
   category: string;
   status: "draft" | "published" | "suspended";
-  theme?: "default" | "midnight" | "lime" | "coral" | "blossom" | "ocean";
+  theme?: "default" | "midnight" | "lime" | "coral" | "blossom" | "ocean" | "sunset" | "grape" | "mint" | "mono";
   accent_color?: string;
   button_style?: "fill" | "outline" | "shadow";
   button_shape?: "sharp" | "rounded" | "pill";
