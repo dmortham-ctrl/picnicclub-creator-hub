@@ -11,8 +11,9 @@ import { MinisiteView } from "@/app/components/minisite-view";
 import { BlockManager } from "@/app/userpanel/block-manager";
 import { AppearancePanel } from "@/app/userpanel/appearance-panel";
 import { AccountPanel } from "@/app/userpanel/account-panel";
-import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOut, Share2, EyeOff, Globe, Link2 as LinkIconLucide, Sparkles, FileText } from "lucide-react";
+import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOut, Share2, EyeOff, Globe, Link2 as LinkIconLucide, Sparkles, FileText, ShieldAlert } from "lucide-react";
 import { ToolsPanel } from "@/app/userpanel/tools-panel";
+import { SupportPanel } from "@/app/userpanel/support-panel";
 
 const SECTIONS = [
   { id: "profile", label: "Profil", group: "" },
@@ -21,6 +22,7 @@ const SECTIONS = [
   { id: "analytics", label: "Analitik", group: "" },
   { id: "hook", label: "Ide Hook", group: "Picnic AI Tools" },
   { id: "script", label: "Ide Script", group: "Picnic AI Tools" },
+  { id: "banding", label: "Banding Pelanggaran", group: "Picnic Support" },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
 
@@ -31,6 +33,7 @@ const SECTION_ICON: Record<SectionId, ReactNode> = {
   analytics: <BarChart3 size={17} />,
   hook: <Sparkles size={17} />,
   script: <FileText size={17} />,
+  banding: <ShieldAlert size={17} />,
 };
 
 type CreatorAnalytics = {
@@ -198,7 +201,7 @@ export default function UserPanelPage() {
     banner_url: profile.banner_url ?? "",
     layout: profile.layout ?? "classic",
   };
-  const isToolsSection = section === "hook" || section === "script";
+  const isToolsSection = section === "hook" || section === "script" || section === "banding";
   return (
     <>
     <div className={`panel-shell ${isToolsSection ? "no-preview" : ""}`}>
@@ -395,6 +398,7 @@ export default function UserPanelPage() {
 
           {section === "hook" && <ToolsPanel tool="hook" />}
           {section === "script" && <ToolsPanel tool="script" />}
+          {section === "banding" && <SupportPanel username={profile.username} />}
 
         </>
       ) : (
