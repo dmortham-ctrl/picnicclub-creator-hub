@@ -195,6 +195,7 @@ export default function UserPanelPage() {
     theme: profile.theme ?? "default",
   };
   return (
+    <>
     <div className="panel-shell">
       <header className="panel-mobilebar">
         <BrandLogo href="/" />
@@ -373,6 +374,7 @@ export default function UserPanelPage() {
         <div className="admin-card"><p>{username ? "Memuat profil..." : "Profil belum dipilih."}</p></div>
       )}
       </main>
+    </div>
 
       {previewProfile && (
         <aside className="panel-preview">
@@ -426,6 +428,6 @@ export default function UserPanelPage() {
           </form>
         </div>
       )}
-    </div>
+    </>
   );
 }
