@@ -19,8 +19,8 @@ const SECTIONS = [
   { id: "links", label: "Minisite Kamu", group: "" },
   { id: "theme", label: "Tema minisite", group: "" },
   { id: "analytics", label: "Analitik", group: "" },
-  { id: "hook", label: "Ide Hook", group: "Picnic Tools" },
-  { id: "script", label: "Ide Script", group: "Picnic Tools" },
+  { id: "hook", label: "Ide Hook", group: "Picnic AI Tools" },
+  { id: "script", label: "Ide Script", group: "Picnic AI Tools" },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
 
