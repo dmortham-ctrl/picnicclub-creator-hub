@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Sparkles, Copy, Check, Bookmark, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { TOOL_DAILY_LIMIT, TOOL_PLATFORMS, TOOL_TYPE_CHIPS } from "@/lib/picnic-tools";
+import { TOOL_DAILY_LIMIT, TOOL_COUNT_MAX, TOOL_COUNT_DEFAULT, TOOL_PLATFORMS, TOOL_TYPE_CHIPS } from "@/lib/picnic-tools";
 
 type ScriptResult = { angle: string; script: string };
 type SavedRow = { id: string; content: string; meta: { angle?: string } | null };
@@ -14,6 +14,7 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
   const [productName, setProductName] = useState("");
   const [productType, setProductType] = useState("");
   const [platform, setPlatform] = useState<string>(TOOL_PLATFORMS[0].value);
+  const [count, setCount] = useState(TOOL_COUNT_DEFAULT[tool]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -36,8 +37,9 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
 
   useEffect(() => {
     setHooks([]); setScripts([]); setError(""); setNotice("");
+    setCount(TOOL_COUNT_DEFAULT[tool]);
     loadSaved();
-  }, [loadSaved]);
+  }, [tool, loadSaved]);
 
   async function generate(event: React.FormEvent) {
     event.preventDefault();
@@ -51,7 +53,7 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
       const res = await fetch("/api/tools/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tool, product_name: productName.trim(), product_type: productType.trim(), platform }),
+        body: JSON.stringify({ tool, product_name: productName.trim(), product_type: productType.trim(), platform, count }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -114,15 +116,24 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
           ))}
         </div>
 
-        <label>Platform
-          <select value={platform} onChange={(e) => setPlatform(e.target.value)}>
-            {TOOL_PLATFORMS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
-          </select>
-        </label>
+        <div className="admin-row">
+          <label>Platform
+            <select value={platform} onChange={(e) => setPlatform(e.target.value)}>
+              {TOOL_PLATFORMS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+            </select>
+          </label>
+          <label>Jumlah {isHook ? "hook" : "script"}
+            <select value={count} onChange={(e) => setCount(Number(e.target.value))}>
+              {Array.from({ length: TOOL_COUNT_MAX }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </label>
+        </div>
 
         <div className="tools-actions">
           <button className="button-dark" type="submit" disabled={loading}>
-            <Sparkles size={15} /> {loading ? "Membuat..." : isHook ? "Generate 10 hook" : "Generate 3 script"}
+            <Sparkles size={15} /> {loading ? "Membuat..." : `Generate ${count} ${isHook ? "hook" : "script"}`}
           </button>
           {remaining !== null && <span className="tools-quota">Sisa hari ini: {remaining}/{TOOL_DAILY_LIMIT}</span>}
         </div>

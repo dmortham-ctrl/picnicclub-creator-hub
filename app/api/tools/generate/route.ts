@@ -7,6 +7,7 @@ import { getServerSupabase } from "@/lib/supabase-server";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import {
   TOOL_DAILY_LIMIT,
+  TOOL_COUNT_MAX,
   TOOL_PLATFORM_VALUES,
   toolPlatformLabel,
   HOOK_SYSTEM,
@@ -22,11 +23,7 @@ const bodySchema = z.object({
   product_name: z.string().trim().min(2).max(120),
   product_type: z.string().trim().min(2).max(80),
   platform: z.enum(TOOL_PLATFORM_VALUES),
-});
-
-const hookSchema = z.object({ hooks: z.array(z.string().min(3).max(200)).length(10) });
-const scriptSchema = z.object({
-  scripts: z.array(z.object({ angle: z.string().max(40), script: z.string().min(30).max(1200) })).length(3),
+  count: z.coerce.number().int().min(1).max(TOOL_COUNT_MAX),
 });
 
 function since(hours: number) {
@@ -53,10 +50,10 @@ export async function POST(request: Request) {
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Isi nama produk, jenis, dan platform dulu." }, { status: 400 });
-  const { tool, product_name, product_type, platform } = parsed.data;
+  const { tool, product_name, product_type, platform, count } = parsed.data;
 
   const hash = createHash("sha256")
-    .update(`${tool}|${product_name.toLowerCase()}|${product_type.toLowerCase()}|${platform}`)
+    .update(`${tool}|${count}|${product_name.toLowerCase()}|${product_type.toLowerCase()}|${platform}`)
     .digest("hex");
 
   const countToday = async () =>
@@ -92,25 +89,30 @@ export async function POST(request: Request) {
   }
 
   // 3. Generate.
-  const promptInput = `Produk: ${product_name}\nJenis produk: ${product_type}\nPlatform: ${toolPlatformLabel(platform)}`;
+  const noun = tool === "hook" ? "hook" : "script";
+  const prompt = `Buat tepat ${count} ${noun}.\nProduk: ${product_name}\nJenis produk: ${product_type}\nPlatform: ${toolPlatformLabel(platform)}`;
   let output: unknown;
   try {
     if (tool === "hook") {
       const { object } = await generateObject({
         model: google(MODEL),
-        schema: hookSchema,
+        schema: z.object({ hooks: z.array(z.string().min(3).max(200)).length(count) }),
         temperature: 1,
         system: HOOK_SYSTEM,
-        prompt: promptInput,
+        prompt,
       });
       output = object.hooks;
     } else {
       const { object } = await generateObject({
         model: google(MODEL),
-        schema: scriptSchema,
+        schema: z.object({
+          scripts: z
+            .array(z.object({ angle: z.string().max(40), script: z.string().min(30).max(1200) }))
+            .length(count),
+        }),
         temperature: 1,
         system: SCRIPT_SYSTEM,
-        prompt: promptInput,
+        prompt,
       });
       output = object.scripts;
     }
