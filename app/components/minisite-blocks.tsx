@@ -37,7 +37,7 @@ export function MinisiteBlocks({
 
   return (
     <>
-      {blocks.length >= 3 && (
+      {blocks.length > 0 && (
         <div className="bio-search">
           <Search size={14} aria-hidden="true" />
           <input
