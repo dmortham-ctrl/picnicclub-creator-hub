@@ -1,9 +1,7 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { LinkIcon } from "@/app/components/link-icon";
-import { SocialIcon } from "@/app/components/social-icons";
-import { sanitizeRichText, socialPlatformLabel } from "@/lib/blocks";
+import { MinisiteBlocks } from "@/app/components/minisite-blocks";
 import { isHexColor } from "@/lib/themes";
 import type { BlockContent, BlockType } from "@/lib/types";
 
@@ -102,9 +100,7 @@ export function MinisiteView({
         )}
         {profile.bio && <p className="bio-copy">{profile.bio}</p>}
 
-        {visible.map((block) => (
-          <Block key={block.id} block={block} interactive={interactive} />
-        ))}
+        <MinisiteBlocks blocks={visible} interactive={interactive} />
 
         {hasAffiliate && (
           <p className="bio-disclosure">
@@ -122,89 +118,5 @@ export function MinisiteView({
         <div className="bio-footer">Part of the Picnic Club community ↗</div>
       </div>
     </div>
-  );
-}
-
-function Block({ block, interactive }: { block: MinisiteLink; interactive: boolean }) {
-  const type = block.block_type ?? "link";
-
-  if (type === "text") {
-    return (
-      <div
-        className="bio-text"
-        dangerouslySetInnerHTML={{ __html: sanitizeRichText(block.content?.html ?? "") }}
-      />
-    );
-  }
-
-  if (type === "social") {
-    const items = block.content?.items ?? [];
-    if (items.length === 0) return null;
-    return (
-      <div className="bio-social">
-        {items.map((item, i) =>
-          interactive ? (
-            <a
-              key={i}
-              href={item.url}
-              target="_blank"
-              rel="noreferrer nofollow"
-              aria-label={socialPlatformLabel(item.platform)}
-            >
-              <SocialIcon platform={item.platform} />
-            </a>
-          ) : (
-            <span key={i} aria-label={socialPlatformLabel(item.platform)}>
-              <SocialIcon platform={item.platform} />
-            </span>
-          ),
-        )}
-      </div>
-    );
-  }
-
-  if (type === "photo") {
-    if (!block.image_url) return null;
-    const img = (
-      <Image
-        className="bio-photo-img"
-        src={block.image_url}
-        alt={block.label || block.content?.caption || ""}
-        width={520}
-        height={520}
-      />
-    );
-    return (
-      <figure className="bio-photo">
-        {interactive && block.url ? (
-          <a href={`/l/${block.id}`} target="_blank" rel="noreferrer nofollow">
-            {img}
-          </a>
-        ) : (
-          img
-        )}
-        {block.content?.caption && <figcaption>{block.content.caption}</figcaption>}
-      </figure>
-    );
-  }
-
-  // link
-  const body = (
-    <>
-      {block.image_url ? (
-        <Image className="bio-link-thumb" src={block.image_url} alt="" width={48} height={48} />
-      ) : (
-        <LinkIcon linkType={block.link_type} />
-      )}
-      <span className="bio-link-label">{block.label}</span>
-      {block.affiliate_disclosure && <small>affiliate</small>}
-    </>
-  );
-  return interactive ? (
-    <a className="bio-link" href={`/l/${block.id}`} target="_blank" rel="noreferrer nofollow">
-      {body}
-    </a>
-  ) : (
-    <div className="bio-link">{body}</div>
   );
 }
