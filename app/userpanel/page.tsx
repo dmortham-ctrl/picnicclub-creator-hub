@@ -74,6 +74,7 @@ export default function UserPanelPage() {
       if (queryError) setError(queryError.message);
       setProfile(data as Profile | null);
       if (data) {
+        try { sessionStorage.removeItem("pc_bounce"); } catch {}
         const { data: profileLinks, error: linksError } = await client.from("profile_links").select("*").eq("profile_id", data.id).order("sort_order");
         if (linksError) setError(linksError.message);
         setLinks((profileLinks as ProfileLink[]) ?? []);

@@ -42,16 +42,26 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    ({
+      data: { user },
+    } = await supabase.auth.getUser());
+  } catch {
+    // Transient auth-server error — don't bounce the user, let the page load and
+    // its own client check handle it. Prevents redirect loops on flaky networks.
+    return response;
+  }
 
   if (matches(path, AUTH_PREFIXES) && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/admin";
     loginUrl.search = "";
     loginUrl.searchParams.set("redirectedFrom", path);
-    return NextResponse.redirect(loginUrl);
+    const redirect = NextResponse.redirect(loginUrl);
+    // Carry over any auth cookies the SSR client refreshed while checking.
+    response.cookies.getAll().forEach((c) => redirect.cookies.set(c.name, c.value, c));
+    return redirect;
   }
 
   if (matches(path, ADMIN_PREFIXES) && user) {

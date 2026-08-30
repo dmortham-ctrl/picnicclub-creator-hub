@@ -24,30 +24,54 @@ export default function AdminPage() {
   useEffect(() => {
     if (!supabase) return;
     const client = supabase;
-    const mode = new URLSearchParams(window.location.search).get("mode");
-    if (mode === "signup") setAuthMode("signup");
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("mode") === "signup") setAuthMode("signup");
     let redirecting = false;
+    const bounced = params.has("redirectedFrom");
     const toDashboard = (username: string) => {
       if (redirecting) return;
+      // Loop breaker: if middleware keeps bouncing us here, stop redirecting and
+      // let the user sign in manually rather than reloading forever.
+      let n = 0;
+      try { n = Number(sessionStorage.getItem("pc_bounce") || "0"); } catch {}
+      if (bounced && n >= 2) {
+        try { sessionStorage.removeItem("pc_bounce"); } catch {}
+        setLoggedIn(false);
+        setMessage("Sesi login bermasalah. Silakan login ulang.");
+        client.auth.signOut().catch(() => {});
+        return;
+      }
+      if (bounced) { try { sessionStorage.setItem("pc_bounce", String(n + 1)); } catch {} }
       redirecting = true;
       window.location.href = `/userpanel?username=${encodeURIComponent(username)}`;
     };
-    async function afterAuth(userId: string) {
+    async function routeSignedIn(userId: string) {
       // Already a creator? Skip this page and go straight to the dashboard.
       const { data: existing } = await client.from("profiles").select("username").eq("owner_id", userId).maybeSingle();
       if (existing?.username) { toDashboard(existing.username); return; }
       // Was a placeholder profile reserved for this email? Take it over.
       const { data: claimed } = await client.rpc("claim_profile");
-      if (claimed?.username) toDashboard(claimed.username);
+      if (claimed?.username) { toDashboard(claimed.username); return; }
+      // Signed in but no profile yet — show the "Create creator" form.
+      setLoggedIn(true);
     }
     (async () => {
-      const { data } = await client.auth.getSession();
-      setLoggedIn(Boolean(data.session));
-      if (data.session) afterAuth(data.session.user.id);
+      // getUser() validates the token with the auth server. getSession() alone can
+      // hand back a stale/expired session that middleware then rejects — the client
+      // would redirect to /userpanel, middleware would bounce back here, and the
+      // page would refresh forever.
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) {
+        setLoggedIn(false);
+        // If we were bounced here by middleware, a stale cookie is the likely cause.
+        if (params.has("redirectedFrom")) await client.auth.signOut().catch(() => {});
+        return;
+      }
+      routeSignedIn(user.id);
     })();
-    const { data: listener } = client.auth.onAuthStateChange((_event, session) => {
-      setLoggedIn(Boolean(session));
-      if (session) afterAuth(session.user.id);
+    const { data: listener } = client.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) routeSignedIn(session.user.id);
+      if (event === "SIGNED_OUT") { setLoggedIn(false); setStep("form"); }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
