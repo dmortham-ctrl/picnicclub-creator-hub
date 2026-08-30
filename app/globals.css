@@ -316,6 +316,18 @@ body, body * { font-family: Poppins, sans-serif !important; }
 .panel-main > * { width: 100%; max-width: 840px; }
 .panel-main .admin-card:first-child, .panel-main .link-manager { margin-top: 0; }
 
+/* Top toolbar: page URL + share/publish dropdown */
+.panel-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+.panel-toolbar-url { margin: 0; font: 12px 'DM Mono', monospace; color: var(--muted); display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.panel-pubmenu { position: relative; }
+.panel-pubmenu-toggle { display: inline-flex; align-items: center; gap: 7px; }
+.panel-pubmenu-list { position: absolute; top: calc(100% + 8px); right: 0; z-index: 50; min-width: 236px; display: grid; gap: 2px; padding: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 40px rgba(22, 42, 36, .16); }
+.panel-pubmenu-list a, .panel-pubmenu-list button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 12px; border: none; background: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--ink); text-align: left; cursor: pointer; }
+.panel-pubmenu-list a:hover, .panel-pubmenu-list button:hover { background: var(--cream); }
+.panel-pubmenu-list button.is-danger { color: var(--accent-text); }
+.panel-pubmenu-list button.is-danger:hover { background: #f7ddd6; }
+.panel-pubmenu-sep { height: 1px; background: var(--line); margin: 5px 4px; }
+
 /* The preview rail is pinned to the viewport's right edge — never clipped. */
 .panel-preview { display: none; }
 .panel-preview-head { font: 10px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: 14px; }

@@ -10,7 +10,7 @@ import { BrandLogo } from "@/app/components/brand-logo";
 import { MinisiteView } from "@/app/components/minisite-view";
 import { BlockManager } from "@/app/userpanel/block-manager";
 import { AppearancePanel } from "@/app/userpanel/appearance-panel";
-import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOut } from "lucide-react";
+import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOut, Share2, EyeOff, Globe, Link2 as LinkIconLucide } from "lucide-react";
 
 const SECTIONS = [
   { id: "profile", label: "Profil" },
@@ -52,6 +52,7 @@ export default function UserPanelPage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [pubMenuOpen, setPubMenuOpen] = useState(false);
   const [section, setSection] = useState<SectionId>("links");
 
   useEffect(() => {
@@ -72,16 +73,17 @@ export default function UserPanelPage() {
   }, []);
 
   useEffect(() => {
-    if (!sidebarOpen && !avatarModalOpen && !previewOpen) return;
+    if (!sidebarOpen && !avatarModalOpen && !previewOpen && !pubMenuOpen) return;
     function onKey(e: KeyboardEvent) {
       if (e.key !== "Escape") return;
       setSidebarOpen(false);
       setAvatarModalOpen(false);
       setPreviewOpen(false);
+      setPubMenuOpen(false);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [sidebarOpen, avatarModalOpen, previewOpen]);
+  }, [sidebarOpen, avatarModalOpen, previewOpen, pubMenuOpen]);
 
   useEffect(() => {
     if (!profile) return;
@@ -251,6 +253,42 @@ export default function UserPanelPage() {
       </aside>
 
       <main className="panel-main">
+      {profile && (
+        <div className="panel-toolbar">
+          <p className="panel-toolbar-url">
+            picnicclub.id/@{profile.username}
+            <span className={`status-pill status-${profile.status}`}>{profile.status}</span>
+          </p>
+          <div className="panel-pubmenu">
+            <button type="button" className="button-dark panel-pubmenu-toggle" aria-expanded={pubMenuOpen} onClick={() => setPubMenuOpen((o) => !o)}>
+              <Share2 size={15} /> Bagikan &amp; publikasi
+            </button>
+            {pubMenuOpen && (
+              <>
+                <div className="panel-menu-backdrop" onClick={() => setPubMenuOpen(false)} />
+                <div className="panel-pubmenu-list" role="menu">
+                  <a href={`/@${profile.username}`} target="_blank" rel="noreferrer" onClick={() => setPubMenuOpen(false)}>
+                    <ExternalLink size={15} /><span>Lihat halaman publik</span>
+                  </a>
+                  <button type="button" onClick={() => { navigator.clipboard?.writeText(`${window.location.origin}/@${profile.username}`); setNotice("Link disalin."); setPubMenuOpen(false); }}>
+                    <LinkIconLucide size={15} /><span>Salin link</span>
+                  </button>
+                  <div className="panel-pubmenu-sep" />
+                  {profile.status === "published" ? (
+                    <button type="button" className="is-danger" onClick={() => { setStatus("draft"); setPubMenuOpen(false); }}>
+                      <EyeOff size={15} /><span>Sembunyikan halaman</span>
+                    </button>
+                  ) : (
+                    <button type="button" onClick={() => { setStatus("published"); setPubMenuOpen(false); }}>
+                      <Globe size={15} /><span>Publikasikan halaman</span>
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
       {error && <p className="error">{error}</p>}
       {notice && !error && <p className="cms-message">{notice}</p>}
       {profile ? (
@@ -258,17 +296,7 @@ export default function UserPanelPage() {
           {section === "profile" && (
             <form className="admin-card admin-form profile-editor" onSubmit={saveProfile}>
               <div className="profile-editor-head">
-                <div>
-                  <h3>Profil halaman</h3>
-                  <p className="profile-editor-url">
-                    picnicclub.id/@{profile.username}
-                    <span className={`status-pill status-${profile.status}`}>{profile.status}</span>
-                  </p>
-                </div>
-                <div className="profile-editor-actions">
-                  <a href={`/@${profile.username}`} target="_blank" rel="noreferrer" className="button-outline">Lihat halaman ↗</a>
-                  <button type="button" className="button-outline" onClick={() => { navigator.clipboard?.writeText(`${window.location.origin}/@${profile.username}`); setNotice("Link disalin."); }}>Bagikan</button>
-                </div>
+                <h3>Profil halaman</h3>
               </div>
 
               <div className="profile-photo-row">
@@ -351,19 +379,6 @@ export default function UserPanelPage() {
             />
           )}
 
-          {section === "links" && (
-          <div className="admin-card panel-actions">
-            <div className="eyebrow">Halaman &amp; publikasi</div>
-            <strong>picnicclub.id/@{profile.username}</strong>
-            <Link className="button-dark" href={`/@${profile.username}`}>View public page ↗</Link>
-            <button className="button-outline" type="button" onClick={() => { navigator.clipboard?.writeText(`${window.location.origin}/@${profile.username}`); setNotice("Link disalin."); }}>Copy profile link</button>
-            {profile.status === "published" ? (
-              <button className="button-outline" type="button" onClick={() => setStatus("draft")}>Unpublish page</button>
-            ) : (
-              <button className="button-dark" type="button" onClick={() => setStatus("published")}>Publish page</button>
-            )}
-          </div>
-          )}
         </>
       ) : (
         <div className="admin-card"><p>{username ? "Memuat profil..." : "Profil belum dipilih."}</p></div>
