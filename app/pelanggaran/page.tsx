@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { LegalPage } from "../components/legal-layout";
 
@@ -42,6 +43,25 @@ export default function PelanggaranPage() {
         yang diisi adalah username, bukan nama akun. Setelah mengisi, konfirmasi ke admin di{" "}
         <a href="https://wa.me/6285797132658">085797132658</a>.
       </p>
+
+      <p>
+        <strong>Cara menemukan User ID (UID) TikTok kamu:</strong>
+      </p>
+      <figure className="legal-figure">
+        <Image
+          src="/uid-guide-1.jpg"
+          alt="Langkah 1 sampai 3: buka TikTok lalu masuk ke profil, ketuk menu garis tiga di kanan atas, lalu pilih Settings and privacy."
+          width={1600}
+          height={900}
+        />
+        <Image
+          src="/uid-guide-2.jpg"
+          alt="Langkah 4 sampai 6: di menu Settings and privacy scroll ke paling bawah, ketuk berkali-kali pada nomor versi aplikasi sampai muncul keterangan UserId, lalu catat User ID kamu."
+          width={1600}
+          height={900}
+        />
+        <figcaption>Ketuk berkali-kali pada nomor versi aplikasi di bagian paling bawah menu Settings sampai muncul baris &ldquo;UserId&rdquo;.</figcaption>
+      </figure>
 
       <h2>Banding lanjutan via MCN</h2>
       <p>

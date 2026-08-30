@@ -234,6 +234,9 @@ body, body * { font-family: Poppins, sans-serif !important; }
 .legal .panel-back { color: var(--muted); text-decoration: none; }
 .legal code { font: 12px 'DM Mono', monospace; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
 .legal hr { border: 0; border-top: 1px solid var(--line); margin: 40px 0 20px; }
+.legal-figure { margin: 16px 0 8px; display: grid; gap: 14px; }
+.legal-figure img { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); display: block; }
+.legal-figure figcaption { font-size: 12px; color: var(--muted); line-height: 1.6; }
 .legal-contact { font-size: 13px; }
 .legal .panel-back { margin-top: 24px; }
 @media (max-width: 760px) { .legal { padding: 40px 20px 70px; } }
