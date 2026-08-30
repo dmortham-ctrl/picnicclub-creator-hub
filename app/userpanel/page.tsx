@@ -256,25 +256,34 @@ export default function UserPanelPage() {
       {profile ? (
         <>
           {section === "profile" && (
-            <form className="admin-card admin-form panel-profile-editor" onSubmit={saveProfile}>
-              <div className="panel-profile-head">
-                <button type="button" className="avatar-picker" onClick={() => setAvatarModalOpen(true)} aria-label="Ganti foto profil">
-                  {profileDraft.avatar_url ? (
-                    <Image className="panel-profile-avatar" src={profileDraft.avatar_url} alt={profile.display_name} width={140} height={140} />
-                  ) : (
-                    <span className="panel-profile-avatar panel-profile-avatar--empty" aria-hidden="true" />
-                  )}
-                  <span className="avatar-picker-hint">Ganti foto</span>
-                </button>
-                <div className="panel-profile-info">
-                  <p className="bio-username">
-                    @{profile.username}
+            <form className="admin-card admin-form profile-editor" onSubmit={saveProfile}>
+              <div className="profile-editor-head">
+                <div>
+                  <h3>Profil halaman</h3>
+                  <p className="profile-editor-url">
+                    picnicclub.id/@{profile.username}
                     <span className={`status-pill status-${profile.status}`}>{profile.status}</span>
                   </p>
-                  <label>Display name<input required value={profileDraft.display_name} onChange={(e) => setProfileDraft({ ...profileDraft, display_name: e.target.value })} /></label>
+                </div>
+                <div className="profile-editor-actions">
+                  <a href={`/@${profile.username}`} target="_blank" rel="noreferrer" className="button-outline">Lihat halaman ↗</a>
+                  <button type="button" className="button-outline" onClick={() => { navigator.clipboard?.writeText(`${window.location.origin}/@${profile.username}`); setNotice("Link disalin."); }}>Bagikan</button>
                 </div>
               </div>
-              <label>Category<input value={profileDraft.category} onChange={(e) => setProfileDraft({ ...profileDraft, category: e.target.value })} /></label>
+
+              <div className="profile-photo-row">
+                <button type="button" className="profile-photo" onClick={() => setAvatarModalOpen(true)} aria-label="Ganti foto profil">
+                  {profileDraft.avatar_url ? (
+                    <Image src={profileDraft.avatar_url} alt={profile.display_name} width={140} height={140} />
+                  ) : (
+                    <span className="profile-photo-empty" aria-hidden="true" />
+                  )}
+                </button>
+                <button type="button" className="profile-photo-change" onClick={() => setAvatarModalOpen(true)}>Ganti foto</button>
+              </div>
+
+              <label>Judul halaman<input required value={profileDraft.display_name} onChange={(e) => setProfileDraft({ ...profileDraft, display_name: e.target.value })} /></label>
+              <label>Kategori<input value={profileDraft.category} onChange={(e) => setProfileDraft({ ...profileDraft, category: e.target.value })} /></label>
               <label>Bio<textarea rows={3} maxLength={280} value={profileDraft.bio} onChange={(e) => setProfileDraft({ ...profileDraft, bio: e.target.value })} /></label>
               <div className="form-actions">
                 <button className="button-dark" type="submit" disabled={savingProfile}>{savingProfile ? "Menyimpan..." : "Simpan profil"}</button>
