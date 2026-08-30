@@ -3,23 +3,57 @@
 import { useCallback, useEffect, useState } from "react";
 import { Sparkles, Copy, Check, Bookmark, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { TOOL_DAILY_LIMIT, TOOL_COUNT_MAX, TOOL_COUNT_DEFAULT, TOOL_PLATFORMS, TOOL_TYPE_CHIPS } from "@/lib/picnic-tools";
+import {
+  TOOL_DAILY_LIMIT,
+  TOOL_COUNT_MAX,
+  TOOL_META,
+  TOOL_PLATFORMS,
+  TOOL_TYPE_CHIPS,
+  type ToolKey,
+} from "@/lib/picnic-tools";
 
-type ScriptResult = { angle: string; script: string };
 type SavedRow = { id: string; content: string; meta: { angle?: string } | null };
+type ResultItem = { key: string; badge?: string; text: string; copyText: string; saveText: string; saveAngle?: string };
 
-export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
-  const isHook = tool === "hook";
+type ScriptOut = { angle: string; script: string };
+type LiveOut = { title: string; script: string };
+type CalendarOut = { day: number; format: string; angle: string; idea: string };
+
+function normalize(tool: ToolKey, output: unknown): ResultItem[] {
+  if (tool === "hook" || tool === "caption") {
+    return (output as string[]).map((t, i) => ({ key: `${i}`, text: t, copyText: t, saveText: t }));
+  }
+  if (tool === "script") {
+    return (output as ScriptOut[]).map((s, i) => ({
+      key: `${i}`, badge: s.angle, text: s.script, copyText: s.script, saveText: s.script, saveAngle: s.angle,
+    }));
+  }
+  if (tool === "live") {
+    return (output as LiveOut[]).map((s, i) => ({
+      key: `${i}`, badge: s.title, text: s.script, copyText: `${s.title}\n${s.script}`, saveText: s.script, saveAngle: s.title,
+    }));
+  }
+  if (tool === "calendar") {
+    return (output as CalendarOut[]).map((d, i) => {
+      const badge = `Hari ${d.day} · ${d.format}`;
+      const text = `${d.angle}\n${d.idea}`;
+      return { key: `${i}`, badge, text, copyText: `${badge}\n${text}`, saveText: text, saveAngle: badge };
+    });
+  }
+  return [];
+}
+
+export function ToolsPanel({ tool }: { tool: ToolKey }) {
+  const meta = TOOL_META[tool];
 
   const [productName, setProductName] = useState("");
   const [productType, setProductType] = useState("");
   const [platform, setPlatform] = useState<string>(TOOL_PLATFORMS[0].value);
-  const [count, setCount] = useState(TOOL_COUNT_DEFAULT[tool]);
+  const [count, setCount] = useState(meta.defaultCount);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [hooks, setHooks] = useState<string[]>([]);
-  const [scripts, setScripts] = useState<ScriptResult[]>([]);
+  const [results, setResults] = useState<ResultItem[]>([]);
   const [usedToday, setUsedToday] = useState<number | null>(null);
   const [copiedKey, setCopiedKey] = useState("");
   const [saved, setSaved] = useState<SavedRow[]>([]);
@@ -36,8 +70,8 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
   }, [tool]);
 
   useEffect(() => {
-    setHooks([]); setScripts([]); setError(""); setNotice("");
-    setCount(TOOL_COUNT_DEFAULT[tool]);
+    setResults([]); setError(""); setNotice("");
+    setCount(TOOL_META[tool].defaultCount);
     loadSaved();
   }, [tool, loadSaved]);
 
@@ -48,12 +82,18 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
       setError("Isi nama produk dan jenis produk dulu.");
       return;
     }
-    setLoading(true); setHooks([]); setScripts([]);
+    setLoading(true); setResults([]);
     try {
       const res = await fetch("/api/tools/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tool, product_name: productName.trim(), product_type: productType.trim(), platform, count }),
+        body: JSON.stringify({
+          tool,
+          product_name: productName.trim(),
+          product_type: productType.trim(),
+          platform,
+          count: meta.hasCount ? count : meta.defaultCount,
+        }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -61,8 +101,7 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
         if (typeof json.used_today === "number") setUsedToday(json.used_today);
         return;
       }
-      if (isHook) setHooks(json.output as string[]);
-      else setScripts(json.output as ScriptResult[]);
+      setResults(normalize(tool, json.output));
       setUsedToday(json.used_today);
       if (json.cached) setNotice("Diambil dari hasil terbaru untuk produk yang sama (tidak memotong kuota).");
     } finally {
@@ -94,17 +133,20 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
   }
 
   const remaining = usedToday === null ? null : Math.max(0, TOOL_DAILY_LIMIT - usedToday);
+  const buttonLabel = loading
+    ? "Membuat..."
+    : meta.hasCount
+    ? `Generate ${count} ${meta.noun}`
+    : tool === "calendar"
+    ? "Buat kalender 7 hari"
+    : "Buat skrip live";
 
   return (
     <div className="tools-panel">
       <form className="admin-card admin-form tools-form" onSubmit={generate}>
         <div className="appear-head">
-          <h3>{isHook ? "Ide Hook" : "Ide Script"}</h3>
-          <p>
-            {isHook
-              ? "Masukkan produk kamu, AI buatkan 10 hook siap pakai."
-              : "Masukkan produk kamu, AI buatkan 3 script video ±30 detik."}
-          </p>
+          <h3>{meta.label}</h3>
+          <p>{meta.desc}</p>
         </div>
 
         <label>Nama produk<input required maxLength={120} value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="mis. Serum Glow Vitamin C" /></label>
@@ -122,18 +164,20 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
               {TOOL_PLATFORMS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
             </select>
           </label>
-          <label>Jumlah {isHook ? "hook" : "script"}
-            <select value={count} onChange={(e) => setCount(Number(e.target.value))}>
-              {Array.from({ length: TOOL_COUNT_MAX }, (_, i) => i + 1).map((n) => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
-          </label>
+          {meta.hasCount && (
+            <label>Jumlah {meta.noun}
+              <select value={count} onChange={(e) => setCount(Number(e.target.value))}>
+                {Array.from({ length: TOOL_COUNT_MAX }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
 
         <div className="tools-actions">
           <button className="button-dark" type="submit" disabled={loading}>
-            <Sparkles size={15} /> {loading ? "Membuat..." : `Generate ${count} ${isHook ? "hook" : "script"}`}
+            <Sparkles size={15} /> {buttonLabel}
           </button>
           {remaining !== null && <span className="tools-quota">Sisa hari ini: {remaining}/{TOOL_DAILY_LIMIT}</span>}
         </div>
@@ -142,30 +186,20 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
         {notice && !error && <p className="cms-message">{notice}</p>}
       </form>
 
-      {(hooks.length > 0 || scripts.length > 0) && (
+      {results.length > 0 && (
         <div className="admin-card">
           <div className="eyebrow">Hasil</div>
           <div className="tools-results">
-            {isHook
-              ? hooks.map((h, i) => (
-                  <div className="tools-result" key={i}>
-                    <p>{h}</p>
-                    <div className="tools-result-actions">
-                      <button type="button" onClick={() => copy(`h${i}`, h)}>{copiedKey === `h${i}` ? <Check size={14} /> : <Copy size={14} />}</button>
-                      <button type="button" onClick={() => save(h)}><Bookmark size={14} /></button>
-                    </div>
-                  </div>
-                ))
-              : scripts.map((s, i) => (
-                  <div className="tools-result tools-result--script" key={i}>
-                    <span className="tools-angle">{s.angle}</span>
-                    <p>{s.script}</p>
-                    <div className="tools-result-actions">
-                      <button type="button" onClick={() => copy(`s${i}`, s.script)}>{copiedKey === `s${i}` ? <Check size={14} /> : <Copy size={14} />}</button>
-                      <button type="button" onClick={() => save(s.script, s.angle)}><Bookmark size={14} /></button>
-                    </div>
-                  </div>
-                ))}
+            {results.map((r) => (
+              <div className={`tools-result${r.badge ? " tools-result--script" : ""}`} key={r.key}>
+                {r.badge && <span className="tools-angle">{r.badge}</span>}
+                <p>{r.text}</p>
+                <div className="tools-result-actions">
+                  <button type="button" onClick={() => copy(r.key, r.copyText)}>{copiedKey === r.key ? <Check size={14} /> : <Copy size={14} />}</button>
+                  <button type="button" onClick={() => save(r.saveText, r.saveAngle)}><Bookmark size={14} /></button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -177,7 +211,7 @@ export function ToolsPanel({ tool }: { tool: "hook" | "script" }) {
         ) : (
           <div className="tools-results">
             {saved.map((row) => (
-              <div className="tools-result" key={row.id}>
+              <div className={`tools-result${row.meta?.angle ? " tools-result--script" : ""}`} key={row.id}>
                 {row.meta?.angle && <span className="tools-angle">{row.meta.angle}</span>}
                 <p>{row.content}</p>
                 <div className="tools-result-actions">
