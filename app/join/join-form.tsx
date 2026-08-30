@@ -3,11 +3,17 @@
 import { useRef, useState } from "react";
 import { X } from "lucide-react";
 
-const FORM_SRC =
-  "https://docs.google.com/forms/d/e/1FAIpQLSftrMydNstjbpli7liWgbW3Zn5tzDOSDT3anlFC6R04woB-8Q/viewform?embedded=true";
-const ADMIN_WA = "6287888527772";
-
-export function JoinForm() {
+export function JoinForm({
+  formSrc,
+  adminWa,
+  formTitle,
+  waMessage,
+}: {
+  formSrc: string;
+  adminWa: string;
+  formTitle: string;
+  waMessage: string;
+}) {
   const loads = useRef(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -18,15 +24,13 @@ export function JoinForm() {
     if (loads.current >= 2) setConfirmOpen(true);
   }
 
-  const waText = encodeURIComponent(
-    "Halo admin Picnic Club, saya baru saja mengisi formulir Join as Creator.\nMohon dikonfirmasi ya. Terima kasih.",
-  );
-  const waLink = `https://wa.me/${ADMIN_WA}?text=${waText}`;
+  const src = formSrc.includes("?") ? `${formSrc}&embedded=true` : `${formSrc}?embedded=true`;
+  const waLink = `https://wa.me/${adminWa}?text=${encodeURIComponent(waMessage)}`;
 
   return (
     <div className="support-panel">
       <div className="support-frame">
-        <iframe src={FORM_SRC} title="Formulir Join as Creator" onLoad={onFrameLoad} loading="lazy">
+        <iframe src={src} title={formTitle} onLoad={onFrameLoad} loading="lazy">
           Memuat formulir…
         </iframe>
       </div>

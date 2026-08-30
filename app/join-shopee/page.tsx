@@ -1,35 +1,35 @@
 import Link from "next/link";
 import { SiteNav } from "../components/site-nav";
-import { JoinForm } from "./join-form";
+import { JoinForm } from "../join/join-form";
 
 export const metadata = {
-  title: "Join Agency TikTok | Picnic Club",
+  title: "Join Agency Shopee | Picnic Club",
   description:
-    "Daftar jadi creator agency TikTok Picnic Club. Isi formulir pendaftaran, lalu konfirmasi ke admin lewat WhatsApp.",
-  alternates: { canonical: "/join" },
+    "Daftar jadi creator agency Shopee Picnic Club. Isi formulir pendaftaran, lalu konfirmasi ke admin lewat WhatsApp.",
+  alternates: { canonical: "/join-shopee" },
 };
 
 const FORM_SRC =
-  "https://docs.google.com/forms/d/e/1FAIpQLSftrMydNstjbpli7liWgbW3Zn5tzDOSDT3anlFC6R04woB-8Q/viewform";
+  "https://docs.google.com/forms/d/e/1FAIpQLSff-E4zOONwC5OUtJmIV9sj0QQASOlgi0UmSNFt5FJVC8NRBA/viewform";
 
-export default function JoinPage() {
+export default function JoinShopeePage() {
   return (
     <main className="legal-page">
       <SiteNav />
       <article className="legal">
         <div className="eyebrow">Picnic Club</div>
-        <h1>Join Agency TikTok</h1>
+        <h1>Join Agency Shopee</h1>
         <p className="hero-copy">
-          Isi formulir di bawah untuk gabung agency TikTok Picnic Club. Setelah selesai, kamu akan
+          Isi formulir di bawah untuk gabung agency Shopee Picnic Club. Setelah selesai, kamu akan
           diminta konfirmasi ke admin lewat WhatsApp supaya pendaftaran cepat diproses.
         </p>
 
         <JoinForm
           formSrc={FORM_SRC}
-          adminWa="6287888527772"
-          formTitle="Formulir Join Agency TikTok"
+          adminWa="6289606687080"
+          formTitle="Formulir Join Agency Shopee"
           waMessage={
-            "Halo admin Picnic Club, saya baru saja mengisi formulir Join Agency TikTok.\nMohon dikonfirmasi ya. Terima kasih."
+            "Halo admin Picnic Club, saya baru saja mengisi formulir Join Agency Shopee.\nMohon dikonfirmasi ya. Terima kasih."
           }
         />
 
