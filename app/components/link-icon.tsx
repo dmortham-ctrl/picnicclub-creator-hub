@@ -1,4 +1,4 @@
-import { Globe, Instagram, Mail, MessageCircle, Music2, ShoppingBag, Youtube } from "lucide-react";
+import { Facebook, Globe, Instagram, Mail, MessageCircle, Music2, ShoppingBag, Youtube } from "lucide-react";
 import { linkTypeMeta } from "@/lib/link-types";
 
 const ICONS = {
@@ -6,6 +6,7 @@ const ICONS = {
   tiktok: Music2,
   instagram: Instagram,
   youtube: Youtube,
+  facebook: Facebook,
   whatsapp: MessageCircle,
   shop: ShoppingBag,
   email: Mail,
