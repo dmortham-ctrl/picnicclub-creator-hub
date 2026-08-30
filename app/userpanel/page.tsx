@@ -10,6 +10,7 @@ import { BrandLogo } from "@/app/components/brand-logo";
 import { MinisiteView } from "@/app/components/minisite-view";
 import { BlockManager } from "@/app/userpanel/block-manager";
 import { AppearancePanel } from "@/app/userpanel/appearance-panel";
+import { AccountPanel } from "@/app/userpanel/account-panel";
 import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOut, Share2, EyeOff, Globe, Link2 as LinkIconLucide } from "lucide-react";
 
 const SECTIONS = [
@@ -294,6 +295,7 @@ export default function UserPanelPage() {
       {profile ? (
         <>
           {section === "profile" && (
+          <>
             <form className="admin-card admin-form profile-editor" onSubmit={saveProfile}>
               <div className="profile-editor-head">
                 <h3>Profil halaman</h3>
@@ -317,6 +319,8 @@ export default function UserPanelPage() {
                 <button className="button-dark" type="submit" disabled={savingProfile}>{savingProfile ? "Menyimpan..." : "Simpan profil"}</button>
               </div>
             </form>
+            <AccountPanel onNotice={setNotice} onError={setError} />
+          </>
           )}
 
           {section === "theme" && (

@@ -121,6 +121,10 @@ h2 { font-size: clamp(34px, 5vw, 62px); letter-spacing: -.07em; line-height: .98
 .profile-photo-empty { background: var(--line); border: 1px dashed #c3ccbe; }
 .profile-photo-change { border: none; background: none; color: var(--accent-text); font-size: 13px; font-weight: 700; cursor: pointer; padding: 0; }
 .profile-photo-change:hover { text-decoration: underline; }
+.account-panel { margin-top: 16px; display: grid; gap: 18px; }
+.account-form { gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.account-danger { padding-top: 2px; }
+.account-danger .button-outline { font-size: 12px; padding: 9px 14px; }
 .modal-backdrop { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(22, 42, 36, .5); }
 .modal-card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 26px; width: 100%; max-width: 380px; display: grid; gap: 14px; }
 .modal-card h2 { margin: 0; font-size: 20px; letter-spacing: -.02em; }
