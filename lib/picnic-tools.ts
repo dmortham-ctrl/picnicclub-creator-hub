@@ -12,7 +12,7 @@ export const TOOL_META: Record<
   hook: { label: "Ide Hook", noun: "hook", hasCount: true, defaultCount: 10, desc: "Masukkan produk kamu, AI buatkan hook penahan scroll siap pakai." },
   script: { label: "Ide Script", noun: "script", hasCount: true, defaultCount: 3, desc: "Masukkan produk kamu, AI buatkan naskah video ±30 detik." },
   caption: { label: "Ide Caption", noun: "caption", hasCount: true, defaultCount: 5, desc: "Caption siap tempel di bawah video, sudah lengkap dengan hashtag." },
-  live: { label: "Skrip Live Selling", noun: "bagian", hasCount: false, defaultCount: 1, desc: "Naskah lengkap untuk sesi live: dari opening sampai closing." },
+  live: { label: "Skrip Live Selling", noun: "bagian", hasCount: false, defaultCount: 1, desc: "Naskah live yang dirancang untuk diulang-ulang: pembuka sekali, inti putaran jualan + selingan yang dipakai berulang, penutup sekali." },
   calendar: { label: "Kalender Konten", noun: "hari", hasCount: false, defaultCount: 7, desc: "Rencana konten 7 hari dari satu produk — tiap hari angle & format berbeda." },
 };
 
@@ -91,17 +91,20 @@ Setiap caption berupa satu string dengan struktur:
 ${BANNED_URGENCY_RULE}`;
 
 export const LIVE_SYSTEM = `Kamu pelatih live selling untuk affiliate TikTok Shop & Shopee Live di Indonesia.
-Tugas: buat naskah lengkap satu sesi live selling untuk produk yang diberikan. Abaikan angka jumlah yang diminta — keluarkan tepat 6 bagian berurutan.
+Tugas: buat naskah sesi live selling yang dirancang untuk DIULANG-ULANG (looping) selama berjam-jam, untuk produk yang diberikan. Abaikan angka jumlah yang diminta — keluarkan tepat 7 bagian.
 
-Keluarkan array 6 objek dengan "title" dan "script":
-1. "Opening / Sapa Penonton" — sapaan hangat, bangun energi, kasih tahu bakal bahas produk apa dan kenapa worth ditonton sampai habis.
-2. "Perkenalan Produk" — apa produknya, untuk siapa, masalah apa yang dijawab. Sebut 2-3 keunggulan utama.
-3. "Demo & Bukti" — cara pakai / tunjukkan langsung, plus 1 bukti konkret (hasil, testimoni, perbandingan).
-4. "Jawab Pertanyaan & Keberatan Umum" — antisipasi pertanyaan penonton ("harganya berapa?", "ori nggak?", "cocok buat kulit sensitif?", "worth it nggak?") dan cara menjawabnya dengan meyakinkan tapi jujur.
-5. "Dorongan Beli" — arahkan ke keranjang kuning, jelaskan promo berbasis WAKTU kalau ada, ciptakan momentum tanpa menyinggung stok.
-6. "Closing" — recap singkat, ajak follow & nyalakan lonceng, tutup dengan ramah.
+Konsepnya: viewer live datang & pergi terus, jadi host mengulang "inti putaran jualan" tiap 5-10 menit atau tiap ada lonjakan viewer baru, dan menyelipkan variasi biar nggak monoton. Pembuka & penutup cuma sekali (awal & akhir sesi).
 
-Setiap "script": teks mengalir Bahasa Indonesia santai, siap dibaca host, 60-110 kata per bagian. Jangan tulis label bagian di dalam script. Sesuaikan diksi dengan platform yang disebut.
+Keluarkan array 7 objek dengan "title" dan "script":
+1. "Pembuka Sesi (sekali di awal)" — sapaan hangat, bangun energi, kasih tahu produk apa yang dibahas hari ini dan kenapa worth ditungguin.
+2. "🔁 Inti Putaran Jualan (ulang tiap 5-10 menit)" — satu blok lengkap yang bisa diulang terus: sapa viewer baru + hook ulang, sebut masalah yang dijawab produk, 2-3 keunggulan utama, 1 bukti/demo singkat, lalu arahkan ke keranjang kuning dengan momentum. 120-160 kata.
+3. "🔁 Versi Cepat Putaran (buat pas chat rame)" — versi 25-35 detik dari poin 2: hook + 1 benefit terkuat + CTA keranjang kuning. 40-60 kata.
+4. "🔁 Selingan: Balas Komentar & Interaksi" — cara mengajak ngobrol, jawab pertanyaan umum ("harganya berapa?", "ori nggak?", "cocok buat aku nggak?"), sambil tetap halus mengarahkan ke produk.
+5. "🔁 Selingan: Storytime / Pengalaman" — cerita personal singkat kenapa host suka produk ini (before-after atau momen relatable), ditutup ajakan santai.
+6. "🔁 Selingan: Recap Manfaat + Ajak Follow" — rangkum 3 alasan utama beli, ajak follow & nyalakan lonceng biar dapat notif live berikutnya, lalu balik ke keranjang kuning.
+7. "Penutup Sesi (sekali di akhir)" — terima kasih, ingatkan cek keranjang kuning terakhir kali, kasih tahu jadwal live berikutnya, tutup hangat.
+
+Setiap "script": teks mengalir Bahasa Indonesia santai, siap dibaca host, tanpa menuliskan label bagian di dalam script. Sesuaikan diksi dengan platform yang disebut.
 
 ${BANNED_URGENCY_RULE}`;
 

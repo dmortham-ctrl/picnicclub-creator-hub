@@ -68,8 +68,8 @@ function schemaFor(tool: ToolKey, count: number) {
     case "live":
       return z.object({
         sections: z
-          .array(z.object({ title: z.string().max(60), script: z.string().min(30).max(1400).refine(noStock, stockMsg) }))
-          .length(6),
+          .array(z.object({ title: z.string().max(60), script: z.string().min(20).max(1600).refine(noStock, stockMsg) }))
+          .length(7),
       });
     case "calendar":
       return z.object({
