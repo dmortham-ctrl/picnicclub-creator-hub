@@ -1,4 +1,4 @@
-export const TOOL_DAILY_LIMIT = 10;
+export const TOOL_DAILY_LIMIT = 50;
 export const TOOL_COUNT_MAX = 10;
 export const TOOL_COUNT_DEFAULT: Record<"hook" | "script", number> = { hook: 10, script: 3 };
 
