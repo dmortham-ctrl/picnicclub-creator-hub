@@ -109,12 +109,6 @@ export function BlockManager({
       affiliate_disclosure: draft.affiliate_disclosure,
     });
     if (!parsed.success) return { error: firstIssue(parsed.error) };
-    let image = imageCleared ? "" : existingImage;
-    if (imageFile) {
-      const uploaded = await uploadImage(imageFile);
-      if (uploaded === null) return { error: "" };
-      image = uploaded;
-    }
     return {
       row: {
         block_type: "link",
@@ -122,7 +116,7 @@ export function BlockManager({
         url: parsed.data.url,
         link_type: parsed.data.link_type,
         icon_key: parsed.data.link_type,
-        image_url: image,
+        image_url: "",
         affiliate_disclosure: parsed.data.affiliate_disclosure,
         content: {},
       },
@@ -434,17 +428,6 @@ function BlockFields({
         </label>
       </div>
       <label>URL<input required type="url" value={draft.url} onChange={(e) => { const url = e.target.value; setDraft((d) => ({ ...d, url, link_type: d.link_type === "link" ? guessLinkType(url) : d.link_type })); }} placeholder="https://..." /></label>
-      <div className="link-image-field">
-        {image ? (
-          <Image className="link-thumb" src={URL.createObjectURL(image)} alt="" width={48} height={48} unoptimized />
-        ) : existingImage ? (
-          <Image className="link-thumb" src={existingImage} alt="" width={48} height={48} />
-        ) : (
-          <span className="link-thumb link-thumb--empty" aria-hidden="true" />
-        )}
-        <label className="link-image-pick">Gambar / foto produk (opsional)<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setImage(e.target.files?.[0] ?? null)} /></label>
-        {(image || existingImage) && <button type="button" className="button-outline" onClick={onClearImage}>Hapus gambar</button>}
-      </div>
       <label className="checkbox-label"><input type="checkbox" checked={draft.affiliate_disclosure} onChange={(e) => setDraft((d) => ({ ...d, affiliate_disclosure: e.target.checked }))} /> Tautan affiliasi / berbayar</label>
     </>
   );
