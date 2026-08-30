@@ -10,12 +10,19 @@ export default function AdminPage() { const [email, setEmail] = useState(""); co
     const client = supabase;
     const mode = new URLSearchParams(window.location.search).get("mode");
     if (mode === "signup") setAuthMode("signup");
+    let redirecting = false;
+    const toDashboard = (username: string) => {
+      if (redirecting) return;
+      redirecting = true;
+      window.location.href = `/userpanel?username=${encodeURIComponent(username)}`;
+    };
     async function afterAuth(userId: string) {
-      const { data: existing } = await client.from("profiles").select("*").eq("owner_id", userId).maybeSingle();
-      if (existing) { setProfile(existing); return; }
+      // Already a creator? Skip this page and go straight to the dashboard.
+      const { data: existing } = await client.from("profiles").select("username").eq("owner_id", userId).maybeSingle();
+      if (existing?.username) { toDashboard(existing.username); return; }
       // Was a placeholder profile reserved for this email? Take it over.
       const { data: claimed } = await client.rpc("claim_profile");
-      if (claimed?.username) { window.location.href = `/userpanel?username=${encodeURIComponent(claimed.username)}`; }
+      if (claimed?.username) toDashboard(claimed.username);
     }
     (async () => {
       const { data } = await client.auth.getSession();
