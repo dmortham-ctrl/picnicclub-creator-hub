@@ -8,8 +8,8 @@ export function BrandLogo({ href = "/" }: { href?: string | null }) {
     <Image
       src="/picnic-logo.png"
       alt="Picnic Club"
-      width={92}
-      height={42}
+      width={110}
+      height={50}
       className="site-logo"
       priority
     />
