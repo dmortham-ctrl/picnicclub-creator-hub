@@ -13,6 +13,7 @@ export type Profile = {
   button_shape?: "sharp" | "rounded" | "pill";
   banner_url?: string;
   layout?: "classic" | "full";
+  claim_email?: string;
   level?: "All Star" | "Featured" | "Rising";
   is_featured: boolean;
   featured_order: number;

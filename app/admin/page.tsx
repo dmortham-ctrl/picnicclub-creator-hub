@@ -6,7 +6,29 @@ import { firstIssue, profileSchema } from "@/lib/validation";
 import { BrandLogo } from "@/app/components/brand-logo";
 
 export default function AdminPage() { const router = useRouter(); const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [confirmPassword, setConfirmPassword] = useState(""); const [authMode, setAuthMode] = useState<"login" | "signup">("login"); const [message, setMessage] = useState(""); const [loggedIn, setLoggedIn] = useState(false); const [avatarFile, setAvatarFile] = useState<File | null>(null); const [uploading, setUploading] = useState(false); const [profile, setProfile] = useState({ username: "", display_name: "", bio: "", category: "Lifestyle", avatar_url: "", status: "draft" });
-  useEffect(() => { if (!supabase) return; const client = supabase; const mode = new URLSearchParams(window.location.search).get("mode"); if (mode === "signup") setAuthMode("signup"); const loadSession = async () => { const { data } = await client.auth.getSession(); setLoggedIn(Boolean(data.session)); if (data.session) { const { data: existing } = await client.from("profiles").select("*").eq("owner_id", data.session.user.id).maybeSingle(); if (existing) setProfile(existing); } }; loadSession(); const { data: listener } = client.auth.onAuthStateChange((_event, session) => { setLoggedIn(Boolean(session)); if (session) client.from("profiles").select("*").eq("owner_id", session.user.id).maybeSingle().then(({ data }) => { if (data) setProfile(data); }); }); return () => listener.subscription.unsubscribe(); }, []);
+  useEffect(() => {
+    if (!supabase) return;
+    const client = supabase;
+    const mode = new URLSearchParams(window.location.search).get("mode");
+    if (mode === "signup") setAuthMode("signup");
+    async function afterAuth(userId: string) {
+      const { data: existing } = await client.from("profiles").select("*").eq("owner_id", userId).maybeSingle();
+      if (existing) { setProfile(existing); return; }
+      // Was a placeholder profile reserved for this email? Take it over.
+      const { data: claimed } = await client.rpc("claim_profile");
+      if (claimed?.username) { window.location.href = `/userpanel?username=${encodeURIComponent(claimed.username)}`; }
+    }
+    (async () => {
+      const { data } = await client.auth.getSession();
+      setLoggedIn(Boolean(data.session));
+      if (data.session) afterAuth(data.session.user.id);
+    })();
+    const { data: listener } = client.auth.onAuthStateChange((_event, session) => {
+      setLoggedIn(Boolean(session));
+      if (session) afterAuth(session.user.id);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
   async function login(e: FormEvent) { e.preventDefault(); if (!supabase) return setMessage("Tambahkan NEXT_PUBLIC_SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_ANON_KEY terlebih dahulu."); const { error } = await supabase.auth.signInWithOtp({ email }); setMessage(error?.message ?? "Magic link sudah dikirim ke email admin."); }
   async function passwordAuth(e: FormEvent) { e.preventDefault(); if (!supabase) return setMessage("Tambahkan environment variables Supabase terlebih dahulu."); if (authMode === "signup" && password !== confirmPassword) return setMessage("Password dan konfirmasi password tidak sama."); const result = authMode === "login" ? await supabase.auth.signInWithPassword({ email, password }) : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/admin` } }); if (result.error) return setMessage(result.error.message); setMessage(authMode === "signup" ? "Signup berhasil. Cek email untuk verifikasi akun." : "Login berhasil."); if (authMode === "login") setLoggedIn(true); }
   async function loginWithGoogle() { if (!supabase) return setMessage("Tambahkan environment variables Supabase terlebih dahulu."); const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/admin` } }); if (error) setMessage(error.message); }
@@ -41,8 +63,17 @@ export default function AdminPage() { const router = useRouter(); const [email, 
       const { error } = await supabase.from("profiles").update(payload).eq("id", existing.id);
       if (error) { setMessage(error.message); setUploading(false); return; }
     } else {
-      const { data: taken } = await supabase.from("profiles").select("id").eq("username", payload.username).maybeSingle();
-      if (taken) { setMessage("Username ini sudah dipakai creator lain."); setUploading(false); return; }
+      const { data: taken } = await supabase.from("profiles").select("id, owner_id").eq("username", payload.username).maybeSingle();
+      if (taken?.owner_id) { setMessage("Username ini sudah dipakai creator lain."); setUploading(false); return; }
+      if (taken) {
+        // Placeholder profile with this username — claim it if it's open or reserved for us.
+        const { data: claimed, error: claimError } = await supabase.rpc("claim_profile", { target_username: payload.username });
+        if (claimError) { setMessage(claimError.message); setUploading(false); return; }
+        if (!claimed) { setMessage("Username ini sudah disiapkan untuk creator lain. Hubungi admin Picnic Club."); setUploading(false); return; }
+        setUploading(false);
+        router.push(`/userpanel?username=${encodeURIComponent(payload.username)}`);
+        return;
+      }
       const { error } = await supabase.from("profiles").insert({ ...payload, status: "draft" });
       if (error) { setMessage(error.message); setUploading(false); return; }
     }
