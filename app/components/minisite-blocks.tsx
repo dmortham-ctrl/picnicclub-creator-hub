@@ -30,14 +30,38 @@ export function MinisiteBlocks({
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
 
+  // A WhatsApp link set to "float" is pulled out of the list and shown as a
+  // fixed button in the bottom-right corner instead.
+  const waFloat = blocks.find(
+    (b) => (b.block_type ?? "link") === "link" && b.link_type === "whatsapp" && b.content?.wa_float,
+  );
+  const listBlocks = waFloat ? blocks.filter((b) => b.id !== waFloat.id) : blocks;
+
   const filtered = useMemo(
-    () => (q ? blocks.filter((b) => blockText(b).toLowerCase().includes(q)) : blocks),
-    [blocks, q],
+    () => (q ? listBlocks.filter((b) => blockText(b).toLowerCase().includes(q)) : listBlocks),
+    [listBlocks, q],
   );
 
   return (
     <>
-      {blocks.length > 0 && (
+      {waFloat &&
+        (interactive ? (
+          <a
+            className="bio-wa-float"
+            href={`/l/${waFloat.id}`}
+            target="_blank"
+            rel="noreferrer nofollow"
+            aria-label={waFloat.label || "Chat WhatsApp"}
+          >
+            <SocialIcon platform="whatsapp" size={26} />
+          </a>
+        ) : (
+          <span className="bio-wa-float bio-wa-float--preview" aria-hidden="true">
+            <SocialIcon platform="whatsapp" size={20} />
+          </span>
+        ))}
+
+      {listBlocks.length > 0 && (
         <div className="bio-search">
           <Search size={14} aria-hidden="true" />
           <input

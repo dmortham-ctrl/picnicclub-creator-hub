@@ -16,12 +16,13 @@ type Draft = {
   url: string;
   link_type: string;
   affiliate_disclosure: boolean;
+  wa_float: boolean;
   html: string;
   items: SocialItem[];
   caption: string;
 };
 
-const EMPTY: Draft = { label: "", url: "", link_type: "link", affiliate_disclosure: false, html: "", items: [], caption: "" };
+const EMPTY: Draft = { label: "", url: "", link_type: "link", affiliate_disclosure: false, wa_float: false, html: "", items: [], caption: "" };
 
 function draftFrom(block: ProfileLink): Draft {
   return {
@@ -29,6 +30,7 @@ function draftFrom(block: ProfileLink): Draft {
     url: block.url ?? "",
     link_type: block.link_type ?? "link",
     affiliate_disclosure: block.affiliate_disclosure ?? false,
+    wa_float: block.content?.wa_float ?? false,
     html: block.content?.html ?? "",
     items: block.content?.items?.length ? block.content.items : [{ platform: "instagram", url: "" }],
     caption: block.content?.caption ?? "",
@@ -109,6 +111,7 @@ export function BlockManager({
       affiliate_disclosure: draft.affiliate_disclosure,
     });
     if (!parsed.success) return { error: firstIssue(parsed.error) };
+    const isWa = parsed.data.link_type === "whatsapp";
     return {
       row: {
         block_type: "link",
@@ -118,7 +121,7 @@ export function BlockManager({
         icon_key: parsed.data.link_type,
         image_url: "",
         affiliate_disclosure: parsed.data.affiliate_disclosure,
-        content: {},
+        content: isWa && draft.wa_float ? { wa_float: true } : {},
       },
     };
   }
@@ -268,6 +271,7 @@ export function BlockManager({
                   {rowSummary(block, type)}
                   {!block.is_active && <em className="link-off"> · nonaktif</em>}
                   {type === "link" && block.affiliate_disclosure && <em className="link-aff"> · affiliate</em>}
+                  {type === "link" && block.content?.wa_float && <em className="link-aff"> · melayang</em>}
                 </strong>
                 {(type === "link" || (type === "photo" && block.url)) && <small>{block.url}</small>}
               </div>
@@ -428,6 +432,19 @@ function BlockFields({
         </label>
       </div>
       <label>URL<input required type="url" value={draft.url} onChange={(e) => { const url = e.target.value; setDraft((d) => ({ ...d, url, link_type: d.link_type === "link" ? guessLinkType(url) : d.link_type })); }} placeholder="https://..." /></label>
+      {draft.link_type === "whatsapp" && (
+        <fieldset className="wa-display">
+          <legend>Tampilan tombol WhatsApp</legend>
+          <label className="radio-label">
+            <input type="radio" checked={!draft.wa_float} onChange={() => setDraft((d) => ({ ...d, wa_float: false }))} />
+            Di daftar link (seperti link lain)
+          </label>
+          <label className="radio-label">
+            <input type="radio" checked={draft.wa_float} onChange={() => setDraft((d) => ({ ...d, wa_float: true }))} />
+            Tombol melayang di pojok kanan bawah
+          </label>
+        </fieldset>
+      )}
       <label className="checkbox-label"><input type="checkbox" checked={draft.affiliate_disclosure} onChange={(e) => setDraft((d) => ({ ...d, affiliate_disclosure: e.target.checked }))} /> Tautan affiliasi / berbayar</label>
     </>
   );

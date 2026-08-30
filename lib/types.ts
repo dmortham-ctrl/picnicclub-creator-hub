@@ -51,4 +51,6 @@ export type BlockContent = {
   html?: string;
   items?: SocialItem[];
   caption?: string;
+  /** WhatsApp link shown as a floating button (bottom-right) instead of in the list. */
+  wa_float?: boolean;
 };
