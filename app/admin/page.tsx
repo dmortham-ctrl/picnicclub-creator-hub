@@ -108,7 +108,7 @@ export default function AdminPage() {
     if (!supabase) return;
     reset();
     const token = code.replace(/\D/g, "").trim();
-    if (token.length !== 6) return setMessage("Kode harus 6 digit angka.");
+    if (token.length < 6) return setMessage("Kode kurang lengkap. Salin semua angka dari email.");
     const { error } = await supabase.auth.verifyOtp({ email, token, type: codeType });
     if (error) {
       return setMessage(/expired|invalid/i.test(error.message) ? "Kode salah atau sudah kedaluwarsa. Kirim ulang lalu coba lagi." : error.message);
@@ -193,12 +193,12 @@ export default function AdminPage() {
             <>
               <div className="eyebrow">Verifikasi email</div>
               <h2>Cek email kamu.</h2>
-              <p className="hero-copy">Masukkan 6 digit kode yang kami kirim ke {email}.</p>
+              <p className="hero-copy">Masukkan kode yang kami kirim ke {email} (salin semua angkanya).</p>
               {notice && <p className="form-notice">{notice}</p>}
               <form className="admin-form" onSubmit={verifyCode}>
                 <label>Kode verifikasi
-                  <input inputMode="numeric" pattern="[0-9]*" maxLength={6} required value={code}
-                    onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} placeholder="123456" style={{ letterSpacing: "0.3em", fontSize: 18 }} />
+                  <input inputMode="numeric" pattern="[0-9]*" maxLength={10} required value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} placeholder="12345678" style={{ letterSpacing: "0.3em", fontSize: 18 }} />
                 </label>
                 <button className="button-dark" type="submit">Verifikasi</button>
               </form>
