@@ -246,7 +246,6 @@ body, body * { font-family: Poppins, sans-serif !important; }
   .panel-preview .bio-card { max-width: 100%; }
   .panel-preview .bio-link { padding-left: 16px; padding-right: 16px; }
   .panel-preview .bio-link-label { white-space: normal; }
-  .preview-fab { display: none; }
 }
 
 /* Compact the block rows when the editor column gets narrow. */
@@ -269,6 +268,7 @@ body, body * { font-family: Poppins, sans-serif !important; }
 }
 
 .preview-fab { position: fixed; right: 18px; bottom: 18px; z-index: 55; display: inline-flex; align-items: center; gap: 7px; padding: 12px 18px; border: none; border-radius: 999px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px rgba(22, 42, 36, .28); }
+@media (min-width: 1120px) { .preview-fab { display: none; } }
 .preview-backdrop { position: fixed; inset: 0; z-index: 60; background: rgba(22, 42, 36, .5); display: flex; justify-content: flex-end; }
 .preview-drawer { width: min(430px, 100%); background: var(--cream); height: 100%; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 .preview-drawer-head { position: sticky; top: 0; background: var(--cream); padding-bottom: 6px; display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto; }
