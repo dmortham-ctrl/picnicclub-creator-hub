@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
 import { Profile, ProfileLink } from "@/lib/types";
 import { firstIssue, profileSettingsSchema } from "@/lib/validation";
@@ -10,7 +10,7 @@ import { MINISITE_THEMES } from "@/lib/themes";
 import { BrandLogo } from "@/app/components/brand-logo";
 import { MinisiteView } from "@/app/components/minisite-view";
 import { BlockManager } from "@/app/userpanel/block-manager";
-import { Menu, X, ChevronRight, Eye } from "lucide-react";
+import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOut } from "lucide-react";
 
 const SECTIONS = [
   { id: "profile", label: "Profil" },
@@ -19,6 +19,13 @@ const SECTIONS = [
   { id: "analytics", label: "Analitik" },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
+
+const SECTION_ICON: Record<SectionId, ReactNode> = {
+  profile: <User size={17} />,
+  links: <LayoutGrid size={17} />,
+  theme: <Palette size={17} />,
+  analytics: <BarChart3 size={17} />,
+};
 
 type CreatorAnalytics = {
   window_days: number;
@@ -44,7 +51,7 @@ export default function UserPanelPage() {
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [section, setSection] = useState<SectionId>("links");
 
   useEffect(() => {
@@ -65,15 +72,16 @@ export default function UserPanelPage() {
   }, []);
 
   useEffect(() => {
-    if (!menuOpen && !avatarModalOpen) return;
+    if (!sidebarOpen && !avatarModalOpen && !previewOpen) return;
     function onKey(e: KeyboardEvent) {
       if (e.key !== "Escape") return;
-      setMenuOpen(false);
+      setSidebarOpen(false);
       setAvatarModalOpen(false);
+      setPreviewOpen(false);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [menuOpen, avatarModalOpen]);
+  }, [sidebarOpen, avatarModalOpen, previewOpen]);
 
   useEffect(() => {
     if (!profile) return;
@@ -186,53 +194,66 @@ export default function UserPanelPage() {
     avatar_url: profileDraft.avatar_url || profile.avatar_url,
     theme: profile.theme ?? "default",
   };
-  const showPreviewFab = !!profile && (section === "links" || section === "profile" || section === "theme");
-
   return (
-    <main className="admin-wrap">
-      <div className="admin-topbar">
+    <div className="panel-shell">
+      <header className="panel-mobilebar">
         <BrandLogo href="/" />
-        <div className="admin-topbar-actions">
-          <div className="panel-menu">
-            <button
-              type="button"
-              className="button-outline panel-menu-toggle"
-              aria-label="Menu editor"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((open) => !open)}
-            >
-              {menuOpen ? <X size={16} /> : <Menu size={16} />}
-            </button>
-            {menuOpen && (
-              <>
-                <div className="panel-menu-backdrop" onClick={() => setMenuOpen(false)} />
-                <nav className="panel-menu-list" aria-label="Panel editor">
-                  <span className="panel-menu-heading">Editor minisite</span>
-                  {SECTIONS.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className={section === item.id ? "active" : ""}
-                      onClick={() => { setSection(item.id); setMenuOpen(false); }}
-                    >
-                      {item.label}
-                      <ChevronRight size={15} />
-                    </button>
-                  ))}
-                  <span className="panel-menu-heading">Lainnya</span>
-                  {profile && (
-                    <a href={`/@${profile.username}`} target="_blank" rel="noreferrer">
-                      Lihat halaman publik ↗
-                    </a>
-                  )}
-                  <Link href="/" onClick={() => setMenuOpen(false)}>View website ↗</Link>
-                  <button type="button" className="panel-menu-logout" onClick={logout}>Logout</button>
-                </nav>
-              </>
-            )}
-          </div>
+        <button type="button" className="panel-mobilebar-toggle" aria-label="Buka menu" onClick={() => setSidebarOpen(true)}>
+          <Menu size={18} />
+        </button>
+      </header>
+
+      {sidebarOpen && <div className="panel-scrim" onClick={() => setSidebarOpen(false)} />}
+
+      <aside className={`panel-sidebar ${sidebarOpen ? "is-open" : ""}`}>
+        <div className="panel-sidebar-head">
+          <BrandLogo href="/" />
+          <button type="button" className="panel-sidebar-x" aria-label="Tutup menu" onClick={() => setSidebarOpen(false)}>
+            <X size={18} />
+          </button>
         </div>
-      </div>
+
+        {profile && (
+          <div className="panel-sidebar-me">
+            {profileDraft.avatar_url || profile.avatar_url ? (
+              <Image src={profileDraft.avatar_url || profile.avatar_url} alt="" width={84} height={84} />
+            ) : (
+              <span className="panel-sidebar-me-empty" aria-hidden="true" />
+            )}
+            <div>
+              <strong>{profile.display_name}</strong>
+              <span className="panel-sidebar-handle">@{profile.username}</span>
+              <span className={`status-pill status-${profile.status}`}>{profile.status}</span>
+            </div>
+          </div>
+        )}
+
+        <nav className="panel-sidebar-nav">
+          {SECTIONS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={section === item.id ? "is-active" : ""}
+              onClick={() => { setSection(item.id); setSidebarOpen(false); }}
+            >
+              {SECTION_ICON[item.id]}
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="panel-sidebar-foot">
+          {profile && (
+            <a href={`/@${profile.username}`} target="_blank" rel="noreferrer">
+              <ExternalLink size={16} /><span>Lihat halaman publik</span>
+            </a>
+          )}
+          <Link href="/"><ExternalLink size={16} /><span>Buka website</span></Link>
+          <button type="button" onClick={logout}><LogOut size={16} /><span>Keluar</span></button>
+        </div>
+      </aside>
+
+      <main className="panel-main">
       {error && <p className="error">{error}</p>}
       {notice && !error && <p className="cms-message">{notice}</p>}
       {profile ? (
@@ -349,11 +370,20 @@ export default function UserPanelPage() {
           )}
         </>
       ) : (
-        <div className="admin-card"><p>{username ? "Loading profile..." : "Profile belum dipilih."}</p></div>
+        <div className="admin-card"><p>{username ? "Memuat profil..." : "Profil belum dipilih."}</p></div>
       )}
-      <Link href="/" className="panel-back">← Back to homepage</Link>
+      </main>
 
-      {showPreviewFab && (
+      {previewProfile && (
+        <aside className="panel-preview">
+          <div className="panel-preview-head">Pratinjau halaman</div>
+          <div className="preview-phone">
+            <MinisiteView profile={previewProfile} links={ordered} />
+          </div>
+        </aside>
+      )}
+
+      {!!profile && (
         <button type="button" className="preview-fab" onClick={() => setPreviewOpen(true)}>
           <Eye size={16} /> Preview
         </button>
@@ -363,7 +393,7 @@ export default function UserPanelPage() {
         <div className="preview-backdrop" onClick={() => setPreviewOpen(false)}>
           <aside className="preview-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="preview-drawer-head">
-              <strong>Preview minisite</strong>
+              <strong>Pratinjau halaman</strong>
               <button type="button" className="button-outline" onClick={() => setPreviewOpen(false)} aria-label="Tutup preview"><X size={16} /></button>
             </div>
             <div className="preview-phone">
@@ -396,6 +426,6 @@ export default function UserPanelPage() {
           </form>
         </div>
       )}
-    </main>
+    </div>
   );
 }
