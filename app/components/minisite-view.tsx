@@ -53,7 +53,10 @@ export function MinisiteView({
     (link) => (link.block_type ?? "link") === "link" && link.link_type === "whatsapp" && link.content?.wa_float,
   );
   const listBlocks = waFloat ? visible.filter((link) => link.id !== waFloat.id) : visible;
-  const hasAffiliate = listBlocks.some((link) => (link.block_type ?? "link") === "link" && link.affiliate_disclosure);
+  const hasAffiliate = listBlocks.some((link) => {
+    const t = link.block_type ?? "link";
+    return t === "product" || (t === "link" && link.affiliate_disclosure);
+  });
   const layout = profile.layout === "full" ? "full" : "classic";
   const pageStyle: CSSProperties = isHexColor(profile.accent_color)
     ? ({ ["--bio-accent" as string]: profile.accent_color })

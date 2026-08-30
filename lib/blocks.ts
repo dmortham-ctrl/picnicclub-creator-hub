@@ -2,10 +2,22 @@ import type { BlockType } from "./types";
 
 export const BLOCK_TYPES: { value: BlockType; label: string; hint: string }[] = [
   { value: "link", label: "Link", hint: "Tombol menuju satu URL." },
+  { value: "product", label: "Produk", hint: "Kartu produk otomatis dari link Shopee, TikTok Shop, dll." },
   { value: "social", label: "Social media", hint: "Deretan ikon akun sosial kamu." },
   { value: "text", label: "Teks", hint: "Judul atau paragraf dengan format." },
   { value: "photo", label: "Foto", hint: "Satu gambar, bisa diklik ke link." },
 ];
+
+/** Marketplace label from a product link's host. */
+export function productSourceLabel(source?: string): string {
+  const map: Record<string, string> = {
+    shopee: "Shopee",
+    tokopedia: "Tokopedia",
+    tiktok: "TikTok Shop",
+    lazada: "Lazada",
+  };
+  return source ? map[source] ?? "" : "";
+}
 
 export function blockTypeLabel(value: string): string {
   return BLOCK_TYPES.find((b) => b.value === value)?.label ?? "Link";

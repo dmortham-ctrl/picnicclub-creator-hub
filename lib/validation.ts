@@ -128,6 +128,14 @@ export const photoBlockSchema = z.object({
   caption: z.string().trim().max(120, "Caption maksimal 120 karakter.").default(""),
 });
 
+export const productBlockSchema = z.object({
+  label: z.string().trim().min(1, "Nama produk wajib diisi.").max(120, "Nama produk maksimal 120 karakter."),
+  url: linkUrlSchema,
+  image_url: z.union([linkUrlSchema, z.literal("")]).default(""),
+  price: z.string().trim().max(40, "Harga maksimal 40 karakter.").default(""),
+  price_original: z.string().trim().max(40, "Harga maksimal 40 karakter.").default(""),
+});
+
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type LinkInput = z.infer<typeof linkSchema>;
 

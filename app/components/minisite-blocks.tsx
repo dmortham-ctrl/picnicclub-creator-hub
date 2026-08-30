@@ -17,7 +17,23 @@ function blockText(block: MinisiteLink): string {
       .join(" ");
   }
   if (type === "photo") return `${block.label ?? ""} ${block.content?.caption ?? ""}`;
+  if (type === "product") return `${block.label ?? ""} ${block.content?.price ?? ""} ${block.url ?? ""}`;
   return `${block.label ?? ""} ${block.url ?? ""} ${block.link_type ?? ""}`;
+}
+
+/** Group a flat block list so consecutive product blocks form one grid. */
+function groupBlocks(blocks: MinisiteLink[]): (MinisiteLink | MinisiteLink[])[] {
+  const out: (MinisiteLink | MinisiteLink[])[] = [];
+  for (const block of blocks) {
+    if ((block.block_type ?? "link") === "product") {
+      const last = out[out.length - 1];
+      if (Array.isArray(last)) last.push(block);
+      else out.push([block]);
+    } else {
+      out.push(block);
+    }
+  }
+  return out;
 }
 
 export function MinisiteBlocks({
@@ -55,9 +71,17 @@ export function MinisiteBlocks({
         </div>
       )}
 
-      {filtered.map((block) => (
-        <Block key={block.id} block={block} interactive={interactive} />
-      ))}
+      {groupBlocks(filtered).map((entry) =>
+        Array.isArray(entry) ? (
+          <div className="bio-catalog" key={`cat-${entry[0].id}`}>
+            {entry.map((p) => (
+              <ProductCard key={p.id} block={p} interactive={interactive} />
+            ))}
+          </div>
+        ) : (
+          <Block key={entry.id} block={entry} interactive={interactive} />
+        ),
+      )}
 
       {q && filtered.length === 0 && <p className="bio-search-empty">Tidak ada yang cocok dengan &ldquo;{query}&rdquo;.</p>}
     </>
@@ -136,5 +160,37 @@ function Block({ block, interactive }: { block: MinisiteLink; interactive: boole
     </a>
   ) : (
     <div className="bio-link">{body}</div>
+  );
+}
+
+function ProductCard({ block, interactive }: { block: MinisiteLink; interactive: boolean }) {
+  const price = block.content?.price;
+  const priceOriginal = block.content?.price_original;
+  const inner = (
+    <>
+      <span className="bio-product-photo">
+        {block.image_url ? (
+          // Marketplace CDN images vary wildly; skip next/image optimisation.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={block.image_url} alt="" loading="lazy" referrerPolicy="no-referrer" />
+        ) : (
+          <span className="bio-product-photo--empty" aria-hidden="true">🛍</span>
+        )}
+      </span>
+      <span className="bio-product-name">{block.label}</span>
+      {(price || priceOriginal) && (
+        <span className="bio-product-price">
+          {price && <b>{price}</b>}
+          {priceOriginal && <s>{priceOriginal}</s>}
+        </span>
+      )}
+    </>
+  );
+  return interactive ? (
+    <a className="bio-product" href={`/l/${block.id}`} target="_blank" rel="noreferrer nofollow">
+      {inner}
+    </a>
+  ) : (
+    <div className="bio-product">{inner}</div>
   );
 }

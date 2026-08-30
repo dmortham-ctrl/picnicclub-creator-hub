@@ -64,7 +64,7 @@ create table public.profile_links (
   label text not null default '',
   url text not null default '' check (url = '' or url ~* '^https?://'),
   link_type text not null default 'link',
-  block_type text not null default 'link' check (block_type in ('link', 'text', 'social', 'photo')),
+  block_type text not null default 'link' check (block_type in ('link', 'text', 'social', 'photo', 'product')),
   content jsonb not null default '{}'::jsonb,
   icon_key text not null default 'link',
   image_url text not null default '' check (image_url = '' or image_url ~* '^https?://'),

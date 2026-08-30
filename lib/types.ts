@@ -43,7 +43,7 @@ export type ProfileLink = {
   affiliate_disclosure: boolean;
 };
 
-export type BlockType = "link" | "text" | "social" | "photo";
+export type BlockType = "link" | "text" | "social" | "photo" | "product";
 
 export type SocialItem = { platform: string; url: string };
 
@@ -53,4 +53,10 @@ export type BlockContent = {
   caption?: string;
   /** WhatsApp link shown as a floating button (bottom-right) instead of in the list. */
   wa_float?: boolean;
+  /** Product block: display price, e.g. "Rp 89.000". */
+  price?: string;
+  /** Product block: crossed-out original price. */
+  price_original?: string;
+  /** Product block: marketplace the link came from (shopee/tokopedia/tiktok/lazada/web). */
+  source?: string;
 };

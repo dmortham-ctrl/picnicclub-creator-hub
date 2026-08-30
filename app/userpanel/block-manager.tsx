@@ -4,9 +4,9 @@ import { Dispatch, SetStateAction, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import type { Profile, ProfileLink, SocialItem, BlockType } from "@/lib/types";
-import { firstIssue, linkSchema, textBlockSchema, socialBlockSchema, photoBlockSchema } from "@/lib/validation";
+import { firstIssue, linkSchema, textBlockSchema, socialBlockSchema, photoBlockSchema, productBlockSchema } from "@/lib/validation";
 import { guessLinkType, LINK_TYPES } from "@/lib/link-types";
-import { BLOCK_TYPES, blockTypeLabel, SOCIAL_PLATFORMS, socialPlatformLabel } from "@/lib/blocks";
+import { BLOCK_TYPES, blockTypeLabel, productSourceLabel, SOCIAL_PLATFORMS, socialPlatformLabel } from "@/lib/blocks";
 import { LinkIcon } from "@/app/components/link-icon";
 import { SocialIcon } from "@/app/components/social-icons";
 import { RichTextEditor } from "@/app/components/rich-text-editor";
@@ -20,9 +20,13 @@ type Draft = {
   html: string;
   items: SocialItem[];
   caption: string;
+  image_url: string;
+  price: string;
+  price_original: string;
+  source: string;
 };
 
-const EMPTY: Draft = { label: "", url: "", link_type: "link", affiliate_disclosure: false, wa_float: false, html: "", items: [], caption: "" };
+const EMPTY: Draft = { label: "", url: "", link_type: "link", affiliate_disclosure: false, wa_float: false, html: "", items: [], caption: "", image_url: "", price: "", price_original: "", source: "" };
 
 function draftFrom(block: ProfileLink): Draft {
   return {
@@ -34,6 +38,10 @@ function draftFrom(block: ProfileLink): Draft {
     html: block.content?.html ?? "",
     items: block.content?.items?.length ? block.content.items : [{ platform: "instagram", url: "" }],
     caption: block.content?.caption ?? "",
+    image_url: block.image_url ?? "",
+    price: block.content?.price ?? "",
+    price_original: block.content?.price_original ?? "",
+    source: block.content?.source ?? "",
   };
 }
 
@@ -102,6 +110,39 @@ export function BlockManager({
       const parsed = photoBlockSchema.safeParse({ image_url: image, url: draft.url, caption: draft.caption });
       if (!parsed.success) return { error: firstIssue(parsed.error) };
       return { row: { block_type: "photo", label: "", url: parsed.data.url, link_type: "link", icon_key: "link", image_url: parsed.data.image_url, content: { caption: parsed.data.caption } } };
+    }
+    if (type === "product") {
+      // An uploaded photo overrides the scraped image URL held in the draft.
+      let image = imageCleared ? "" : draft.image_url || existingImage;
+      if (imageFile) {
+        const uploaded = await uploadImage(imageFile);
+        if (uploaded === null) return { error: "" };
+        image = uploaded;
+      }
+      const parsed = productBlockSchema.safeParse({
+        label: draft.label,
+        url: draft.url,
+        image_url: image,
+        price: draft.price,
+        price_original: draft.price_original,
+      });
+      if (!parsed.success) return { error: firstIssue(parsed.error) };
+      return {
+        row: {
+          block_type: "product",
+          label: parsed.data.label,
+          url: parsed.data.url,
+          link_type: "shop",
+          icon_key: "shop",
+          image_url: parsed.data.image_url,
+          affiliate_disclosure: false,
+          content: {
+            price: parsed.data.price,
+            price_original: parsed.data.price_original,
+            source: draft.source || undefined,
+          },
+        },
+      };
     }
     // link
     const parsed = linkSchema.safeParse({
@@ -255,14 +296,14 @@ export function BlockManager({
           return (
             <div className="link-row" key={block.id}>
               <span className="link-row-icon">
-                {type === "link" && block.image_url
-                  ? <Image className="link-thumb" src={block.image_url} alt="" width={48} height={48} />
-                  : type === "photo" && block.image_url
-                  ? <Image className="link-thumb" src={block.image_url} alt="" width={48} height={48} />
+                {(type === "photo" || type === "product") && block.image_url
+                  ? <Image className="link-thumb" src={block.image_url} alt="" width={48} height={48} unoptimized={type === "product"} />
                   : type === "social"
                   ? <SocialIcon platform={block.content?.items?.[0]?.platform ?? "website"} size={20} />
                   : type === "text"
                   ? <span aria-hidden="true">¶</span>
+                  : type === "product"
+                  ? <span aria-hidden="true">🛍</span>
                   : <LinkIcon linkType={block.link_type} />}
               </span>
               <div className="link-row-main">
@@ -272,8 +313,9 @@ export function BlockManager({
                   {!block.is_active && <em className="link-off"> · nonaktif</em>}
                   {type === "link" && block.affiliate_disclosure && <em className="link-aff"> · affiliate</em>}
                   {type === "link" && block.content?.wa_float && <em className="link-aff"> · melayang</em>}
+                  {type === "product" && block.content?.price && <em className="link-aff"> · {block.content.price}</em>}
                 </strong>
-                {(type === "link" || (type === "photo" && block.url)) && <small>{block.url}</small>}
+                {(type === "link" || type === "product" || (type === "photo" && block.url)) && <small>{block.url}</small>}
               </div>
               <div className="link-row-actions">
                 <button className="icon-button" type="button" aria-label="Naikkan" disabled={index === 0} onClick={() => move(block, -1)}>↑</button>
@@ -302,6 +344,7 @@ export function BlockManager({
                 >
                   <span className="block-type-icon">
                     {b.value === "link" && <LinkIcon linkType="link" />}
+                    {b.value === "product" && <span aria-hidden="true">🛍</span>}
                     {b.value === "social" && <SocialIcon platform="instagram" size={20} />}
                     {b.value === "text" && <span aria-hidden="true">¶</span>}
                     {b.value === "photo" && <span aria-hidden="true">🖼</span>}
@@ -336,7 +379,7 @@ export function BlockManager({
 }
 
 function rowSummary(block: ProfileLink, type: BlockType): string {
-  if (type === "link") return ` ${block.label}`;
+  if (type === "link" || type === "product") return ` ${block.label}`;
   if (type === "text") return ` ${block.content?.html?.replace(/<[^>]+>/g, "").slice(0, 40) || "(kosong)"}`;
   if (type === "social") return ` ${(block.content?.items ?? []).map((i) => socialPlatformLabel(i.platform)).join(", ") || "(kosong)"}`;
   if (type === "photo") return ` ${block.content?.caption || "Foto"}`;
@@ -366,6 +409,19 @@ function BlockFields({
         Teks
         <RichTextEditor value={draft.html} onChange={(html) => setDraft((d) => ({ ...d, html }))} />
       </label>
+    );
+  }
+
+  if (type === "product") {
+    return (
+      <ProductFields
+        draft={draft}
+        setDraft={setDraft}
+        image={image}
+        setImage={setImage}
+        existingImage={existingImage}
+        onClearImage={onClearImage}
+      />
     );
   }
 
@@ -446,6 +502,105 @@ function BlockFields({
         </fieldset>
       )}
       <label className="checkbox-label"><input type="checkbox" checked={draft.affiliate_disclosure} onChange={(e) => setDraft((d) => ({ ...d, affiliate_disclosure: e.target.checked }))} /> Tautan affiliasi / berbayar</label>
+    </>
+  );
+}
+
+function ProductFields({
+  draft,
+  setDraft,
+  image,
+  setImage,
+  existingImage,
+  onClearImage,
+}: {
+  draft: Draft;
+  setDraft: Dispatch<SetStateAction<Draft>>;
+  image: File | null;
+  setImage: (f: File | null) => void;
+  existingImage: string;
+  onClearImage: () => void;
+}) {
+  const [fetching, setFetching] = useState(false);
+  const [fetchNote, setFetchNote] = useState("");
+  const preview = image ? URL.createObjectURL(image) : draft.image_url || existingImage;
+
+  async function grab() {
+    const url = draft.url.trim();
+    if (!/^https?:\/\//i.test(url)) { setFetchNote("Tempel link produk dulu (harus diawali http/https)."); return; }
+    setFetching(true);
+    setFetchNote("");
+    try {
+      const res = await fetch("/api/product-preview", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setFetchNote(data.error ?? "Gagal mengambil info produk."); return; }
+      setDraft((d) => ({
+        ...d,
+        url: data.url || d.url,
+        label: d.label || data.title || "",
+        price: d.price || data.price || "",
+        image_url: data.image || d.image_url,
+        source: data.source || d.source,
+      }));
+      setImage(null);
+      const missing = [!data.title && "nama", !data.image && "foto", !data.price && "harga"].filter(Boolean);
+      setFetchNote(
+        missing.length
+          ? `Sebagian info tidak terbaca (${missing.join(", ")}). Lengkapi manual di bawah.`
+          : "Info produk berhasil diambil. Cek lalu simpan.",
+      );
+    } catch {
+      setFetchNote("Gagal terhubung. Coba lagi atau isi manual.");
+    } finally {
+      setFetching(false);
+    }
+  }
+
+  return (
+    <>
+      <label>
+        Link produk
+        <div className="product-url">
+          <input
+            required
+            type="url"
+            value={draft.url}
+            placeholder="Tempel link Shopee / TikTok Shop / Tokopedia / Lazada"
+            onChange={(e) => setDraft((d) => ({ ...d, url: e.target.value }))}
+          />
+          <button type="button" className="button-dark" onClick={grab} disabled={fetching}>
+            {fetching ? "Mengambil…" : "Ambil info"}
+          </button>
+        </div>
+      </label>
+      {fetchNote && <p className="product-note">{fetchNote}</p>}
+
+      <div className="link-image-field">
+        {preview ? (
+          <Image className="link-thumb" src={preview} alt="" width={56} height={56} unoptimized />
+        ) : (
+          <span className="link-thumb link-thumb--empty" aria-hidden="true" />
+        )}
+        <label className="link-image-pick">
+          Foto produk (opsional — ganti manual)
+          <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setImage(e.target.files?.[0] ?? null)} />
+        </label>
+        {preview && (
+          <button type="button" className="button-outline" onClick={() => { setImage(null); setDraft((d) => ({ ...d, image_url: "" })); onClearImage(); }}>
+            Hapus foto
+          </button>
+        )}
+      </div>
+
+      <label>Nama produk<input required maxLength={120} value={draft.label} onChange={(e) => setDraft((d) => ({ ...d, label: e.target.value }))} placeholder="Serum Glow Vitamin C 30ml" /></label>
+      <div className="admin-row">
+        <label>Harga<input maxLength={40} value={draft.price} onChange={(e) => setDraft((d) => ({ ...d, price: e.target.value }))} placeholder="Rp 89.000" /></label>
+        <label>Harga coret (opsional)<input maxLength={40} value={draft.price_original} onChange={(e) => setDraft((d) => ({ ...d, price_original: e.target.value }))} placeholder="Rp 150.000" /></label>
+      </div>
     </>
   );
 }
