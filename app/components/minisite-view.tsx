@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MinisiteBlocks } from "@/app/components/minisite-blocks";
+import { SocialIcon } from "@/app/components/social-icons";
 import { isHexColor } from "@/lib/themes";
 import type { BlockContent, BlockType } from "@/lib/types";
 
@@ -45,7 +46,14 @@ export function MinisiteView({
   interactive?: boolean;
 }) {
   const visible = links.filter((link) => link.is_active !== false);
-  const hasAffiliate = visible.some((link) => (link.block_type ?? "link") === "link" && link.affiliate_disclosure);
+  // A WhatsApp link marked "float" is lifted out of the list into a fixed
+  // bottom-right button (rendered outside .bio-card so the card's entrance
+  // animation transform doesn't trap position:fixed).
+  const waFloat = visible.find(
+    (link) => (link.block_type ?? "link") === "link" && link.link_type === "whatsapp" && link.content?.wa_float,
+  );
+  const listBlocks = waFloat ? visible.filter((link) => link.id !== waFloat.id) : visible;
+  const hasAffiliate = listBlocks.some((link) => (link.block_type ?? "link") === "link" && link.affiliate_disclosure);
   const layout = profile.layout === "full" ? "full" : "classic";
   const pageStyle: CSSProperties = isHexColor(profile.accent_color)
     ? ({ ["--bio-accent" as string]: profile.accent_color })
@@ -100,7 +108,7 @@ export function MinisiteView({
         )}
         {profile.bio && <p className="bio-copy">{profile.bio}</p>}
 
-        <MinisiteBlocks blocks={visible} interactive={interactive} />
+        <MinisiteBlocks blocks={listBlocks} interactive={interactive} />
 
         {hasAffiliate && (
           <p className="bio-disclosure">
@@ -117,6 +125,23 @@ export function MinisiteView({
         )}
         <div className="bio-footer">Part of the Picnic Club community ↗</div>
       </div>
+
+      {waFloat &&
+        (interactive ? (
+          <a
+            className="bio-wa-float"
+            href={`/l/${waFloat.id}`}
+            target="_blank"
+            rel="noreferrer nofollow"
+            aria-label={waFloat.label || "Chat WhatsApp"}
+          >
+            <SocialIcon platform="whatsapp" size={26} />
+          </a>
+        ) : (
+          <span className="bio-wa-float bio-wa-float--preview" aria-hidden="true">
+            <SocialIcon platform="whatsapp" size={20} />
+          </span>
+        ))}
     </div>
   );
 }
