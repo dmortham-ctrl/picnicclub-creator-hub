@@ -24,7 +24,7 @@ export function LegalPage({
         <hr />
         <p className="legal-contact">
           Pertanyaan soal halaman ini? Hubungi{" "}
-          <a href="mailto:hello@picnicclub.id">hello@picnicclub.id</a> atau lihat{" "}
+          <a href="mailto:picnicclubcircle@gmail.com">picnicclubcircle@gmail.com</a> atau lihat{" "}
           <Link href="/report">halaman pelaporan</Link>.
         </p>
         <Link href="/" className="panel-back">← Kembali ke beranda</Link>

@@ -52,7 +52,7 @@ export default function PrivacyPage() {
       <h2>Hak Anda</h2>
       <p>
         Creator dapat meminta koreksi atau penghapusan profil dan datanya dengan menghubungi{" "}
-        <a href="mailto:hello@picnicclub.id">hello@picnicclub.id</a>. Kebijakan retensi dan
+        <a href="mailto:picnicclubcircle@gmail.com">picnicclubcircle@gmail.com</a>. Kebijakan retensi dan
         penghapusan detail akan ditetapkan sebelum peluncuran resmi.
       </p>
 

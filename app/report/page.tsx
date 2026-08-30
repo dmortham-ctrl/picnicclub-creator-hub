@@ -24,7 +24,7 @@ export default function ReportPage() {
 
       <h2>Cara melapor</h2>
       <p>
-        Kirim email ke <a href="mailto:hello@picnicclub.id">hello@picnicclub.id</a> dengan subjek
+        Kirim email ke <a href="mailto:picnicclubcircle@gmail.com">picnicclubcircle@gmail.com</a> dengan subjek
         &ldquo;Laporan&rdquo;, sertakan:
       </p>
       <ul>

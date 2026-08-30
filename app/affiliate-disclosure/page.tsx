@@ -35,7 +35,7 @@ export default function AffiliateDisclosurePage() {
 
       <h2>Pertanyaan</h2>
       <p>
-        Hubungi <a href="mailto:hello@picnicclub.id">hello@picnicclub.id</a> untuk pertanyaan
+        Hubungi <a href="mailto:picnicclubcircle@gmail.com">picnicclubcircle@gmail.com</a> untuk pertanyaan
         mengenai kebijakan ini.
       </p>
     </LegalPage>
