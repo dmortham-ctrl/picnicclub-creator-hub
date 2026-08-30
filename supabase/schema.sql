@@ -315,7 +315,7 @@ grant execute on function public.claim_profile(text) to authenticated;
 
 create table public.tool_generations (
   id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
+  owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   tool text not null check (tool in ('hook', 'script')),
   input jsonb not null default '{}'::jsonb,
   input_hash text not null,
@@ -342,7 +342,7 @@ create policy "authenticated updates cache" on public.tool_cache for update to a
 
 create table public.tool_saves (
   id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
+  owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   tool text not null check (tool in ('hook', 'script')),
   content text not null,
   meta jsonb not null default '{}'::jsonb,
