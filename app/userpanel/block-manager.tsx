@@ -5,7 +5,7 @@ import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import type { Profile, ProfileLink, SocialItem, BlockType } from "@/lib/types";
 import { firstIssue, linkSchema, textBlockSchema, socialBlockSchema, photoBlockSchema, productBlockSchema } from "@/lib/validation";
-import { guessLinkType, LINK_TYPES } from "@/lib/link-types";
+import { guessLinkType, normalizeWhatsappUrl, LINK_TYPES } from "@/lib/link-types";
 import { BLOCK_TYPES, blockTypeLabel, productSourceLabel, SOCIAL_PLATFORMS, socialPlatformLabel } from "@/lib/blocks";
 import { LinkIcon } from "@/app/components/link-icon";
 import { SocialIcon } from "@/app/components/social-icons";
@@ -96,7 +96,10 @@ export function BlockManager({
       return { row: { block_type: "text", label: "", url: "", link_type: "link", icon_key: "link", image_url: "", content: { html: parsed.data.html } } };
     }
     if (type === "social") {
-      const parsed = socialBlockSchema.safeParse({ items: draft.items.filter((i) => i.url.trim()) });
+      const items = draft.items
+        .filter((i) => i.url.trim())
+        .map((i) => (i.platform === "whatsapp" ? { ...i, url: normalizeWhatsappUrl(i.url) } : i));
+      const parsed = socialBlockSchema.safeParse({ items });
       if (!parsed.success) return { error: firstIssue(parsed.error) };
       return { row: { block_type: "social", label: "", url: "", link_type: "link", icon_key: "link", image_url: "", content: { items: parsed.data.items } } };
     }
@@ -147,7 +150,7 @@ export function BlockManager({
     // link
     const parsed = linkSchema.safeParse({
       label: draft.label,
-      url: draft.url,
+      url: draft.link_type === "whatsapp" ? normalizeWhatsappUrl(draft.url) : draft.url,
       link_type: draft.link_type,
       affiliate_disclosure: draft.affiliate_disclosure,
     });
@@ -487,7 +490,14 @@ function BlockFields({
           </select>
         </label>
       </div>
-      <label>URL<input required type="url" value={draft.url} onChange={(e) => { const url = e.target.value; setDraft((d) => ({ ...d, url, link_type: d.link_type === "link" ? guessLinkType(url) : d.link_type })); }} placeholder="https://..." /></label>
+      {draft.link_type === "whatsapp" ? (
+        <label>Nomor WhatsApp
+          <input required type="tel" value={draft.url} onChange={(e) => setDraft((d) => ({ ...d, url: e.target.value }))} placeholder="0857xxxxxxxx atau 62857xxxxxxxx" />
+          <small style={{ color: "var(--muted)" }}>Boleh nomor lokal (08…) atau internasional (62…). Otomatis jadi link wa.me yang benar.</small>
+        </label>
+      ) : (
+        <label>URL<input required type="url" value={draft.url} onChange={(e) => { const url = e.target.value; setDraft((d) => ({ ...d, url, link_type: d.link_type === "link" ? guessLinkType(url) : d.link_type })); }} placeholder="https://..." /></label>
+      )}
       {draft.link_type === "whatsapp" && (
         <fieldset className="wa-display">
           <legend>Tampilan tombol WhatsApp</legend>
