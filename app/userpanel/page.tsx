@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
 import { Profile, ProfileLink } from "@/lib/types";
-import { firstIssue, profileSettingsSchema } from "@/lib/validation";
+import { firstIssue, profileSettingsSchema, usernameSchema } from "@/lib/validation";
 import { BrandLogo } from "@/app/components/brand-logo";
 import { MinisiteView } from "@/app/components/minisite-view";
 import { BlockManager } from "@/app/userpanel/block-manager";
@@ -68,6 +68,8 @@ export default function UserPanelPage() {
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [usernameDraft, setUsernameDraft] = useState("");
+  const [savingUsername, setSavingUsername] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pubMenuOpen, setPubMenuOpen] = useState(false);
   const [section, setSection] = useState<SectionId>("links");
@@ -112,6 +114,7 @@ export default function UserPanelPage() {
       avatar_url: profile.avatar_url,
       theme: profile.theme ?? "default",
     });
+    setUsernameDraft(profile.username);
   }, [profile]);
 
   useEffect(() => {
@@ -164,6 +167,29 @@ export default function UserPanelPage() {
     setSavingProfile(false);
     setNotice("Profil diperbarui.");
     revalidateIfPublished(profile);
+  }
+
+  async function saveUsername(event: React.FormEvent) {
+    event.preventDefault();
+    if (!supabase || !profile) return;
+    setError("");
+    setNotice("");
+    const parsed = usernameSchema.safeParse(usernameDraft);
+    if (!parsed.success) return setError(firstIssue(parsed.error));
+    if (parsed.data === profile.username) return setNotice("Username tidak berubah.");
+
+    setSavingUsername(true);
+    const { error: updateError } = await supabase.from("profiles").update({ username: parsed.data }).eq("id", profile.id);
+    if (updateError) {
+      setSavingUsername(false);
+      return setError(
+        updateError.code === "23505" || /duplicate|unique/i.test(updateError.message)
+          ? "Username ini sudah dipakai creator lain."
+          : updateError.message,
+      );
+    }
+    // Hard-reload so the URL param, preview and public link all pick up the new username.
+    window.location.href = `/userpanel?username=${encodeURIComponent(parsed.data)}`;
   }
 
   async function uploadAvatar(event: React.FormEvent) {
@@ -342,6 +368,32 @@ export default function UserPanelPage() {
                 <button className="button-dark" type="submit" disabled={savingProfile}>{savingProfile ? "Menyimpan..." : "Simpan profil"}</button>
               </div>
             </form>
+
+            <form className="admin-card admin-form profile-editor" onSubmit={saveUsername}>
+              <div className="profile-editor-head">
+                <h3>Username minisite</h3>
+                <p>Ini menentukan link minisite kamu. Kalau diubah, link lama <strong>tidak akan berfungsi lagi</strong> — pastikan update di bio TikTok / Instagram kamu.</p>
+              </div>
+              <label>Username
+                <span className="username-field">
+                  <span>picnicclub.id/@</span>
+                  <input
+                    required
+                    minLength={3}
+                    maxLength={30}
+                    value={usernameDraft}
+                    onChange={(e) => setUsernameDraft(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ""))}
+                    placeholder="nama.kamu"
+                  />
+                </span>
+              </label>
+              <div className="form-actions">
+                <button className="button-dark" type="submit" disabled={savingUsername || usernameDraft === profile.username}>
+                  {savingUsername ? "Menyimpan..." : "Simpan username"}
+                </button>
+              </div>
+            </form>
+
             <AccountPanel onNotice={setNotice} onError={setError} />
           </>
           )}
