@@ -149,7 +149,7 @@ export function ToolsPanel({ tool }: { tool: ToolKey }) {
           <p>{meta.desc}</p>
         </div>
 
-        <label>Nama produk<input required maxLength={120} value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="mis. Serum Glow Vitamin C" /></label>
+        <label>Nama produk dan deskripsinya<input required maxLength={300} value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="mis. Serum Vitamin C 15ml, mencerahkan & memudarkan noda hitam, sudah BPOM, cocok kulit sensitif" /></label>
 
         <label>Jenis produk<input required maxLength={80} value={productType} onChange={(e) => setProductType(e.target.value)} placeholder="mis. skincare" /></label>
         <div className="tools-chips">

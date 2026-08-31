@@ -27,7 +27,7 @@ const MODEL = "gemini-flash-lite-latest";
 
 const bodySchema = z.object({
   tool: z.enum(TOOL_KEYS as [ToolKey, ...ToolKey[]]),
-  product_name: z.string().trim().min(2).max(120),
+  product_name: z.string().trim().min(2).max(300),
   product_type: z.string().trim().min(2).max(80),
   platform: z.enum(TOOL_PLATFORM_VALUES),
   count: z.coerce.number().int().min(1).max(TOOL_COUNT_MAX),
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
 
   // 3. Generate.
   const noun = TOOL_META[tool].noun;
-  const prompt = `Buat tepat ${count} ${noun}.\nProduk: ${product_name}\nJenis produk: ${product_type}\nPlatform: ${toolPlatformLabel(platform)}`;
+  const prompt = `Buat tepat ${count} ${noun}.\nProduk & deskripsi: ${product_name}\nJenis produk: ${product_type}\nPlatform: ${toolPlatformLabel(platform)}`;
   let output: unknown;
   try {
     const { object } = await generateObject({
