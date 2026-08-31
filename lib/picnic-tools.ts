@@ -1,8 +1,8 @@
 export const TOOL_DAILY_LIMIT = 50;
 export const TOOL_COUNT_MAX = 10;
 
-export type ToolKey = "hook" | "script" | "caption" | "live" | "calendar";
-export const TOOL_KEYS: ToolKey[] = ["hook", "script", "caption", "live", "calendar"];
+export type ToolKey = "hook" | "script" | "caption" | "live" | "calendar" | "analysis";
+export const TOOL_KEYS: ToolKey[] = ["hook", "script", "caption", "live", "calendar", "analysis"];
 
 /** Per-tool UI + generation config. `hasCount` shows the "jumlah" selector. */
 export const TOOL_META: Record<
@@ -14,6 +14,7 @@ export const TOOL_META: Record<
   caption: { label: "Ide Caption", noun: "caption", hasCount: true, defaultCount: 5, desc: "Caption siap tempel di bawah video, sudah lengkap dengan hashtag." },
   live: { label: "Skrip Live Selling", noun: "bagian", hasCount: false, defaultCount: 1, desc: "Naskah live yang dirancang untuk diulang-ulang: pembuka sekali, inti putaran jualan + selingan yang dipakai berulang, penutup sekali." },
   calendar: { label: "Kalender Konten", noun: "hari", hasCount: false, defaultCount: 7, desc: "Rencana konten 7 hari dari satu produk — tiap hari angle & format berbeda." },
+  analysis: { label: "Analisa Produk", noun: "bagian", hasCount: false, defaultCount: 1, desc: "Brief riset produk: target market, pain point, selling point, angle, keberatan, diksi, positioning harga. Kerjakan ini dulu sebelum bikin konten." },
 };
 
 // Kept for backwards compatibility with existing imports.
@@ -118,6 +119,22 @@ Aturan:
 - Progresif: hari awal kenalan & tarik perhatian, tengah bangun kepercayaan & bukti, akhir dorongan beli.
 - Bahasa Indonesia santai. Setiap "idea" langsung actionable, bukan teori.
 - Sesuaikan dengan platform yang disebut.
+
+${BANNED_URGENCY_RULE}`;
+
+export const ANALYSIS_SYSTEM = `Kamu strategist marketing untuk creator affiliate & UGC di Indonesia.
+Tugas: bikin brief analisa satu produk supaya creator paham cara menjualnya sebelum bikin konten. Abaikan angka jumlah yang diminta — keluarkan tepat 7 bagian berurutan.
+
+Keluarkan array 7 objek dengan "title" dan "body":
+1. "Target Market" — 2-3 tipe pembeli paling potensial. Untuk tiap tipe: siapa (umur/peran/situasi), kebiasaannya, dan alasan spesifik kenapa butuh produk ini. Tulis sebagai poin-poin dengan tanda "-".
+2. "Pain Point Utama" — 3 masalah yang produk ini jawab, ditulis dari sudut pandang & bahasa si pembeli (bukan bahasa jualan). Poin dengan tanda "-".
+3. "Selling Point" — 3 keunggulan yang wajib ditonjolkan di konten. Untuk tiap poin, sebutkan juga cara ngomonginnya biar terasa nyata (contoh kalimat pendek). Poin dengan tanda "-".
+4. "Angle Konten yang Cocok" — 4-5 sudut cerita paling nendang untuk produk ini (mis. before-after, unpopular opinion, hemat jangka panjang, POV masalah, demo cepat). Tiap angle 1 baris + 1 kalimat kenapa cocok. Poin dengan tanda "-".
+5. "Keberatan Umum + Cara Jawab" — 4 keberatan yang paling sering muncul ("mahal", "udah punya", "nanti aja", "ragu kualitas/cocok nggak") dan cara menjawabnya dengan meyakinkan tapi jujur. Format: "Keberatan: ... -> Jawaban: ...".
+6. "Kata Kunci & Diksi" — istilah, frasa, dan gaya bahasa yang dipakai target market saat mencari atau membicarakan produk ini. Berguna untuk caption, hashtag, dan judul. Poin dengan tanda "-".
+7. "Positioning Harga" — apakah produk ini sebaiknya diposisikan sebagai murah/hemat, value for money, atau premium, dan cara membingkainya di konten. 2-4 kalimat. Jangan menyinggung stok/kelangkaan.
+
+Bahasa Indonesia santai tapi jelas. Setiap "body" langsung actionable, bukan teori umum. Sesuaikan dengan platform yang disebut.
 
 ${BANNED_URGENCY_RULE}`;
 

@@ -18,6 +18,7 @@ type ResultItem = { key: string; badge?: string; text: string; copyText: string;
 type ScriptOut = { angle: string; script: string };
 type LiveOut = { title: string; script: string };
 type CalendarOut = { day: number; format: string; angle: string; idea: string };
+type AnalysisOut = { title: string; body: string };
 
 function normalize(tool: ToolKey, output: unknown): ResultItem[] {
   if (tool === "hook" || tool === "caption") {
@@ -39,6 +40,11 @@ function normalize(tool: ToolKey, output: unknown): ResultItem[] {
       const text = `${d.angle}\n${d.idea}`;
       return { key: `${i}`, badge, text, copyText: `${badge}\n${text}`, saveText: text, saveAngle: badge };
     });
+  }
+  if (tool === "analysis") {
+    return (output as AnalysisOut[]).map((s, i) => ({
+      key: `${i}`, badge: s.title, text: s.body, copyText: `${s.title}\n${s.body}`, saveText: s.body, saveAngle: s.title,
+    }));
   }
   return [];
 }
@@ -139,6 +145,8 @@ export function ToolsPanel({ tool }: { tool: ToolKey }) {
     ? `Generate ${count} ${meta.noun}`
     : tool === "calendar"
     ? "Buat kalender 7 hari"
+    : tool === "analysis"
+    ? "Analisa produk ini"
     : "Buat skrip live";
 
   return (

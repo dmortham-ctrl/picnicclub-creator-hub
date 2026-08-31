@@ -11,7 +11,7 @@ import { MinisiteView } from "@/app/components/minisite-view";
 import { BlockManager } from "@/app/userpanel/block-manager";
 import { AppearancePanel } from "@/app/userpanel/appearance-panel";
 import { AccountPanel } from "@/app/userpanel/account-panel";
-import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOut, Share2, EyeOff, Globe, Link2 as LinkIconLucide, Sparkles, FileText, ShieldAlert, MessageSquareText, Radio, CalendarDays } from "lucide-react";
+import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOut, Share2, EyeOff, Globe, Link2 as LinkIconLucide, Sparkles, FileText, ShieldAlert, MessageSquareText, Radio, CalendarDays, Target } from "lucide-react";
 import { ToolsPanel } from "@/app/userpanel/tools-panel";
 import { SupportPanel } from "@/app/userpanel/support-panel";
 
@@ -20,6 +20,7 @@ const SECTIONS = [
   { id: "links", label: "Minisite Kamu", group: "" },
   { id: "theme", label: "Tema minisite", group: "" },
   { id: "analytics", label: "Analitik", group: "" },
+  { id: "analysis", label: "Analisa Produk", group: "Picnic AI Tools" },
   { id: "hook", label: "Ide Hook", group: "Picnic AI Tools" },
   { id: "script", label: "Ide Script", group: "Picnic AI Tools" },
   { id: "caption", label: "Ide Caption", group: "Picnic AI Tools" },
@@ -34,6 +35,7 @@ const SECTION_ICON: Record<SectionId, ReactNode> = {
   links: <LayoutGrid size={17} />,
   theme: <Palette size={17} />,
   analytics: <BarChart3 size={17} />,
+  analysis: <Target size={17} />,
   hook: <Sparkles size={17} />,
   script: <FileText size={17} />,
   caption: <MessageSquareText size={17} />,
@@ -209,7 +211,7 @@ export default function UserPanelPage() {
     layout: profile.layout ?? "classic",
   };
   const isToolsSection =
-    section === "hook" || section === "script" || section === "caption" || section === "live" || section === "calendar" || section === "banding";
+    section === "analysis" || section === "hook" || section === "script" || section === "caption" || section === "live" || section === "calendar" || section === "banding";
   return (
     <>
     <div className={`panel-shell ${isToolsSection ? "no-preview" : ""}`}>
@@ -404,6 +406,7 @@ export default function UserPanelPage() {
             />
           )}
 
+          {section === "analysis" && <ToolsPanel tool="analysis" />}
           {section === "hook" && <ToolsPanel tool="hook" />}
           {section === "script" && <ToolsPanel tool="script" />}
           {section === "caption" && <ToolsPanel tool="caption" />}

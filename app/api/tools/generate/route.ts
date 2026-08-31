@@ -18,6 +18,7 @@ import {
   CAPTION_SYSTEM,
   LIVE_SYSTEM,
   CALENDAR_SYSTEM,
+  ANALYSIS_SYSTEM,
   type ToolKey,
 } from "@/lib/picnic-tools";
 
@@ -51,6 +52,7 @@ const SYSTEM: Record<ToolKey, string> = {
   caption: CAPTION_SYSTEM,
   live: LIVE_SYSTEM,
   calendar: CALENDAR_SYSTEM,
+  analysis: ANALYSIS_SYSTEM,
 };
 
 function schemaFor(tool: ToolKey, count: number) {
@@ -82,6 +84,12 @@ function schemaFor(tool: ToolKey, count: number) {
               idea: z.string().min(10).max(400).refine(noStock, stockMsg),
             }),
           )
+          .length(7),
+      });
+    case "analysis":
+      return z.object({
+        sections: z
+          .array(z.object({ title: z.string().max(60), body: z.string().min(20).max(1600).refine(noStock, stockMsg) }))
           .length(7),
       });
   }
