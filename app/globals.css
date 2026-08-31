@@ -213,6 +213,23 @@ body, body * { font-family: Poppins, sans-serif !important; }
 .cms-empty { margin-top: 14px; }.cms-empty h2 { font-size: 40px; margin: 16px 0; }
 .form-actions { display: flex; gap: 10px; }.brand-admin-row { display: grid; grid-template-columns: 54px 1fr auto auto; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }.brand-admin-row img { width: 54px; height: 54px; object-fit: contain; }.brand-admin-row small { display: block; color: var(--muted); margin-top: 4px; }
 .creator-toolbar { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 10px; }.creator-toolbar input, .creator-toolbar select { width: 100%; padding: 13px; border: 1px solid var(--line); background: white; }
+.cms-filter { display: flex; gap: 8px; margin: 14px 0 4px; }
+.cms-filter button { border: 1px solid var(--line); background: white; border-radius: 999px; padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.cms-filter button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.join-table { margin-top: 18px; border-top: 1px solid var(--line); }
+.join-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.join-row-main { min-width: 0; }
+.join-row-main strong { font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.join-row-main small { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; line-height: 1.6; }
+.join-row-main small a { color: var(--accent-text); text-decoration: underline; }
+.join-note { font-size: 13px; margin: 6px 0 0; color: #45524c; }
+.join-tag { font: 9px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .06em; background: var(--line); color: var(--muted); padding: 3px 8px; border-radius: 999px; }
+.join-status { font: 9px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .06em; padding: 3px 8px; border-radius: 999px; }
+.join-status--new { background: #dce9c6; color: #3f5121; }
+.join-status--contacted { background: #dbe7f2; color: #2b5170; }
+.join-status--approved { background: #cfe8b8; color: #2f5121; }
+.join-status--rejected { background: #f7ddd6; color: #a5341f; }
+.join-row select { flex-shrink: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 5px; background: #fff; font-size: 12px; }
 .claim-table { margin-top: 22px; border-top: 1px solid var(--line); }
 .claim-row { display: grid; grid-template-columns: 1.3fr 120px 1fr; gap: 16px; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--line); }
 .claim-row .status-pill { margin: 0; justify-self: start; }

@@ -9,9 +9,6 @@ export const metadata = {
   alternates: { canonical: "/join-shopee" },
 };
 
-const FORM_SRC =
-  "https://docs.google.com/forms/d/e/1FAIpQLSff-E4zOONwC5OUtJmIV9sj0QQASOlgi0UmSNFt5FJVC8NRBA/viewform";
-
 export default function JoinShopeePage() {
   return (
     <main className="legal-page">
@@ -20,14 +17,14 @@ export default function JoinShopeePage() {
         <div className="eyebrow">Picnic Club</div>
         <h1>Join Agency Shopee</h1>
         <p className="hero-copy">
-          Isi formulir di bawah untuk gabung agency Shopee Picnic Club. Setelah selesai, kamu akan
+          Isi formulir di bawah untuk gabung agency Shopee Picnic Club. Setelah kirim, kamu akan
           diminta konfirmasi ke admin lewat WhatsApp supaya pendaftaran cepat diproses.
         </p>
 
         <JoinForm
-          formSrc={FORM_SRC}
+          program="shopee"
           adminWa="6289606687080"
-          formTitle="Formulir Join Agency Shopee"
+          socialLabel="Username Shopee Affiliate"
           waMessage={
             "Halo admin Picnic Club, saya baru saja mengisi formulir Join Agency Shopee.\nMohon dikonfirmasi ya. Terima kasih."
           }

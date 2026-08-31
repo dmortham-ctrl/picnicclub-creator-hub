@@ -396,6 +396,32 @@ create policy "owner or admin deletes avatars"
   using (bucket_id = 'Avatar' and (owner = auth.uid() or public.is_admin()));
 
 -- ---------------------------------------------------------------------------
+-- join_requests: native "Join Agency" signup form (/join, /join-shopee)
+-- ---------------------------------------------------------------------------
+
+create table public.join_requests (
+  id uuid primary key default gen_random_uuid(),
+  program text not null check (program in ('tiktok', 'shopee')),
+  name text not null,
+  whatsapp text not null,
+  email text not null default '',
+  social_username text not null default '',
+  experience text not null default '',
+  note text not null default '',
+  status text not null default 'new' check (status in ('new', 'contacted', 'approved', 'rejected')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.join_requests enable row level security;
+create policy "anyone submits a join request"
+  on public.join_requests for insert to anon, authenticated with check (true);
+create policy "admins read join requests"
+  on public.join_requests for select to authenticated using (public.is_admin());
+create policy "admins update join requests"
+  on public.join_requests for update to authenticated using (public.is_admin()) with check (public.is_admin());
+create index join_requests_program_time on public.join_requests (program, created_at desc);
+
+-- ---------------------------------------------------------------------------
 -- First admin: after creating your auth user, run
 --   insert into public.admins (user_id, note)
 --   select id, 'founder' from auth.users where email = 'you@example.com';

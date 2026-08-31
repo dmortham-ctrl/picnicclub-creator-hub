@@ -9,9 +9,6 @@ export const metadata = {
   alternates: { canonical: "/join" },
 };
 
-const FORM_SRC =
-  "https://docs.google.com/forms/d/e/1FAIpQLSftrMydNstjbpli7liWgbW3Zn5tzDOSDT3anlFC6R04woB-8Q/viewform";
-
 export default function JoinPage() {
   return (
     <main className="legal-page">
@@ -20,14 +17,14 @@ export default function JoinPage() {
         <div className="eyebrow">Picnic Club</div>
         <h1>Join Agency TikTok</h1>
         <p className="hero-copy">
-          Isi formulir di bawah untuk gabung agency TikTok Picnic Club. Setelah selesai, kamu akan
+          Isi formulir di bawah untuk gabung agency TikTok Picnic Club. Setelah kirim, kamu akan
           diminta konfirmasi ke admin lewat WhatsApp supaya pendaftaran cepat diproses.
         </p>
 
         <JoinForm
-          formSrc={FORM_SRC}
+          program="tiktok"
           adminWa="6287888527772"
-          formTitle="Formulir Join Agency TikTok"
+          socialLabel="Username TikTok"
           waMessage={
             "Halo admin Picnic Club, saya baru saja mengisi formulir Join Agency TikTok.\nMohon dikonfirmasi ya. Terima kasih."
           }
