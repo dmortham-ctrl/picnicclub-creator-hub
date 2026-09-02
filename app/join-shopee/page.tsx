@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { SiteNav } from "../components/site-nav";
-import { JoinForm } from "../join/join-form";
+import { JoinEmbed } from "../join/join-embed";
+
+const FORM_SRC =
+  "https://docs.google.com/forms/d/e/1FAIpQLSff-E4zOONwC5OUtJmIV9sj0QQASOlgi0UmSNFt5FJVC8NRBA/viewform?embedded=true";
 
 export const metadata = {
   title: "Join Agency Shopee | Picnic Club",
@@ -21,10 +24,10 @@ export default function JoinShopeePage() {
           diminta konfirmasi ke admin lewat WhatsApp supaya pendaftaran cepat diproses.
         </p>
 
-        <JoinForm
-          program="shopee"
+        <JoinEmbed
+          formSrc={FORM_SRC}
           adminWa="6289606687080"
-          socialLabel="Username Shopee Affiliate"
+          title="Formulir Join Agency Shopee"
           waMessage={
             "Halo admin Picnic Club, saya baru saja mengisi formulir Join Agency Shopee.\nMohon dikonfirmasi ya. Terima kasih."
           }
