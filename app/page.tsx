@@ -59,7 +59,7 @@ export default async function Home() {
         const ringSize = isOuter ? outerCount : heroCreators.length - outerCount;
         const ringIndex = isOuter ? index : index - outerCount;
         const angle = (360 / ringSize) * ringIndex + (isOuter ? 0 : 180 / ringSize);
-        return <Link className={`avatar ${isOuter ? "avatar-outer" : "avatar-inner"}`} style={{ "--angle": `${angle}deg` } as CSSProperties} href={creator.href} key={index} aria-label="View creator profile"><Image src={creator.avatar} alt="" width={58} height={58} loading={index < 10 ? "eager" : "lazy"} /></Link>;
+        return <Link className={`avatar ${isOuter ? "avatar-outer" : "avatar-inner"}`} style={{ "--angle": `${angle}deg` } as CSSProperties} href={creator.href} key={index} aria-label="View creator profile"><Image src={creator.avatar} alt="" width={58} height={58} loading={index < 10 ? "eager" : "lazy"} unoptimized /></Link>;
       })}<div className="orbit-center">Top Creator<br />Picnic</div></div>
     </section>
     <div className="band">{content.marquee_text}</div>
