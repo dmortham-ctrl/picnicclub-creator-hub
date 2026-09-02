@@ -42,15 +42,10 @@ export default async function Home() {
 
   // Hero orbit — "All Star" creators, ordered by featured_order. Ring split and the
   // angle of every avatar are derived from the count, so it stays even at any size.
-  // Avatars are served as 128px Supabase Storage transforms (not /_next/image —
-  // Vercel's optimizer quota is exhausted and 402s any uncached transform).
-  const orbitThumb = (url: string) =>
-    url.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/") +
-    (url.includes("/storage/v1/object/public/") ? "?width=128&height=128&resize=cover&quality=70" : "");
   const heroCreators = profiles
     .filter((profile) => profile.level === "All Star" && profile.avatar_url)
     .slice(0, 30)
-    .map((profile) => ({ avatar: orbitThumb(profile.avatar_url), href: `/@${profile.username}` }));
+    .map((profile) => ({ avatar: profile.avatar_url, href: `/@${profile.username}` }));
   const outerCount = Math.ceil(heroCreators.length * 0.6);
 
   return <main className="site-shell">
@@ -64,7 +59,7 @@ export default async function Home() {
         const ringSize = isOuter ? outerCount : heroCreators.length - outerCount;
         const ringIndex = isOuter ? index : index - outerCount;
         const angle = (360 / ringSize) * ringIndex + (isOuter ? 0 : 180 / ringSize);
-        return <Link className={`avatar ${isOuter ? "avatar-outer" : "avatar-inner"}`} style={{ "--angle": `${angle}deg` } as CSSProperties} href={creator.href} key={index} aria-label="View creator profile"><Image src={creator.avatar} alt="" width={58} height={58} loading="eager" unoptimized /></Link>;
+        return <Link className={`avatar ${isOuter ? "avatar-outer" : "avatar-inner"}`} style={{ "--angle": `${angle}deg` } as CSSProperties} href={creator.href} key={index} aria-label="View creator profile"><Image src={creator.avatar} alt="" width={58} height={58} loading="eager" /></Link>;
       })}<div className="orbit-center">Top Creator<br />Picnic</div></div>
     </section>
     <div className="band">{content.marquee_text}</div>

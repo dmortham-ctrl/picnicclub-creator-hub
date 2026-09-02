@@ -21,6 +21,11 @@ const nextConfig: NextConfig = {
       : [];
   },
   images: {
+    // Route Supabase Storage images through Supabase's own resizer instead of
+    // Vercel's metered optimizer (which 402s once its quota is spent). See
+    // lib/supabase-image-loader.ts.
+    loader: "custom",
+    loaderFile: "./lib/supabase-image-loader.ts",
     remotePatterns: [
       { protocol: "https", hostname: "picnicclub.id" },
       { protocol: "https", hostname: "i.pravatar.cc" }, // demo avatars
