@@ -35,7 +35,7 @@ export function PelanggaranGuide() {
         Isi <a href={APPEAL_FORM_URL} target="_blank" rel="noreferrer nofollow">formulir di bawah</a>,
         sertakan <strong>USERNAME</strong> dan <strong>UID</strong> kamu. Mohon tidak salah mengisi
         username — yang diisi adalah username, bukan nama akun. Setelah mengisi, konfirmasi ke admin di{" "}
-        <a href="https://wa.me/6285797132658">085797132658</a>.
+        <a href="https://wa.me/6289526701680">089526701680</a>.
       </p>
 
       <p>

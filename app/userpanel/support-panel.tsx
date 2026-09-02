@@ -6,7 +6,7 @@ import { PelanggaranGuide } from "@/app/components/pelanggaran-guide";
 
 const FORM_SRC =
   "https://docs.google.com/forms/d/e/1FAIpQLSe9UGLP3rRubXW-lE_fH7WXQdaYcfHEagurM_RDZ3QEXMgtQQ/viewform?embedded=true";
-const ADMIN_WA = "6285797132658";
+const ADMIN_WA = "6289526701680";
 
 export function SupportPanel({ username }: { username: string }) {
   const loads = useRef(0);

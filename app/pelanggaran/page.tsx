@@ -18,7 +18,7 @@ export default function PelanggaranPage() {
 
       <p>
         Butuh bantuan lain? Lihat <Link href="/report">halaman pelaporan</Link> atau hubungi admin
-        via <a href="https://wa.me/62895364547187">WhatsApp</a>.
+        via <a href="https://wa.me/6289526701680">WhatsApp</a>.
       </p>
     </LegalPage>
   );
