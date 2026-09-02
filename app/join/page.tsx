@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { SiteNav } from "../components/site-nav";
-import { JoinForm } from "./join-form";
+import { JoinEmbed } from "./join-embed";
+
+const FORM_SRC =
+  "https://docs.google.com/forms/d/e/1FAIpQLSftrMydNstjbpli7liWgbW3Zn5tzDOSDT3anlFC6R04woB-8Q/viewform?embedded=true";
 
 export const metadata = {
   title: "Join Agency TikTok | Picnic Club",
@@ -21,10 +24,10 @@ export default function JoinPage() {
           diminta konfirmasi ke admin lewat WhatsApp supaya pendaftaran cepat diproses.
         </p>
 
-        <JoinForm
-          program="tiktok"
+        <JoinEmbed
+          formSrc={FORM_SRC}
           adminWa="6287888527772"
-          socialLabel="Username TikTok"
+          title="Formulir Join Agency TikTok"
           waMessage={
             "Halo admin Picnic Club, saya baru saja mengisi formulir Join Agency TikTok.\nMohon dikonfirmasi ya. Terima kasih."
           }
