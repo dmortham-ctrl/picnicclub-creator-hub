@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CreatorCard } from "./components/creator-card";
@@ -36,10 +37,16 @@ export default async function Home() {
   const content = await getSiteContent();
   const brands = await getActiveBrands();
   const faqs = await getFaqs();
-  const featured = profiles.filter((profile) => profile.level === "All Star").slice(0, 20);
   const founderUsernames = content.founder_usernames.split(",").map((name) => name.trim()).filter(Boolean);
   const founders = founderUsernames.map((username) => profiles.find((profile) => profile.username === username)).filter((profile): profile is typeof profiles[number] => Boolean(profile));
-  const heroCreators = Array.from({ length: 20 }, (_, index) => ({ avatar: featured[index]?.avatar_url ?? `https://i.pravatar.cc/160?img=${index + 20}`, href: featured[index] ? `/@${featured[index].username}` : "/members" }));
+
+  // Hero orbit — "All Star" creators, ordered by featured_order. Ring split and the
+  // angle of every avatar are derived from the count, so it stays even at any size.
+  const heroCreators = profiles
+    .filter((profile) => profile.level === "All Star" && profile.avatar_url)
+    .slice(0, 30)
+    .map((profile) => ({ avatar: profile.avatar_url, href: `/@${profile.username}` }));
+  const outerCount = Math.ceil(heroCreators.length * 0.6);
 
   return <main className="site-shell">
     <JsonLd data={organizationLd} />
@@ -47,7 +54,13 @@ export default async function Home() {
     <SiteNav />
     <section className="hero">
       <div><div className="eyebrow">Creator commerce ecosystem / 001</div><h1>{content.hero_title}</h1><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></div>
-      <div className="orbit">{heroCreators.map((creator, index) => <Link className={`avatar ${index < 12 ? "avatar-outer" : "avatar-inner"}`} href={creator.href} key={index} aria-label="View creator profile"><Image src={creator.avatar} alt="" width={58} height={58} loading={index < 8 ? "eager" : "lazy"} /></Link>)}<div className="orbit-center">Top Creator<br />Picnic</div></div>
+      <div className="orbit">{heroCreators.map((creator, index) => {
+        const isOuter = index < outerCount;
+        const ringSize = isOuter ? outerCount : heroCreators.length - outerCount;
+        const ringIndex = isOuter ? index : index - outerCount;
+        const angle = (360 / ringSize) * ringIndex + (isOuter ? 0 : 180 / ringSize);
+        return <Link className={`avatar ${isOuter ? "avatar-outer" : "avatar-inner"}`} style={{ "--angle": `${angle}deg` } as CSSProperties} href={creator.href} key={index} aria-label="View creator profile"><Image src={creator.avatar} alt="" width={58} height={58} loading={index < 10 ? "eager" : "lazy"} /></Link>;
+      })}<div className="orbit-center">Top Creator<br />Picnic</div></div>
     </section>
     <div className="band">{content.marquee_text}</div>
 
