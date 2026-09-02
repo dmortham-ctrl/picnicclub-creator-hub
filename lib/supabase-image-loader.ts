@@ -16,9 +16,11 @@ const PUBLIC_RENDER = "/storage/v1/render/image/public/";
 export default function supabaseImageLoader({ src, width, quality }: LoaderArgs): string {
   if (src.includes(PUBLIC_OBJECT)) {
     const base = src.split("?")[0].replace(PUBLIC_OBJECT, PUBLIC_RENDER);
-    // Supabase's resizer rejects dimensions above 2500px.
+    // Supabase's resizer rejects dimensions above 2500px. `resize=contain` with
+    // only a width scales height proportionally — without it the height is left
+    // at the original and the image comes back squashed.
     const w = Math.min(width, 2000);
-    return `${base}?width=${w}&quality=${quality ?? 75}`;
+    return `${base}?width=${w}&resize=contain&quality=${quality ?? 75}`;
   }
   return src;
 }
