@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     url: "https://picnicclub.id",
   },
   twitter: { card: "summary_large_image" },
+  verification: {
+    other: { "facebook-domain-verification": "rjp16umeogrivktkakepmpus106f5l" },
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
