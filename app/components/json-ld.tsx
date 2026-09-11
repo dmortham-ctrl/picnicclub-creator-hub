@@ -13,6 +13,7 @@ export const organizationLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Picnic Club",
+  legalName: "PT Trijata Kini Nusantara",
   url: SITE_URL,
   description: "MCN dan komunitas creator commerce untuk creator dan affiliator Indonesia.",
   sameAs: [
