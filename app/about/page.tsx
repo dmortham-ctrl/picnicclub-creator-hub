@@ -42,33 +42,163 @@ export default function AboutPage() {
         </p>
       </section>
 
-      <section className="section about-story">
-        <div className="section-head">
-          <div>
-            <div className="eyebrow">How it started / 002</div>
-            <h2>Dari pengalaman langsung,<br />menjadi satu komunitas.</h2>
-          </div>
-          <p className="section-note">
-            Lima praktisi yang membangun Picnic Club dari pengalaman nyata sebagai creator dan
-            affiliator.
+      <section className="section story-section">
+        <div className="eyebrow">Our story / 002</div>
+        <h2>Everything started<br />with a question.</h2>
+        <blockquote className="story-quote">
+          “Kenapa belum ada ekosistem yang benar-benar memahami kreator?”
+        </blockquote>
+        <div className="story-lede">
+          <p>Pertanyaan sederhana itu menjadi awal dari perjalanan Picnic Club.</p>
+          <p>
+            Berawal dari pengalaman langsung di dunia content creation, Berto Saksono Jati, Daniel
+            Moris Tambunan, Adit Suryo, Adli Hibatul, dan Gufron merasakan keresahan yang sama:
+            banyak kreator punya potensi besar, tapi belum mendapatkan wadah yang benar-benar
+            memahami kebutuhan mereka.
+          </p>
+          <p>
+            Agency dan MCN memang sudah banyak. Namun bagi mereka, masih ada ruang untuk membangun
+            sesuatu yang berbeda — wadah yang bukan hanya menghadirkan campaign, tetapi juga
+            edukasi, pendampingan, peluang, koneksi, dan ruang untuk bertumbuh bersama.
           </p>
         </div>
-        <div className="about-story-body">
-          <p>
-            Picnic Club tidak dimulai dari ruang rapat. Kami dimulai dari pengalaman langsung
-            sebagai creator dan affiliator — mengejar target, beradaptasi dengan algoritma yang
-            terus berubah, dan mencari tahu caranya sendiri karena belum ada tempat yang benar-benar
-            mengerti prosesnya.
-          </p>
-          <p>
-            Dari situ, lima praktisi memutuskan membangun apa yang dulu mereka sendiri butuhkan:
-            sebuah agency yang paham proses tumbuh dari nol — bukan cuma yang mengejar angka.
-          </p>
-          <p>
-            Hari ini, Picnic Club menaungi ribuan creator dan affiliator di seluruh Indonesia,
-            bekerja sama dengan puluhan brand, dan terus bertumbuh — bukan sekadar sebagai agency,
-            tapi sebagai komunitas creator commerce yang saling mendukung.
-          </p>
+
+        <div className="story-chapters">
+          <div className="story-chapter">
+            <span className="story-chapter-label">The meeting</span>
+            <div>
+              <h3>When Creators Meet Business</h3>
+              <div className="story-chapter-body">
+                <p>
+                  Dalam perjalanan tersebut, mereka bertemu dengan Andika Malik Maharaya dan Rommy
+                  Arrahman, yang memiliki pengalaman di bidang Business Development — mempertemukan
+                  dua perspektif yang berbeda namun saling melengkapi.
+                </p>
+                <ul>
+                  <li><strong>Creator perspective</strong> — memahami bagaimana kreator berpikir, bekerja, dan berkembang.</li>
+                  <li><strong>Business perspective</strong> — memahami bagaimana brand dan seller membutuhkan strategi, distribusi, serta creator yang tepat untuk menghasilkan dampak bisnis.</li>
+                </ul>
+                <p>
+                  Dari sinilah muncul sebuah visi: bagaimana jika kita membangun sebuah ekosistem
+                  yang mampu mempertemukan keduanya? Bukan sekadar menjadi penghubung, tetapi
+                  menjadi partner yang benar-benar memahami kedua sisi.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="story-chapter">
+            <span className="story-chapter-label">The birth</span>
+            <div>
+              <h3>Picnic Club Was Born</h3>
+              <div className="story-chapter-body">
+                <p>
+                  Pada Mei 2026, visi tersebut diwujudkan melalui lahirnya Picnic Club — dibangun
+                  sebagai TikTok &amp; Shopee Agency dengan satu tujuan utama: <em>connecting the
+                  right creator with the right brand.</em>
+                </p>
+                <p>
+                  Kami percaya kolaborasi yang baik bukan hanya soal seberapa besar jumlah
+                  followers, tetapi tentang menemukan kreator yang tepat, brand yang tepat,
+                  strategi yang tepat, dan kesempatan yang tepat.
+                </p>
+                <p>
+                  Karena ketika semuanya terhubung dengan tepat, hasilnya bukan hanya sebuah
+                  campaign — tetapi pertumbuhan.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="story-chapter">
+            <span className="story-chapter-label">The growth</span>
+            <div>
+              <h3>From a Small Beginning to a Growing Ecosystem</h3>
+              <div className="story-chapter-body">
+                <p>
+                  Picnic Club tumbuh dengan sangat cepat. Dalam waktu singkat, ribuan kreator telah
+                  bergabung dan ratusan brand serta seller telah menjadi mitra.
+                </p>
+                <p>
+                  Pertumbuhan itu bukan sekadar angka. Setiap member yang bergabung membawa cerita,
+                  karakter, dan potensi yang berbeda. Setiap brand yang menjadi partner membawa
+                  kebutuhan dan tantangan yang berbeda.
+                </p>
+                <p>
+                  Dan Picnic Club hadir di tengah keduanya — sebagai penghubung, sebagai partner,
+                  sebagai tempat untuk bertumbuh.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="story-chapter">
+            <span className="story-chapter-label">More than an agency</span>
+            <div>
+              <h3>We Are Building a Community</h3>
+              <div className="story-chapter-body">
+                <p>
+                  Sejak awal, Picnic Club tidak pernah ingin berhenti sebagai sebuah agency. Kami
+                  punya mimpi yang jauh lebih besar: membangun salah satu ekosistem creator
+                  terbesar di Indonesia.
+                </p>
+                <p>
+                  Sebuah komunitas tempat kreator dapat belajar, bertemu, berkolaborasi,
+                  mendapatkan kesempatan, dan berkembang bersama.
+                </p>
+                <p>
+                  Kami ingin menciptakan lingkungan di mana kreator tidak perlu berjalan sendirian
+                  — di mana kreator baru dapat belajar dari mereka yang sudah berpengalaman, di
+                  mana kreator berpengalaman dapat menemukan peluang yang lebih besar, dan di mana
+                  brand dapat menemukan partner yang tepat untuk membangun pertumbuhan bersama.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="story-chapter">
+            <span className="story-chapter-label">Our belief</span>
+            <div>
+              <h3>Growth Is Better When We Grow Together</h3>
+              <div className="story-chapter-body">
+                <p>Kami percaya bahwa pertumbuhan terbaik bukanlah pertumbuhan yang dilakukan sendirian.</p>
+                <p>
+                  Ketika kreator berkembang, brand berkembang. Ketika brand berkembang, semakin
+                  banyak peluang tercipta. Dan ketika seluruh ekosistem berkembang bersama,
+                  dampaknya menjadi jauh lebih besar.
+                </p>
+                <p>
+                  Itulah alasan Picnic Club hadir — bukan hanya untuk menghubungkan creator dengan
+                  brand, tetapi untuk membangun sebuah ekosistem di mana creator, brand, dan seller
+                  dapat tumbuh bersama.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="story-chapter">
+            <span className="story-chapter-label">The future</span>
+            <div>
+              <h3>This Is Just the Beginning</h3>
+              <div className="story-chapter-body">
+                <p>
+                  Picnic Club dimulai dari sebuah keresahan. Kemudian berubah menjadi sebuah
+                  gagasan. Gagasan itu menjadi sebuah agency.
+                </p>
+                <p>
+                  Dan hari ini, kami sedang membangun sesuatu yang jauh lebih besar: <em>a home for
+                  creators</em> — tempat bagi kreator Indonesia untuk menemukan kesempatan,
+                  membangun koneksi, meningkatkan kemampuan, dan mencapai potensi terbaik mereka.
+                </p>
+                <p>Perjalanan ini baru dimulai. And we believe the best is yet to come.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="story-close">
+          <span>Picnic Club</span>
+          <strong>Grow Together. Go Further.</strong>
         </div>
       </section>
 
