@@ -430,6 +430,8 @@ body, body * { font-family: Poppins, sans-serif !important; }
 .bio-product-price s { font-size: 11px; color: var(--bio-muted); }
 .bio-ratecard { text-align: left; background: var(--bio-link-bg); border: 1px solid var(--bio-link-border); border-radius: 12px; padding: 16px 18px; margin: 14px 0; }
 .bio-ratecard-head { display: flex; align-items: center; gap: 7px; font: 11px 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--bio-muted); margin-bottom: 8px; }
+.bio-ratecard-platforms { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.bio-ratecard-platform { display: inline-flex; align-items: center; padding: 5px 10px; border-radius: 999px; background: var(--bio-link-bg-hover); border: 1px solid var(--bio-link-border); font-size: 11px; font-weight: 700; color: var(--bio-muted); }
 .bio-ratecard-rows { display: grid; }
 .bio-ratecard-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-top: 1px solid var(--bio-link-border); }
 .bio-ratecard-row:first-child { border-top: 0; }

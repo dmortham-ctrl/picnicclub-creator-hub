@@ -6,6 +6,7 @@ import { Search, X } from "lucide-react";
 import { LinkIcon } from "@/app/components/link-icon";
 import { SocialIcon } from "@/app/components/social-icons";
 import { sanitizeRichText, socialPlatformLabel } from "@/lib/blocks";
+import { toolPlatformLabel } from "@/lib/picnic-tools";
 import type { MinisiteLink } from "@/app/components/minisite-view";
 
 function blockText(block: MinisiteLink): string {
@@ -146,6 +147,7 @@ function Block({ block, interactive }: { block: MinisiteLink; interactive: boole
   if (type === "ratecard") {
     const items = block.content?.ratecard_items ?? [];
     if (items.length === 0) return null;
+    const platforms = block.content?.ratecard_platforms ?? [];
     const cta = block.url && (
       interactive ? (
         <a className="bio-ratecard-cta" href={`/l/${block.id}`} target="_blank" rel="noreferrer nofollow">
@@ -163,6 +165,15 @@ function Block({ block, interactive }: { block: MinisiteLink; interactive: boole
           <span aria-hidden="true">🏷️</span>
           <strong>Rate Card</strong>
         </div>
+        {platforms.length > 0 && (
+          <div className="bio-ratecard-platforms">
+            {platforms.map((p, i) => (
+              <span className="bio-ratecard-platform" key={i}>
+                {toolPlatformLabel(p.platform)} · {p.followers.toLocaleString("id-ID")} followers
+              </span>
+            ))}
+          </div>
+        )}
         <div className="bio-ratecard-rows">
           {items.map((item, i) => (
             <div className="bio-ratecard-row" key={i}>

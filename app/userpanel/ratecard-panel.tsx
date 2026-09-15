@@ -55,6 +55,9 @@ export function RatecardPanel({
       setItems(existing.content?.ratecard_items?.length ? existing.content.ratecard_items : EMPTY_ITEMS);
       setWa(existing.url ?? "");
       setNote(existing.content?.ratecard_note ?? "");
+      if (existing.content?.ratecard_platforms?.length) {
+        setPlatforms(existing.content.ratecard_platforms.map((p) => ({ platform: p.platform, followers: String(p.followers) })));
+      }
       setHasGenerated(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -104,6 +107,9 @@ export function RatecardPanel({
       items: items.filter((i) => i.label.trim() && i.price.trim()),
       note,
       wa: wa.trim() ? normalizeWhatsappUrl(wa) : "",
+      platforms: platforms
+        .filter((p) => p.followers.trim() !== "")
+        .map((p) => ({ platform: p.platform, followers: p.followers })),
     });
     if (!parsed.success) { setError(firstIssue(parsed.error)); return; }
     setPublishing(true);
@@ -115,7 +121,7 @@ export function RatecardPanel({
       icon_key: "ratecard",
       image_url: "",
       affiliate_disclosure: false,
-      content: { ratecard_items: parsed.data.items, ratecard_note: parsed.data.note },
+      content: { ratecard_items: parsed.data.items, ratecard_note: parsed.data.note, ratecard_platforms: parsed.data.platforms },
     };
     if (existing) {
       const { error: updateError } = await supabase.from("profile_links").update(row).eq("id", existing.id);

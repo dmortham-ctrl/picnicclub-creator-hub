@@ -48,6 +48,7 @@ export type BlockType = "link" | "text" | "social" | "photo" | "product" | "rate
 export type SocialItem = { platform: string; url: string };
 
 export type RateCardItem = { label: string; price: string; note?: string };
+export type RateCardPlatform = { platform: string; followers: number };
 
 export type BlockContent = {
   html?: string;
@@ -65,4 +66,6 @@ export type BlockContent = {
   ratecard_items?: RateCardItem[];
   /** Rate card block: optional footer note (availability, negotiation terms, etc.). */
   ratecard_note?: string;
+  /** Rate card block: the platforms + follower counts it was priced against. */
+  ratecard_platforms?: RateCardPlatform[];
 };

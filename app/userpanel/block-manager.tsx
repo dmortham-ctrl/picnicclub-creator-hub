@@ -3,7 +3,7 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import type { Profile, ProfileLink, SocialItem, RateCardItem, BlockType } from "@/lib/types";
+import type { Profile, ProfileLink, SocialItem, RateCardItem, RateCardPlatform, BlockType } from "@/lib/types";
 import { firstIssue, linkSchema, textBlockSchema, socialBlockSchema, photoBlockSchema, productBlockSchema, ratecardBlockSchema } from "@/lib/validation";
 import { guessLinkType, normalizeWhatsappUrl, LINK_TYPES } from "@/lib/link-types";
 import { BLOCK_TYPES, blockTypeLabel, productSourceLabel, SOCIAL_PLATFORMS, socialPlatformLabel } from "@/lib/blocks";
@@ -27,9 +27,10 @@ type Draft = {
   source: string;
   ratecard_items: RateCardItem[];
   ratecard_note: string;
+  ratecard_platforms: RateCardPlatform[];
 };
 
-const EMPTY: Draft = { label: "", url: "", link_type: "link", affiliate_disclosure: false, wa_float: false, html: "", items: [], caption: "", image_url: "", price: "", price_original: "", source: "", ratecard_items: [{ label: "", price: "", note: "" }], ratecard_note: "" };
+const EMPTY: Draft = { label: "", url: "", link_type: "link", affiliate_disclosure: false, wa_float: false, html: "", items: [], caption: "", image_url: "", price: "", price_original: "", source: "", ratecard_items: [{ label: "", price: "", note: "" }], ratecard_note: "", ratecard_platforms: [] };
 
 function draftFrom(block: ProfileLink): Draft {
   return {
@@ -47,6 +48,7 @@ function draftFrom(block: ProfileLink): Draft {
     source: block.content?.source ?? "",
     ratecard_items: block.content?.ratecard_items?.length ? block.content.ratecard_items : [{ label: "", price: "", note: "" }],
     ratecard_note: block.content?.ratecard_note ?? "",
+    ratecard_platforms: block.content?.ratecard_platforms ?? [],
   };
 }
 
@@ -153,10 +155,14 @@ export function BlockManager({
       };
     }
     if (type === "ratecard") {
+      // Platforms/followers aren't editable here (they come from the Rate
+      // Card AI tool) — carry whatever was loaded on this block through
+      // unchanged so a manual edit doesn't wipe them.
       const parsed = ratecardBlockSchema.safeParse({
         items: draft.ratecard_items.filter((i) => i.label.trim() && i.price.trim()),
         note: draft.ratecard_note,
         wa: draft.url.trim() ? normalizeWhatsappUrl(draft.url) : "",
+        platforms: draft.ratecard_platforms,
       });
       if (!parsed.success) return { error: firstIssue(parsed.error) };
       return {
@@ -168,7 +174,7 @@ export function BlockManager({
           icon_key: "ratecard",
           image_url: "",
           affiliate_disclosure: false,
-          content: { ratecard_items: parsed.data.items, ratecard_note: parsed.data.note },
+          content: { ratecard_items: parsed.data.items, ratecard_note: parsed.data.note, ratecard_platforms: parsed.data.platforms },
         },
       };
     }

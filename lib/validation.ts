@@ -142,10 +142,16 @@ export const ratecardItemSchema = z.object({
   note: z.string().trim().max(120, "Catatan maksimal 120 karakter.").default(""),
 });
 
+export const ratecardPlatformSchema = z.object({
+  platform: z.string().trim().min(1).max(40),
+  followers: z.coerce.number().int().min(0).max(100_000_000),
+});
+
 export const ratecardBlockSchema = z.object({
   items: z.array(ratecardItemSchema).min(1, "Tambahkan minimal satu layanan.").max(12, "Maksimal 12 layanan."),
   note: z.string().trim().max(200, "Catatan maksimal 200 karakter.").default(""),
   wa: z.union([linkUrlSchema, z.literal("")]).default(""),
+  platforms: z.array(ratecardPlatformSchema).max(6, "Maksimal 6 platform.").default([]),
 });
 
 export type ProfileInput = z.infer<typeof profileSchema>;
