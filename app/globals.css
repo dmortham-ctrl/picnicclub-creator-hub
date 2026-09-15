@@ -384,10 +384,14 @@ body, body * { font-family: Poppins, sans-serif !important; }
 .social-row select, .social-row input { border: 1px solid var(--line); padding: 10px; background: white; border-radius: 4px; min-width: 0; max-width: 100%; }
 .social-rows .button-outline { justify-self: start; padding: 8px 12px; font-size: 11px; }
 .ratecard-rows { display: grid; gap: 10px; }
-.ratecard-rows > label { margin-top: 4px; }
 .ratecard-row { display: grid; grid-template-columns: minmax(0, 1.6fr) 130px minmax(0, 1.2fr) auto; gap: 8px; align-items: center; min-width: 0; }
 .ratecard-row input { border: 1px solid var(--line); padding: 10px; background: white; border-radius: 4px; min-width: 0; max-width: 100%; }
 .ratecard-rows > .button-outline { justify-self: start; padding: 8px 12px; font-size: 11px; }
+/* The "Catatan tambahan" label doesn't always sit inside an .admin-form
+   (the AI results card is a plain .admin-card), so style it directly
+   instead of relying on that ancestor. */
+.ratecard-rows > label { display: grid; gap: 7px; font-size: 12px; font-weight: 700; margin-top: 6px; width: 100%; }
+.ratecard-rows > label textarea { border: 1px solid var(--line); padding: 12px; background: white; border-radius: 4px; min-width: 0; max-width: 100%; width: 100%; box-sizing: border-box; resize: vertical; }
 @media (max-width: 760px) { .block-type-grid { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { .social-row { grid-template-columns: minmax(0, 1fr) auto; } .social-row select { grid-column: 1 / -1; } .ratecard-row { grid-template-columns: 1fr auto; } .ratecard-row input { grid-column: 1 / -1; } }
 
