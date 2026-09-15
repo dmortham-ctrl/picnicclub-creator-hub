@@ -124,9 +124,13 @@ export function RatecardPanel({
       content: { ratecard_items: parsed.data.items, ratecard_note: parsed.data.note, ratecard_platforms: parsed.data.platforms },
     };
     if (existing) {
-      const { error: updateError } = await supabase.from("profile_links").update(row).eq("id", existing.id);
+      // .select() forces Supabase to report back which row(s) actually
+      // matched — without it, an update RLS silently blocks (0 rows) still
+      // comes back as a "success" with no error, and nothing gets saved.
+      const { data, error: updateError } = await supabase.from("profile_links").update(row).eq("id", existing.id).select().maybeSingle();
       if (updateError) { setError(updateError.message); setPublishing(false); return; }
-      setLinks((rows) => rows.map((r) => (r.id === existing.id ? ({ ...r, ...row } as ProfileLink) : r)));
+      if (!data) { setError("Gagal menyimpan — block ini tidak ditemukan atau kamu tidak punya akses. Coba muat ulang halaman."); setPublishing(false); return; }
+      setLinks((rows) => rows.map((r) => (r.id === existing.id ? (data as ProfileLink) : r)));
     } else {
       const nextOrder = links.length ? Math.max(...links.map((l) => l.sort_order)) + 1 : 1;
       const { data, error: insertError } = await supabase

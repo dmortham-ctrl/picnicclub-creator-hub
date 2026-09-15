@@ -233,9 +233,13 @@ export function BlockManager({
     const built = await buildRow(type, editDraft, editImage, block.image_url ?? "", editImageCleared);
     if ("error" in built) { if (built.error) onError(built.error); setSaving(false); return; }
     onError("");
-    const { error } = await supabase.from("profile_links").update(built.row).eq("id", block.id);
+    // .select() forces Supabase to report which row actually matched —
+    // without it, an update RLS silently blocks (0 rows) still comes back
+    // as a "success" with no error, and the edit is quietly lost.
+    const { data, error } = await supabase.from("profile_links").update(built.row).eq("id", block.id).select().maybeSingle();
     if (error) { onError(error.message); setSaving(false); return; }
-    setLinks((rows) => rows.map((r) => (r.id === block.id ? ({ ...r, ...built.row } as ProfileLink) : r)));
+    if (!data) { onError("Gagal menyimpan — block ini tidak ditemukan atau kamu tidak punya akses. Coba muat ulang halaman."); setSaving(false); return; }
+    setLinks((rows) => rows.map((r) => (r.id === block.id ? (data as ProfileLink) : r)));
     setEditingId(null);
     setEditImage(null);
     setEditImageCleared(false);
