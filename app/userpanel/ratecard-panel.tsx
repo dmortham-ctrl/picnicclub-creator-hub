@@ -12,6 +12,9 @@ import { RatecardFields } from "@/app/userpanel/ratecard-fields";
 const EMPTY_ITEMS: RateCardItem[] = [{ label: "", price: "", note: "" }];
 const meta = TOOL_META.ratecard;
 
+type PlatformEntry = { platform: string; followers: string };
+const EMPTY_PLATFORMS: PlatformEntry[] = [{ platform: TOOL_PLATFORMS[0].value, followers: "" }];
+
 /**
  * AI-assisted rate card builder: fill in follower count / niche / platform,
  * get suggested pricing, tweak the rows, then publish them as a "ratecard"
@@ -30,8 +33,7 @@ export function RatecardPanel({
   onMutated: () => void;
 }) {
   const [niche, setNiche] = useState("");
-  const [followers, setFollowers] = useState("");
-  const [platform, setPlatform] = useState<string>(TOOL_PLATFORMS[0].value);
+  const [platforms, setPlatforms] = useState<PlatformEntry[]>(EMPTY_PLATFORMS);
   const [experience, setExperience] = useState("");
   const [count, setCount] = useState(meta.defaultCount);
   const [loading, setLoading] = useState(false);
@@ -58,18 +60,27 @@ export function RatecardPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function updatePlatform(index: number, patch: Partial<PlatformEntry>) {
+    setPlatforms((rows) => rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  }
+
   async function generate(event: React.FormEvent) {
     event.preventDefault();
     setError(""); setNotice("");
     if (niche.trim().length < 2) { setError("Isi niche/kategori konten kamu dulu."); return; }
-    const followerCount = Number(followers);
-    if (!Number.isFinite(followerCount) || followerCount < 0) { setError("Isi jumlah followers dengan angka."); return; }
+    const validPlatforms = platforms
+      .filter((p) => p.followers.trim() !== "")
+      .map((p) => ({ platform: p.platform, followers: Number(p.followers) }));
+    if (validPlatforms.length === 0 || validPlatforms.some((p) => !Number.isFinite(p.followers) || p.followers < 0)) {
+      setError("Isi jumlah followers minimal untuk satu platform.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/tools/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tool: "ratecard", niche: niche.trim(), followers: followerCount, platform, experience: experience.trim(), count }),
+        body: JSON.stringify({ tool: "ratecard", niche: niche.trim(), platforms: validPlatforms, experience: experience.trim(), count }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -142,14 +153,40 @@ export function RatecardPanel({
           ))}
         </div>
 
-        <div className="admin-row">
-          <label>Jumlah followers<input required type="number" min={0} inputMode="numeric" value={followers} onChange={(e) => setFollowers(e.target.value)} placeholder="mis. 25000" /></label>
-          <label>Platform utama
-            <select value={platform} onChange={(e) => setPlatform(e.target.value)}>
-              {TOOL_PLATFORMS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
-            </select>
-          </label>
-        </div>
+        <fieldset className="wa-display">
+          <legend>Platform &amp; followers kamu</legend>
+          <div className="social-rows">
+            {platforms.map((p, i) => (
+              <div className="social-row" key={i}>
+                <select value={p.platform} onChange={(e) => updatePlatform(i, { platform: e.target.value })}>
+                  {TOOL_PLATFORMS.map((tp) => <option key={tp.value} value={tp.value}>{tp.label}</option>)}
+                </select>
+                <input
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  value={p.followers}
+                  placeholder="Jumlah followers"
+                  onChange={(e) => updatePlatform(i, { followers: e.target.value })}
+                />
+                {platforms.length > 1 && (
+                  <button type="button" className="icon-button" aria-label="Hapus platform" onClick={() => setPlatforms((rows) => rows.filter((_, j) => j !== i))}>
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+            {platforms.length < 6 && (
+              <button
+                type="button"
+                className="button-outline"
+                onClick={() => setPlatforms((rows) => [...rows, { platform: TOOL_PLATFORMS[0].value, followers: "" }])}
+              >
+                + Tambah platform
+              </button>
+            )}
+          </div>
+        </fieldset>
         <label>Pengalaman kerja sama (opsional)<input maxLength={200} value={experience} onChange={(e) => setExperience(e.target.value)} placeholder="mis. sudah kerja sama dengan 5 brand skincare lokal" /></label>
         <label>Jumlah layanan
           <select value={count} onChange={(e) => setCount(Number(e.target.value))}>

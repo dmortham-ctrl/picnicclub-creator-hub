@@ -41,8 +41,15 @@ const bodySchema = z.union([
   z.object({
     tool: z.literal("ratecard"),
     niche: z.string().trim().min(2).max(80),
-    followers: z.coerce.number().int().min(0).max(100_000_000),
-    platform: z.enum(TOOL_PLATFORM_VALUES),
+    platforms: z
+      .array(
+        z.object({
+          platform: z.enum(TOOL_PLATFORM_VALUES),
+          followers: z.coerce.number().int().min(0).max(100_000_000),
+        }),
+      )
+      .min(1, "Isi minimal satu platform.")
+      .max(6, "Maksimal 6 platform."),
     experience: z.string().trim().max(200).default(""),
     count: z.coerce.number().int().min(1).max(TOOL_COUNT_MAX),
   }),
@@ -139,7 +146,9 @@ export async function POST(request: Request) {
   const hash =
     body.tool === "ratecard"
       ? createHash("sha256")
-          .update(`ratecard|${count}|${body.niche.toLowerCase()}|${body.followers}|${body.platform}|${body.experience.toLowerCase()}`)
+          .update(
+            `ratecard|${count}|${body.niche.toLowerCase()}|${body.platforms.map((p) => `${p.platform}:${p.followers}`).join(",")}|${body.experience.toLowerCase()}`,
+          )
           .digest("hex")
       : createHash("sha256")
           .update(`${tool}|${count}|${body.product_name.toLowerCase()}|${body.product_type.toLowerCase()}|${body.platform}`)
@@ -176,7 +185,7 @@ export async function POST(request: Request) {
   const noun = TOOL_META[tool].noun;
   const prompt =
     body.tool === "ratecard"
-      ? `Buat tepat ${count} ${noun}.\nNiche/kategori konten: ${body.niche}\nJumlah followers: ${body.followers}\nPlatform utama: ${toolPlatformLabel(body.platform)}\nPengalaman/kerja sama sebelumnya: ${body.experience || "belum ada info"}`
+      ? `Buat tepat ${count} ${noun}.\nNiche/kategori konten: ${body.niche}\nPlatform & followers: ${body.platforms.map((p) => `${toolPlatformLabel(p.platform)} (${p.followers} followers)`).join(", ")}\nPengalaman/kerja sama sebelumnya: ${body.experience || "belum ada info"}`
       : `Buat tepat ${count} ${noun}.\nProduk & deskripsi: ${body.product_name}\nJenis produk: ${body.product_type}\nPlatform: ${toolPlatformLabel(body.platform)}`;
   let output: unknown;
   try {
