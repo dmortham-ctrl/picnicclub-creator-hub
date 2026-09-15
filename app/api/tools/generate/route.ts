@@ -8,7 +8,6 @@ import { rateLimit, clientIp } from "@/lib/rate-limit";
 import {
   TOOL_DAILY_LIMIT,
   TOOL_COUNT_MAX,
-  TOOL_KEYS,
   TOOL_META,
   TOOL_PLATFORM_VALUES,
   toolPlatformLabel,
@@ -19,20 +18,35 @@ import {
   LIVE_SYSTEM,
   CALENDAR_SYSTEM,
   ANALYSIS_SYSTEM,
+  RATECARD_SYSTEM,
   type ToolKey,
 } from "@/lib/picnic-tools";
+
+const PRODUCT_TOOLS = ["hook", "script", "caption", "live", "calendar", "analysis"] as const;
 
 // gemini-flash-lite is fast (~2s) and cheap; plenty for short marketing copy.
 // The `-latest` alias tracks the newest lite release with no code changes.
 const MODEL = "gemini-flash-lite-latest";
 
-const bodySchema = z.object({
-  tool: z.enum(TOOL_KEYS as [ToolKey, ...ToolKey[]]),
-  product_name: z.string().trim().min(2).max(300),
-  product_type: z.string().trim().min(2).max(80),
-  platform: z.enum(TOOL_PLATFORM_VALUES),
-  count: z.coerce.number().int().min(1).max(TOOL_COUNT_MAX),
-});
+// Most tools riff on a product; Rate Card riffs on the creator's own profile
+// (followers, niche, experience), so it gets its own input shape.
+const bodySchema = z.union([
+  z.object({
+    tool: z.enum(PRODUCT_TOOLS),
+    product_name: z.string().trim().min(2).max(300),
+    product_type: z.string().trim().min(2).max(80),
+    platform: z.enum(TOOL_PLATFORM_VALUES),
+    count: z.coerce.number().int().min(1).max(TOOL_COUNT_MAX),
+  }),
+  z.object({
+    tool: z.literal("ratecard"),
+    niche: z.string().trim().min(2).max(80),
+    followers: z.coerce.number().int().min(0).max(100_000_000),
+    platform: z.enum(TOOL_PLATFORM_VALUES),
+    experience: z.string().trim().max(200).default(""),
+    count: z.coerce.number().int().min(1).max(TOOL_COUNT_MAX),
+  }),
+]);
 
 function since(hours: number) {
   return new Date(Date.now() - hours * 3_600_000).toISOString();
@@ -53,6 +67,7 @@ const SYSTEM: Record<ToolKey, string> = {
   live: LIVE_SYSTEM,
   calendar: CALENDAR_SYSTEM,
   analysis: ANALYSIS_SYSTEM,
+  ratecard: RATECARD_SYSTEM,
 };
 
 function schemaFor(tool: ToolKey, count: number) {
@@ -92,6 +107,12 @@ function schemaFor(tool: ToolKey, count: number) {
           .array(z.object({ title: z.string().max(60), body: z.string().min(20).max(1600).refine(noStock, stockMsg) }))
           .length(7),
       });
+    case "ratecard":
+      return z.object({
+        items: z
+          .array(z.object({ label: z.string().max(80), price: z.string().max(40), note: z.string().max(120).optional() }))
+          .length(count),
+      });
   }
 }
 
@@ -109,14 +130,20 @@ export async function POST(request: Request) {
   }
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ error: "Isi nama produk, jenis, dan platform dulu." }, { status: 400 });
-  const { tool, product_name, product_type, platform } = parsed.data;
+  if (!parsed.success) return NextResponse.json({ error: "Lengkapi form dulu, lalu coba lagi." }, { status: 400 });
+  const body = parsed.data;
+  const tool = body.tool;
   // Fixed-shape tools (live, calendar) ignore the requested count.
-  const count = TOOL_META[tool].hasCount ? parsed.data.count : TOOL_META[tool].defaultCount;
+  const count = TOOL_META[tool].hasCount ? body.count : TOOL_META[tool].defaultCount;
 
-  const hash = createHash("sha256")
-    .update(`${tool}|${count}|${product_name.toLowerCase()}|${product_type.toLowerCase()}|${platform}`)
-    .digest("hex");
+  const hash =
+    body.tool === "ratecard"
+      ? createHash("sha256")
+          .update(`ratecard|${count}|${body.niche.toLowerCase()}|${body.followers}|${body.platform}|${body.experience.toLowerCase()}`)
+          .digest("hex")
+      : createHash("sha256")
+          .update(`${tool}|${count}|${body.product_name.toLowerCase()}|${body.product_type.toLowerCase()}|${body.platform}`)
+          .digest("hex");
 
   const countToday = async () =>
     (await supabase
@@ -147,7 +174,10 @@ export async function POST(request: Request) {
 
   // 3. Generate.
   const noun = TOOL_META[tool].noun;
-  const prompt = `Buat tepat ${count} ${noun}.\nProduk & deskripsi: ${product_name}\nJenis produk: ${product_type}\nPlatform: ${toolPlatformLabel(platform)}`;
+  const prompt =
+    body.tool === "ratecard"
+      ? `Buat tepat ${count} ${noun}.\nNiche/kategori konten: ${body.niche}\nJumlah followers: ${body.followers}\nPlatform utama: ${toolPlatformLabel(body.platform)}\nPengalaman/kerja sama sebelumnya: ${body.experience || "belum ada info"}`
+      : `Buat tepat ${count} ${noun}.\nProduk & deskripsi: ${body.product_name}\nJenis produk: ${body.product_type}\nPlatform: ${toolPlatformLabel(body.platform)}`;
   let output: unknown;
   try {
     const { object } = await generateObject({
@@ -159,14 +189,14 @@ export async function POST(request: Request) {
       prompt,
     });
     const o = object as Record<string, unknown>;
-    output = o.hooks ?? o.captions ?? o.scripts ?? o.sections ?? o.days;
+    output = o.hooks ?? o.captions ?? o.scripts ?? o.sections ?? o.days ?? o.items;
   } catch (error) {
     console.error("[tools/generate]", error);
     return NextResponse.json({ error: "AI sedang sibuk. Coba lagi sebentar." }, { status: 502 });
   }
 
   // 4. Record + cache (best effort).
-  await supabase.from("tool_generations").insert({ owner_id: user.id, tool, input: parsed.data, input_hash: hash, output });
+  await supabase.from("tool_generations").insert({ owner_id: user.id, tool, input: body, input_hash: hash, output });
   await supabase.from("tool_cache").upsert({ input_hash: hash, tool, output, created_at: new Date().toISOString() });
 
   return NextResponse.json({ output, used_today: used + 1, limit: TOOL_DAILY_LIMIT, cached: false });

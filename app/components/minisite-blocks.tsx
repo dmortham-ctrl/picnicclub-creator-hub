@@ -18,6 +18,7 @@ function blockText(block: MinisiteLink): string {
   }
   if (type === "photo") return `${block.label ?? ""} ${block.content?.caption ?? ""}`;
   if (type === "product") return `${block.label ?? ""} ${block.content?.price ?? ""} ${block.url ?? ""}`;
+  if (type === "ratecard") return `rate card ${(block.content?.ratecard_items ?? []).map((i) => i.label).join(" ")}`;
   return `${block.label ?? ""} ${block.url ?? ""} ${block.link_type ?? ""}`;
 }
 
@@ -139,6 +140,31 @@ function Block({ block, interactive }: { block: MinisiteLink; interactive: boole
         )}
         {block.content?.caption && <figcaption>{block.content.caption}</figcaption>}
       </figure>
+    );
+  }
+
+  if (type === "ratecard") {
+    const items = block.content?.ratecard_items ?? [];
+    if (items.length === 0) return null;
+    return (
+      <div className="bio-ratecard">
+        <div className="bio-ratecard-head">
+          <span aria-hidden="true">🏷️</span>
+          <strong>Rate Card</strong>
+        </div>
+        <div className="bio-ratecard-rows">
+          {items.map((item, i) => (
+            <div className="bio-ratecard-row" key={i}>
+              <div>
+                <span className="bio-ratecard-label">{item.label}</span>
+                {item.note && <span className="bio-ratecard-note">{item.note}</span>}
+              </div>
+              <span className="bio-ratecard-price">{item.price}</span>
+            </div>
+          ))}
+        </div>
+        {block.content?.ratecard_note && <p className="bio-ratecard-footer">{block.content.ratecard_note}</p>}
+      </div>
     );
   }
 

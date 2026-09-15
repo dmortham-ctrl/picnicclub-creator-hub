@@ -43,9 +43,11 @@ export type ProfileLink = {
   affiliate_disclosure: boolean;
 };
 
-export type BlockType = "link" | "text" | "social" | "photo" | "product";
+export type BlockType = "link" | "text" | "social" | "photo" | "product" | "ratecard";
 
 export type SocialItem = { platform: string; url: string };
+
+export type RateCardItem = { label: string; price: string; note?: string };
 
 export type BlockContent = {
   html?: string;
@@ -59,4 +61,8 @@ export type BlockContent = {
   price_original?: string;
   /** Product block: marketplace the link came from (shopee/tokopedia/tiktok/lazada/web). */
   source?: string;
+  /** Rate card block: paid collab services, e.g. { label: "1 Video TikTok", price: "Rp 300.000" }. */
+  ratecard_items?: RateCardItem[];
+  /** Rate card block: optional footer note (availability, negotiation terms, etc.). */
+  ratecard_note?: string;
 };

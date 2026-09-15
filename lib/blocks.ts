@@ -3,6 +3,7 @@ import type { BlockType } from "./types";
 export const BLOCK_TYPES: { value: BlockType; label: string; hint: string }[] = [
   { value: "link", label: "Link", hint: "Tombol menuju satu URL." },
   { value: "product", label: "Produk", hint: "Kartu produk otomatis dari link Shopee, TikTok Shop, dll." },
+  { value: "ratecard", label: "Rate Card", hint: "Daftar harga kerja sama — video, live, bundle — tampil sebagai kartu di profil." },
   { value: "social", label: "Social media", hint: "Deretan ikon akun sosial kamu." },
   { value: "text", label: "Teks", hint: "Judul atau paragraf dengan format." },
   { value: "photo", label: "Foto", hint: "Satu gambar, bisa diklik ke link." },

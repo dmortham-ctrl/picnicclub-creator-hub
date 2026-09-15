@@ -383,8 +383,13 @@ body, body * { font-family: Poppins, sans-serif !important; }
 .social-row { display: grid; grid-template-columns: 138px minmax(0, 1fr) auto; gap: 8px; align-items: center; min-width: 0; }
 .social-row select, .social-row input { border: 1px solid var(--line); padding: 10px; background: white; border-radius: 4px; min-width: 0; max-width: 100%; }
 .social-rows .button-outline { justify-self: start; padding: 8px 12px; font-size: 11px; }
+.ratecard-rows { display: grid; gap: 10px; }
+.ratecard-rows > label { margin-top: 4px; }
+.ratecard-row { display: grid; grid-template-columns: minmax(0, 1.6fr) 130px minmax(0, 1.2fr) auto; gap: 8px; align-items: center; min-width: 0; }
+.ratecard-row input { border: 1px solid var(--line); padding: 10px; background: white; border-radius: 4px; min-width: 0; max-width: 100%; }
+.ratecard-rows > .button-outline { justify-self: start; padding: 8px 12px; font-size: 11px; }
 @media (max-width: 760px) { .block-type-grid { grid-template-columns: 1fr; } }
-@media (max-width: 560px) { .social-row { grid-template-columns: minmax(0, 1fr) auto; } .social-row select { grid-column: 1 / -1; } }
+@media (max-width: 560px) { .social-row { grid-template-columns: minmax(0, 1fr) auto; } .social-row select { grid-column: 1 / -1; } .ratecard-row { grid-template-columns: 1fr auto; } .ratecard-row input { grid-column: 1 / -1; } }
 
 /* Rich text editor */
 .rich-editor { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: white; }
@@ -419,6 +424,15 @@ body, body * { font-family: Poppins, sans-serif !important; }
 .bio-product-price { padding: 4px 11px 11px; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
 .bio-product-price b { font-size: 13px; color: var(--bio-accent); }
 .bio-product-price s { font-size: 11px; color: var(--bio-muted); }
+.bio-ratecard { text-align: left; background: var(--bio-link-bg); border: 1px solid var(--bio-link-border); border-radius: 12px; padding: 16px 18px; margin: 14px 0; }
+.bio-ratecard-head { display: flex; align-items: center; gap: 7px; font: 11px 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--bio-muted); margin-bottom: 8px; }
+.bio-ratecard-rows { display: grid; }
+.bio-ratecard-row { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 10px 0; border-top: 1px solid var(--bio-link-border); }
+.bio-ratecard-row:first-child { border-top: 0; }
+.bio-ratecard-label { display: block; font-size: 13.5px; font-weight: 700; color: var(--bio-link-fg); }
+.bio-ratecard-note { display: block; font-size: 11.5px; color: var(--bio-muted); margin-top: 2px; }
+.bio-ratecard-price { flex-shrink: 0; font-size: 13.5px; font-weight: 800; color: var(--bio-accent); white-space: nowrap; }
+.bio-ratecard-footer { margin: 12px 0 0; padding-top: 10px; border-top: 1px dashed var(--bio-link-border); font-size: 11.5px; color: var(--bio-muted); line-height: 1.6; }
 
 .product-url { display: flex; gap: 8px; }
 .product-url input { flex: 1; min-width: 0; }

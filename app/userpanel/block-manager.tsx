@@ -3,13 +3,14 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import type { Profile, ProfileLink, SocialItem, BlockType } from "@/lib/types";
-import { firstIssue, linkSchema, textBlockSchema, socialBlockSchema, photoBlockSchema, productBlockSchema } from "@/lib/validation";
+import type { Profile, ProfileLink, SocialItem, RateCardItem, BlockType } from "@/lib/types";
+import { firstIssue, linkSchema, textBlockSchema, socialBlockSchema, photoBlockSchema, productBlockSchema, ratecardBlockSchema } from "@/lib/validation";
 import { guessLinkType, normalizeWhatsappUrl, LINK_TYPES } from "@/lib/link-types";
 import { BLOCK_TYPES, blockTypeLabel, productSourceLabel, SOCIAL_PLATFORMS, socialPlatformLabel } from "@/lib/blocks";
 import { LinkIcon } from "@/app/components/link-icon";
 import { SocialIcon } from "@/app/components/social-icons";
 import { RichTextEditor } from "@/app/components/rich-text-editor";
+import { RatecardFields } from "@/app/userpanel/ratecard-fields";
 
 type Draft = {
   label: string;
@@ -24,9 +25,11 @@ type Draft = {
   price: string;
   price_original: string;
   source: string;
+  ratecard_items: RateCardItem[];
+  ratecard_note: string;
 };
 
-const EMPTY: Draft = { label: "", url: "", link_type: "link", affiliate_disclosure: false, wa_float: false, html: "", items: [], caption: "", image_url: "", price: "", price_original: "", source: "" };
+const EMPTY: Draft = { label: "", url: "", link_type: "link", affiliate_disclosure: false, wa_float: false, html: "", items: [], caption: "", image_url: "", price: "", price_original: "", source: "", ratecard_items: [{ label: "", price: "", note: "" }], ratecard_note: "" };
 
 function draftFrom(block: ProfileLink): Draft {
   return {
@@ -42,6 +45,8 @@ function draftFrom(block: ProfileLink): Draft {
     price: block.content?.price ?? "",
     price_original: block.content?.price_original ?? "",
     source: block.content?.source ?? "",
+    ratecard_items: block.content?.ratecard_items?.length ? block.content.ratecard_items : [{ label: "", price: "", note: "" }],
+    ratecard_note: block.content?.ratecard_note ?? "",
   };
 }
 
@@ -144,6 +149,25 @@ export function BlockManager({
             price_original: parsed.data.price_original,
             source: draft.source || undefined,
           },
+        },
+      };
+    }
+    if (type === "ratecard") {
+      const parsed = ratecardBlockSchema.safeParse({
+        items: draft.ratecard_items.filter((i) => i.label.trim() && i.price.trim()),
+        note: draft.ratecard_note,
+      });
+      if (!parsed.success) return { error: firstIssue(parsed.error) };
+      return {
+        row: {
+          block_type: "ratecard",
+          label: "Rate Card",
+          url: "",
+          link_type: "ratecard",
+          icon_key: "ratecard",
+          image_url: "",
+          affiliate_disclosure: false,
+          content: { ratecard_items: parsed.data.items, ratecard_note: parsed.data.note },
         },
       };
     }
@@ -307,6 +331,8 @@ export function BlockManager({
                   ? <span aria-hidden="true">¶</span>
                   : type === "product"
                   ? <span aria-hidden="true">🛍</span>
+                  : type === "ratecard"
+                  ? <span aria-hidden="true">🏷️</span>
                   : <LinkIcon linkType={block.link_type} />}
               </span>
               <div className="link-row-main">
@@ -348,6 +374,7 @@ export function BlockManager({
                   <span className="block-type-icon">
                     {b.value === "link" && <LinkIcon linkType="link" />}
                     {b.value === "product" && <span aria-hidden="true">🛍</span>}
+                    {b.value === "ratecard" && <span aria-hidden="true">🏷️</span>}
                     {b.value === "social" && <SocialIcon platform="instagram" size={20} />}
                     {b.value === "text" && <span aria-hidden="true">¶</span>}
                     {b.value === "photo" && <span aria-hidden="true">🖼</span>}
@@ -386,6 +413,7 @@ function rowSummary(block: ProfileLink, type: BlockType): string {
   if (type === "text") return ` ${block.content?.html?.replace(/<[^>]+>/g, "").slice(0, 40) || "(kosong)"}`;
   if (type === "social") return ` ${(block.content?.items ?? []).map((i) => socialPlatformLabel(i.platform)).join(", ") || "(kosong)"}`;
   if (type === "photo") return ` ${block.content?.caption || "Foto"}`;
+  if (type === "ratecard") return ` ${block.content?.ratecard_items?.length ?? 0} layanan`;
   return "";
 }
 
@@ -424,6 +452,17 @@ function BlockFields({
         setImage={setImage}
         existingImage={existingImage}
         onClearImage={onClearImage}
+      />
+    );
+  }
+
+  if (type === "ratecard") {
+    return (
+      <RatecardFields
+        items={draft.ratecard_items}
+        setItems={(items) => setDraft((d) => ({ ...d, ratecard_items: items }))}
+        note={draft.ratecard_note}
+        setNote={(note) => setDraft((d) => ({ ...d, ratecard_note: note }))}
       />
     );
   }

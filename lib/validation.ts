@@ -136,6 +136,17 @@ export const productBlockSchema = z.object({
   price_original: z.string().trim().max(40, "Harga maksimal 40 karakter.").default(""),
 });
 
+export const ratecardItemSchema = z.object({
+  label: z.string().trim().min(1, "Nama layanan wajib diisi.").max(80, "Nama layanan maksimal 80 karakter."),
+  price: z.string().trim().min(1, "Harga wajib diisi.").max(40, "Harga maksimal 40 karakter."),
+  note: z.string().trim().max(120, "Catatan maksimal 120 karakter.").default(""),
+});
+
+export const ratecardBlockSchema = z.object({
+  items: z.array(ratecardItemSchema).min(1, "Tambahkan minimal satu layanan.").max(12, "Maksimal 12 layanan."),
+  note: z.string().trim().max(200, "Catatan maksimal 200 karakter.").default(""),
+});
+
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type LinkInput = z.infer<typeof linkSchema>;
 

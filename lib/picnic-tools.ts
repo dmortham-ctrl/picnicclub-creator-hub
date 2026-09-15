@@ -1,8 +1,8 @@
 export const TOOL_DAILY_LIMIT = 50;
 export const TOOL_COUNT_MAX = 10;
 
-export type ToolKey = "hook" | "script" | "caption" | "live" | "calendar" | "analysis";
-export const TOOL_KEYS: ToolKey[] = ["hook", "script", "caption", "live", "calendar", "analysis"];
+export type ToolKey = "hook" | "script" | "caption" | "live" | "calendar" | "analysis" | "ratecard";
+export const TOOL_KEYS: ToolKey[] = ["hook", "script", "caption", "live", "calendar", "analysis", "ratecard"];
 
 /** Per-tool UI + generation config. `hasCount` shows the "jumlah" selector. */
 export const TOOL_META: Record<
@@ -15,6 +15,7 @@ export const TOOL_META: Record<
   live: { label: "Skrip Live Selling", noun: "bagian", hasCount: false, defaultCount: 1, desc: "Naskah live yang dirancang untuk diulang-ulang: pembuka sekali, inti putaran jualan + selingan yang dipakai berulang, penutup sekali." },
   calendar: { label: "Kalender Konten", noun: "hari", hasCount: false, defaultCount: 7, desc: "Rencana konten 7 hari dari satu produk — tiap hari angle & format berbeda." },
   analysis: { label: "Analisa Produk", noun: "bagian", hasCount: false, defaultCount: 1, desc: "Brief riset produk: target market, pain point, selling point, angle, keberatan, diksi, positioning harga. Kerjakan ini dulu sebelum bikin konten." },
+  ratecard: { label: "Rate Card", noun: "layanan", hasCount: true, defaultCount: 6, desc: "Masukkan jumlah followers, niche, dan platform kamu — AI kasih saran rate card siap tampil di profil." },
 };
 
 // Kept for backwards compatibility with existing imports.
@@ -137,6 +138,16 @@ Keluarkan array 7 objek dengan "title" dan "body":
 Bahasa Indonesia santai tapi jelas. Setiap "body" langsung actionable, bukan teori umum. Sesuaikan dengan platform yang disebut.
 
 ${BANNED_URGENCY_RULE}`;
+
+export const RATECARD_SYSTEM = `Kamu konsultan pricing untuk creator affiliate & UGC di Indonesia.
+Tugas: berdasarkan niche, jumlah followers, platform utama, dan pengalaman kerja sama yang diberikan, susun rate card (daftar harga jasa) yang realistis untuk pasar Indonesia. Jumlah layanan mengikuti angka yang diminta.
+
+Setiap layanan:
+- "label": nama paket/jasa singkat dan jelas (contoh: "1 Video TikTok (UGC)", "Live Selling 1 Jam", "Bundle 3 Video + 1 Live", "Endorse Story 24 Jam", "Video + Repost Akun Brand").
+- "price": kisaran atau angka harga dalam Rupiah, format "Rp 300.000" atau "Rp 500.000 - 750.000". Sesuaikan besarannya dengan jumlah followers (semakin besar followers/engagement, semakin tinggi harga wajar di pasar Indonesia saat ini) dan tingkat pengalaman yang disebutkan.
+- "note" (opsional, boleh dikosongkan): syarat singkat kalau perlu, contoh "termasuk 1x revisi", "harga belum termasuk produk sample".
+
+Susun dari paket termurah/termudah ke yang paling premium/lengkap. Variasikan jenis format (video, live, bundle, story) sesuai platform yang disebut, jangan cuma beda harga di jenis yang sama. Bahasa Indonesia, singkat dan profesional — ini akan ditampilkan langsung ke brand yang mau kerja sama, bukan draft internal.`;
 
 const BANNED_URGENCY_RE =
   /\b(stok|stock|persediaan|restock|sold\s*out|limited\s*stock)\b|keburu\s+(habis|kehabisan)|sebelum\s+(habis|kehabisan)|jangan\s+sampai\s+kehabisan|sisa\s+(sedikit|\d)|(barang|unit|slot)\s+terbatas|buruan\s+(sebelum|keburu)/i;

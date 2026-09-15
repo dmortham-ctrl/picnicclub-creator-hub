@@ -64,7 +64,7 @@ create table public.profile_links (
   label text not null default '',
   url text not null default '' check (url = '' or url ~* '^https?://'),
   link_type text not null default 'link',
-  block_type text not null default 'link' check (block_type in ('link', 'text', 'social', 'photo', 'product')),
+  block_type text not null default 'link' check (block_type in ('link', 'text', 'social', 'photo', 'product', 'ratecard')),
   content jsonb not null default '{}'::jsonb,
   icon_key text not null default 'link',
   image_url text not null default '' check (image_url = '' or image_url ~* '^https?://'),
@@ -316,7 +316,7 @@ grant execute on function public.claim_profile(text) to authenticated;
 create table public.tool_generations (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  tool text not null check (tool in ('hook', 'script', 'caption', 'live', 'calendar', 'analysis')),
+  tool text not null check (tool in ('hook', 'script', 'caption', 'live', 'calendar', 'analysis', 'ratecard')),
   input jsonb not null default '{}'::jsonb,
   input_hash text not null,
   output jsonb not null default '[]'::jsonb,
@@ -343,7 +343,7 @@ create policy "authenticated updates cache" on public.tool_cache for update to a
 create table public.tool_saves (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  tool text not null check (tool in ('hook', 'script', 'caption', 'live', 'calendar', 'analysis')),
+  tool text not null check (tool in ('hook', 'script', 'caption', 'live', 'calendar', 'analysis', 'ratecard')),
   content text not null,
   meta jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
