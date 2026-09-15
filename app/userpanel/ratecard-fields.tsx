@@ -11,11 +11,15 @@ import type { RateCardItem } from "@/lib/types";
 export function RatecardFields({
   items,
   setItems,
+  wa,
+  setWa,
   note,
   setNote,
 }: {
   items: RateCardItem[];
   setItems: (items: RateCardItem[]) => void;
+  wa: string;
+  setWa: (wa: string) => void;
   note: string;
   setNote: (note: string) => void;
 }) {
@@ -57,6 +61,17 @@ export function RatecardFields({
           + Tambah layanan
         </button>
       )}
+      <label>
+        Nomor WhatsApp untuk tombol &quot;Hubungi Creator&quot; (opsional)
+        <input
+          type="tel"
+          value={wa}
+          maxLength={30}
+          onChange={(e) => setWa(e.target.value)}
+          placeholder="0857xxxxxxxx atau 62857xxxxxxxx"
+        />
+        <small style={{ color: "var(--muted)" }}>Kosongkan kalau belum mau tampilkan tombol kontak di rate card.</small>
+      </label>
       <label>
         Catatan tambahan (opsional)
         <textarea

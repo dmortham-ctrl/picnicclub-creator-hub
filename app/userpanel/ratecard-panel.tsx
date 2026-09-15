@@ -5,6 +5,7 @@ import { Sparkles, ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Profile, ProfileLink, RateCardItem } from "@/lib/types";
 import { ratecardBlockSchema, firstIssue } from "@/lib/validation";
+import { normalizeWhatsappUrl } from "@/lib/link-types";
 import { TOOL_DAILY_LIMIT, TOOL_COUNT_MAX, TOOL_META, TOOL_PLATFORMS, TOOL_TYPE_CHIPS } from "@/lib/picnic-tools";
 import { RatecardFields } from "@/app/userpanel/ratecard-fields";
 
@@ -39,6 +40,7 @@ export function RatecardPanel({
   const [notice, setNotice] = useState("");
   const [usedToday, setUsedToday] = useState<number | null>(null);
   const [items, setItems] = useState<RateCardItem[]>(EMPTY_ITEMS);
+  const [wa, setWa] = useState("");
   const [note, setNote] = useState("");
   const [hasGenerated, setHasGenerated] = useState(false);
 
@@ -49,6 +51,7 @@ export function RatecardPanel({
   useEffect(() => {
     if (existing) {
       setItems(existing.content?.ratecard_items?.length ? existing.content.ratecard_items : EMPTY_ITEMS);
+      setWa(existing.url ?? "");
       setNote(existing.content?.ratecard_note ?? "");
       setHasGenerated(true);
     }
@@ -89,13 +92,14 @@ export function RatecardPanel({
     const parsed = ratecardBlockSchema.safeParse({
       items: items.filter((i) => i.label.trim() && i.price.trim()),
       note,
+      wa: wa.trim() ? normalizeWhatsappUrl(wa) : "",
     });
     if (!parsed.success) { setError(firstIssue(parsed.error)); return; }
     setPublishing(true);
     const row = {
       block_type: "ratecard" as const,
       label: "Rate Card",
-      url: "",
+      url: parsed.data.wa,
       link_type: "ratecard",
       icon_key: "ratecard",
       image_url: "",
@@ -170,7 +174,7 @@ export function RatecardPanel({
             <h3>Rate card kamu</h3>
             <p>Edit bebas sebelum ditampilkan — harga saran AI cuma titik awal.</p>
           </div>
-          <RatecardFields items={items} setItems={setItems} note={note} setNote={setNote} />
+          <RatecardFields items={items} setItems={setItems} wa={wa} setWa={setWa} note={note} setNote={setNote} />
           <div className="form-actions">
             <button className="button-dark" type="button" onClick={publish} disabled={publishing}>
               {publishing ? "Menyimpan..." : existing ? "Perbarui di profil" : "Tampilkan di profil"}

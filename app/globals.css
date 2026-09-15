@@ -431,12 +431,17 @@ body, body * { font-family: Poppins, sans-serif !important; }
 .bio-ratecard { text-align: left; background: var(--bio-link-bg); border: 1px solid var(--bio-link-border); border-radius: 12px; padding: 16px 18px; margin: 14px 0; }
 .bio-ratecard-head { display: flex; align-items: center; gap: 7px; font: 11px 'DM Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--bio-muted); margin-bottom: 8px; }
 .bio-ratecard-rows { display: grid; }
-.bio-ratecard-row { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 10px 0; border-top: 1px solid var(--bio-link-border); }
+.bio-ratecard-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-top: 1px solid var(--bio-link-border); }
 .bio-ratecard-row:first-child { border-top: 0; }
+.bio-ratecard-num { flex-shrink: 0; width: 19px; height: 19px; margin-top: 1px; border-radius: 50%; background: var(--bio-link-bg-hover); border: 1px solid var(--bio-link-border); display: grid; place-items: center; font: 700 10px 'DM Mono', monospace; color: var(--bio-muted); }
+.bio-ratecard-info { flex: 1; min-width: 0; }
 .bio-ratecard-label { display: block; font-size: 13.5px; font-weight: 700; color: var(--bio-link-fg); }
 .bio-ratecard-note { display: block; font-size: 11.5px; color: var(--bio-muted); margin-top: 2px; }
 .bio-ratecard-price { flex-shrink: 0; font-size: 13.5px; font-weight: 800; color: var(--bio-accent); white-space: nowrap; }
 .bio-ratecard-footer { margin: 12px 0 0; padding-top: 10px; border-top: 1px dashed var(--bio-link-border); font-size: 11.5px; color: var(--bio-muted); line-height: 1.6; }
+.bio-ratecard-cta { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; padding: 13px; border-radius: 8px; background: var(--bio-fg); color: var(--bio-link-bg); font-size: 13px; font-weight: 700; text-decoration: none; transition: transform .15s; }
+.bio-ratecard-cta svg { color: var(--bio-link-bg); flex-shrink: 0; }
+a.bio-ratecard-cta:hover { transform: translateY(-2px); }
 
 .product-url { display: flex; gap: 8px; }
 .product-url input { flex: 1; min-width: 0; }

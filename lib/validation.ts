@@ -145,6 +145,7 @@ export const ratecardItemSchema = z.object({
 export const ratecardBlockSchema = z.object({
   items: z.array(ratecardItemSchema).min(1, "Tambahkan minimal satu layanan.").max(12, "Maksimal 12 layanan."),
   note: z.string().trim().max(200, "Catatan maksimal 200 karakter.").default(""),
+  wa: z.union([linkUrlSchema, z.literal("")]).default(""),
 });
 
 export type ProfileInput = z.infer<typeof profileSchema>;

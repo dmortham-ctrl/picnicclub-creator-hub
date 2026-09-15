@@ -156,13 +156,14 @@ export function BlockManager({
       const parsed = ratecardBlockSchema.safeParse({
         items: draft.ratecard_items.filter((i) => i.label.trim() && i.price.trim()),
         note: draft.ratecard_note,
+        wa: draft.url.trim() ? normalizeWhatsappUrl(draft.url) : "",
       });
       if (!parsed.success) return { error: firstIssue(parsed.error) };
       return {
         row: {
           block_type: "ratecard",
           label: "Rate Card",
-          url: "",
+          url: parsed.data.wa,
           link_type: "ratecard",
           icon_key: "ratecard",
           image_url: "",
@@ -344,7 +345,7 @@ export function BlockManager({
                   {type === "link" && block.content?.wa_float && <em className="link-aff"> · melayang</em>}
                   {type === "product" && block.content?.price && <em className="link-aff"> · {block.content.price}</em>}
                 </strong>
-                {(type === "link" || type === "product" || (type === "photo" && block.url)) && <small>{block.url}</small>}
+                {(type === "link" || type === "product" || ((type === "photo" || type === "ratecard") && block.url)) && <small>{block.url}</small>}
               </div>
               <div className="link-row-actions">
                 <button className="icon-button" type="button" aria-label="Naikkan" disabled={index === 0} onClick={() => move(block, -1)}>↑</button>
@@ -461,6 +462,8 @@ function BlockFields({
       <RatecardFields
         items={draft.ratecard_items}
         setItems={(items) => setDraft((d) => ({ ...d, ratecard_items: items }))}
+        wa={draft.url}
+        setWa={(wa) => setDraft((d) => ({ ...d, url: wa }))}
         note={draft.ratecard_note}
         setNote={(note) => setDraft((d) => ({ ...d, ratecard_note: note }))}
       />

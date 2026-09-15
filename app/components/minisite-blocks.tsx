@@ -146,6 +146,17 @@ function Block({ block, interactive }: { block: MinisiteLink; interactive: boole
   if (type === "ratecard") {
     const items = block.content?.ratecard_items ?? [];
     if (items.length === 0) return null;
+    const cta = block.url && (
+      interactive ? (
+        <a className="bio-ratecard-cta" href={`/l/${block.id}`} target="_blank" rel="noreferrer nofollow">
+          <SocialIcon platform="whatsapp" size={16} /> Hubungi Creator
+        </a>
+      ) : (
+        <span className="bio-ratecard-cta">
+          <SocialIcon platform="whatsapp" size={16} /> Hubungi Creator
+        </span>
+      )
+    );
     return (
       <div className="bio-ratecard">
         <div className="bio-ratecard-head">
@@ -155,7 +166,8 @@ function Block({ block, interactive }: { block: MinisiteLink; interactive: boole
         <div className="bio-ratecard-rows">
           {items.map((item, i) => (
             <div className="bio-ratecard-row" key={i}>
-              <div>
+              <span className="bio-ratecard-num">{i + 1}</span>
+              <div className="bio-ratecard-info">
                 <span className="bio-ratecard-label">{item.label}</span>
                 {item.note && <span className="bio-ratecard-note">{item.note}</span>}
               </div>
@@ -164,6 +176,7 @@ function Block({ block, interactive }: { block: MinisiteLink; interactive: boole
           ))}
         </div>
         {block.content?.ratecard_note && <p className="bio-ratecard-footer">{block.content.ratecard_note}</p>}
+        {cta}
       </div>
     );
   }
