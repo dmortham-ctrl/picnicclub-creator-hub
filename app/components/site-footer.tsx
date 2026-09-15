@@ -31,9 +31,9 @@ export function SiteFooter() {
         </div>
         <div className="footer-column">
           <span className="footer-label">For brands</span>
-          <Link href="https://wa.me/62895364547187">Collaborate ↗</Link>
+          <Link href="https://wa.me/6282353677282">Collaborate ↗</Link>
           <Link href="mailto:picnicclubcircle@gmail.com">picnicclubcircle@gmail.com</Link>
-          <Link href="https://wa.me/62895364547187">WhatsApp ↗</Link>
+          <Link href="https://wa.me/6282353677282">WhatsApp ↗</Link>
         </div>
       </div>
       <div className="footer-bottom">

@@ -40,7 +40,7 @@ export default function ReportPage() {
       <h2>Mendesak</h2>
       <p>
         Untuk hal yang membahayakan keselamatan, hubungi juga admin Picnic Club melalui{" "}
-        <a href="https://wa.me/62895364547187">WhatsApp</a>.
+        <a href="https://wa.me/6282353677282">WhatsApp</a>.
       </p>
     </LegalPage>
   );

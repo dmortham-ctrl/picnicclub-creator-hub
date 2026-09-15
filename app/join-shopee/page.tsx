@@ -26,7 +26,7 @@ export default function JoinShopeePage() {
 
         <JoinEmbed
           formSrc={FORM_SRC}
-          adminWa="6289606687080"
+          adminWa="6282353677282"
           title="Formulir Join Agency Shopee"
           waMessage={
             "Halo admin Picnic Club, saya baru saja mengisi formulir Join Agency Shopee.\nMohon dikonfirmasi ya. Terima kasih."

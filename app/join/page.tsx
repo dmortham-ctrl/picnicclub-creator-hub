@@ -26,7 +26,7 @@ export default function JoinPage() {
 
         <JoinEmbed
           formSrc={FORM_SRC}
-          adminWa="6287888527772"
+          adminWa="6282353677282"
           title="Formulir Join Agency TikTok"
           waMessage={
             "Halo admin Picnic Club, saya baru saja mengisi formulir Join Agency TikTok.\nMohon dikonfirmasi ya. Terima kasih."

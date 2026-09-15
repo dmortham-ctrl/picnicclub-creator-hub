@@ -28,7 +28,7 @@ export default function ContactPage() {
           Email: <a href="mailto:picnicclubcircle@gmail.com">picnicclubcircle@gmail.com</a>
         </li>
         <li>
-          WhatsApp (kerja sama brand): <a href="https://wa.me/62895364547187">wa.me/62895364547187</a>
+          WhatsApp (kerja sama brand): <a href="https://wa.me/6282353677282">wa.me/6282353677282</a>
         </li>
         <li>
           TikTok:{" "}
