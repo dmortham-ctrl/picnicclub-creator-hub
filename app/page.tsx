@@ -66,7 +66,7 @@ export default async function Home() {
     <div className="band">{content.marquee_text}</div>
 
     <section id="community" className="section">
-      <div className="section-head"><div><div className="eyebrow">The founders / 002</div><h2>The<br />Founders.</h2><p className="section-note founder-note">Lima praktisi yang membangun Picnic Club dari pengalaman nyata sebagai creator dan affiliator.</p></div></div>
+      <div className="section-head"><div><div className="eyebrow">The founders / 002</div><h2>The<br />Founders.</h2><p className="section-note founder-note">Tujuh praktisi yang membangun Picnic Club dari pengalaman nyata sebagai creator, affiliator, dan business development.</p></div></div>
       <div className="creator-grid founder-grid">{founders.map((profile) => <CreatorCard key={profile.id} profile={profile} />)}</div>
     </section>
 
