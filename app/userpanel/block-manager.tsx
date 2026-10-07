@@ -11,6 +11,7 @@ import { LinkIcon } from "@/app/components/link-icon";
 import { SocialIcon } from "@/app/components/social-icons";
 import { RichTextEditor } from "@/app/components/rich-text-editor";
 import { RatecardFields } from "@/app/userpanel/ratecard-fields";
+import { RATECARD_ENABLED } from "@/lib/features";
 
 type Draft = {
   label: string;
@@ -77,7 +78,10 @@ export function BlockManager({
   const [editImageCleared, setEditImageCleared] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  const ordered = [...links].sort((a, b) => a.sort_order - b.sort_order);
+  // A rate-card block stays in the database but is hidden here while the feature is off.
+  const ordered = [...links]
+    .filter((l) => RATECARD_ENABLED || (l.block_type ?? "link") !== "ratecard")
+    .sort((a, b) => a.sort_order - b.sort_order);
 
   async function uploadImage(file: File): Promise<string | null> {
     if (!supabase) return null;
@@ -367,7 +371,7 @@ export function BlockManager({
             </div>
           );
         })}
-        {links.length === 0 && <p className="hero-copy">Belum ada block. Tambahkan block pertama kamu.</p>}
+        {ordered.length === 0 && <p className="hero-copy">Belum ada block. Tambahkan block pertama kamu.</p>}
       </div>
 
       <div className="block-add">

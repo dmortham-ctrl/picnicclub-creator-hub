@@ -15,6 +15,7 @@ import { Menu, X, Eye, User, LayoutGrid, Palette, BarChart3, ExternalLink, LogOu
 import { ToolsPanel } from "@/app/userpanel/tools-panel";
 import { RatecardPanel } from "@/app/userpanel/ratecard-panel";
 import { SupportPanel } from "@/app/userpanel/support-panel";
+import { RATECARD_ENABLED } from "@/lib/features";
 
 const SECTIONS = [
   { id: "profile", label: "Profil", group: "" },
@@ -31,6 +32,8 @@ const SECTIONS = [
   { id: "banding", label: "Banding Pelanggaran", group: "Picnic Support" },
 ] as const;
 type SectionId = (typeof SECTIONS)[number]["id"];
+// Sidebar entries actually shown (Rate Card is hidden while the feature is off).
+const VISIBLE_SECTIONS = SECTIONS.filter((s) => RATECARD_ENABLED || s.id !== "ratecard");
 
 const SECTION_ICON: Record<SectionId, ReactNode> = {
   profile: <User size={17} />,
@@ -277,9 +280,9 @@ export default function UserPanelPage() {
         )}
 
         <nav className="panel-sidebar-nav">
-          {SECTIONS.map((item, i) => (
+          {VISIBLE_SECTIONS.map((item, i) => (
             <div key={item.id} className="panel-sidebar-navitem">
-              {item.group && SECTIONS[i - 1]?.group !== item.group && (
+              {item.group && VISIBLE_SECTIONS[i - 1]?.group !== item.group && (
                 <span className="panel-sidebar-group">{item.group}</span>
               )}
               <button
@@ -462,7 +465,7 @@ export default function UserPanelPage() {
           )}
 
           {section === "analysis" && <ToolsPanel tool="analysis" />}
-          {section === "ratecard" && (
+          {RATECARD_ENABLED && section === "ratecard" && (
             <RatecardPanel profile={profile} links={links} setLinks={setLinks} onMutated={() => revalidateIfPublished(profile)} />
           )}
           {section === "hook" && <ToolsPanel tool="hook" />}

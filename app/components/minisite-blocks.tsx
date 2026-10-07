@@ -7,6 +7,7 @@ import { LinkIcon } from "@/app/components/link-icon";
 import { SocialIcon } from "@/app/components/social-icons";
 import { sanitizeRichText, socialPlatformLabel } from "@/lib/blocks";
 import { toolPlatformLabel } from "@/lib/picnic-tools";
+import { RATECARD_ENABLED } from "@/lib/features";
 import type { MinisiteLink } from "@/app/components/minisite-view";
 
 function blockText(block: MinisiteLink): string {
@@ -48,10 +49,11 @@ export function MinisiteBlocks({
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
 
-  const filtered = useMemo(
-    () => (q ? blocks.filter((b) => blockText(b).toLowerCase().includes(q)) : blocks),
-    [blocks, q],
-  );
+  const filtered = useMemo(() => {
+    // Rate-card blocks are not rendered while the feature is off (data stays in the DB).
+    const visible = blocks.filter((b) => RATECARD_ENABLED || (b.block_type ?? "link") !== "ratecard");
+    return q ? visible.filter((b) => blockText(b).toLowerCase().includes(q)) : visible;
+  }, [blocks, q]);
 
   return (
     <>

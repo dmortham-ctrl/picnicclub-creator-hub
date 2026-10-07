@@ -5,6 +5,7 @@ import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { RATECARD_ENABLED } from "@/lib/features";
 import {
   TOOL_DAILY_LIMIT,
   TOOL_COUNT_MAX,
@@ -140,6 +141,9 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Lengkapi form dulu, lalu coba lagi." }, { status: 400 });
   const body = parsed.data;
   const tool = body.tool;
+  if (tool === "ratecard" && !RATECARD_ENABLED) {
+    return NextResponse.json({ error: "Fitur Rate Card sedang dinonaktifkan." }, { status: 403 });
+  }
   // Fixed-shape tools (live, calendar) ignore the requested count.
   const count = TOOL_META[tool].hasCount ? body.count : TOOL_META[tool].defaultCount;
 

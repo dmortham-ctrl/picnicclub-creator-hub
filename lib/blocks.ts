@@ -1,6 +1,7 @@
 import type { BlockType } from "./types";
+import { RATECARD_ENABLED } from "./features";
 
-export const BLOCK_TYPES: { value: BlockType; label: string; hint: string }[] = [
+const ALL_BLOCK_TYPES: { value: BlockType; label: string; hint: string }[] = [
   { value: "link", label: "Link", hint: "Tombol menuju satu URL." },
   { value: "product", label: "Produk", hint: "Kartu produk otomatis dari link Shopee, TikTok Shop, dll." },
   { value: "ratecard", label: "Rate Card", hint: "Daftar harga kerja sama — video, live, bundle — tampil sebagai kartu di profil." },
@@ -8,6 +9,9 @@ export const BLOCK_TYPES: { value: BlockType; label: string; hint: string }[] = 
   { value: "text", label: "Teks", hint: "Judul atau paragraf dengan format." },
   { value: "photo", label: "Foto", hint: "Satu gambar, bisa diklik ke link." },
 ];
+
+/** Block types a creator can add (Rate Card is hidden while the feature is off). */
+export const BLOCK_TYPES = ALL_BLOCK_TYPES.filter((b) => RATECARD_ENABLED || b.value !== "ratecard");
 
 /** Marketplace label from a product link's host. */
 export function productSourceLabel(source?: string): string {
@@ -21,7 +25,7 @@ export function productSourceLabel(source?: string): string {
 }
 
 export function blockTypeLabel(value: string): string {
-  return BLOCK_TYPES.find((b) => b.value === value)?.label ?? "Link";
+  return ALL_BLOCK_TYPES.find((b) => b.value === value)?.label ?? "Link";
 }
 
 /**
