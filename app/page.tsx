@@ -5,6 +5,7 @@ import { CreatorCard } from "./components/creator-card";
 import { SiteNav } from "./components/site-nav";
 import { SiteFooter } from "./components/site-footer";
 import { OrbitAvatars, type OrbitCreator } from "./components/orbit-avatars";
+import { lensPositions } from "@/lib/orbit-layout";
 import { TrackedLink, TrackView } from "./components/analytics";
 import { getPublishedProfiles } from "@/lib/data";
 import { getFaqs, getSiteContent } from "@/lib/content";
@@ -42,19 +43,14 @@ export default async function Home() {
   const founderUsernames = content.founder_usernames.split(",").map((name) => name.trim()).filter(Boolean);
   const founders = founderUsernames.map((username) => profiles.find((profile) => profile.username === username)).filter((profile): profile is typeof profiles[number] => Boolean(profile));
 
-  // Hero orbit — "All Star" creators, ordered by featured_order. Ring split and the
-  // angle of every avatar are derived from the count, so it stays even at any size.
+  // Hero orbit — "All Star" creators, ordered by featured_order. Row sizes and every
+  // avatar's slot are derived from the count (lib/orbit-layout.ts), so nobody is hidden.
   const heroCreators = profiles
     .filter((profile) => profile.level === "All Star" && profile.avatar_url)
     .slice(0, 30)
     .map((profile) => ({ avatar: profile.avatar_url, href: `/@${profile.username}` }));
-  const outerCount = Math.ceil(heroCreators.length * 0.6);
-  const orbitCreators: OrbitCreator[] = heroCreators.map((creator, index) => {
-    const outer = index < outerCount;
-    const ringSize = outer ? outerCount : heroCreators.length - outerCount;
-    const ringIndex = outer ? index : index - outerCount;
-    return { ...creator, outer, angle: (360 / ringSize) * ringIndex + (outer ? 0 : 180 / ringSize) };
-  });
+  const slots = lensPositions(heroCreators.length);
+  const orbitCreators: OrbitCreator[] = heroCreators.map((creator, index) => ({ ...creator, ...slots[index] }));
 
   return <main className="site-shell">
     <JsonLd data={organizationLd} />

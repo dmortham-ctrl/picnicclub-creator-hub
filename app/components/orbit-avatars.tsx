@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-export type OrbitCreator = { avatar: string; href: string; angle: number; outer: boolean };
+/** u = position along its row, v = row — both centred on 0 (see lib/orbit-layout.ts). */
+export type OrbitCreator = { avatar: string; href: string; u: number; v: number };
 
 /** Where an avatar starts from, and when it launches. */
 type Flight = { delay: number; x: number; y: number; s: number };
@@ -83,7 +84,8 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
         const fly = flights?.[index];
         const state = flights === null ? " avatar-wait" : !fly ? "" : leaving ? " avatar-exit" : " avatar-enter";
         const style = {
-          "--angle": `${creator.angle}deg`,
+          "--u": creator.u,
+          "--v": creator.v,
           ...(fly && {
             "--delay": `${fly.delay}s`,
             "--from-x": `${fly.x}px`,
@@ -93,7 +95,7 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
         } as CSSProperties;
         return (
           <Link
-            className={`avatar ${creator.outer ? "avatar-outer" : "avatar-inner"}${state}`}
+            className={`avatar${state}`}
             style={style}
             href={creator.href}
             key={`${cycle}-${index}`}
