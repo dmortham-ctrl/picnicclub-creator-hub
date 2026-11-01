@@ -13,7 +13,7 @@ type Flight = { delay: number; x: number; y: number; s: number };
 const ENTER_MS = 850; // matches .avatar-enter in globals.css
 const HOLD_MS = 10000; // how long the landed avatars stay put before leaving again
 const EXIT_MS = 450; // matches .avatar-exit in globals.css
-const GAP_MS = 150; // empty beat between leaving and the next launch
+const TITLE_MS = 3000; // the "TOP 40" title card between rounds; matches the .orbit-title timeline in globals.css
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
@@ -56,6 +56,7 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
   // slotOf[i] = which slot (u, v) avatar i stands in; reshuffled on every launch so positions change each round.
   const [slotOf, setSlotOf] = useState<number[] | null>(null);
   const [leaving, setLeaving] = useState(false);
+  const [title, setTitle] = useState(false); // the "TOP 40" card shown after the avatars leave
   const [cycle, setCycle] = useState(0); // bumped each launch so the avatars remount and replay
   const hovering = useRef(0);
 
@@ -70,6 +71,7 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
     const launch = () => {
       const next = randomFlights(creators.length);
       hovering.current = 0;
+      setTitle(false);
       setFlights(next);
       setSlotOf(shuffledSlots(creators.length));
       setLeaving(false);
@@ -84,7 +86,11 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
         return;
       }
       setLeaving(true);
-      timer = setTimeout(launch, EXIT_MS + GAP_MS);
+      // Avatars are gone -> slam the title card in -> then the next round launches.
+      timer = setTimeout(() => {
+        setTitle(true);
+        timer = setTimeout(launch, TITLE_MS);
+      }, EXIT_MS);
     };
 
     launch();
@@ -121,6 +127,14 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
           </Link>
         );
       })}
+      {title && (
+        <div className="orbit-title" aria-hidden="true">
+          <span className="ot-ring" />
+          <span className="ot-top">Top</span>
+          <span className="ot-num">40</span>
+          <span className="ot-club">Picnic Club</span>
+        </div>
+      )}
     </>
   );
 }
