@@ -62,7 +62,7 @@ export default async function Home() {
     <SiteNav />
     <section className="hero">
       <div><div className="eyebrow">Creator commerce ecosystem / 001</div><h1>{content.hero_title}</h1><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></div>
-      <div className="orbit"><OrbitAvatars creators={orbitCreators} /><div className="orbit-center">Top Creator<br />Picnic</div></div>
+      <div className="orbit"><OrbitAvatars creators={orbitCreators} /></div>
     </section>
     <div className="band">{content.marquee_text}</div>
 
