@@ -10,7 +10,7 @@ export type OrbitCreator = { avatar: string; href: string; angle: number; outer:
 type Flight = { delay: number; x: number; y: number; s: number };
 
 const ENTER_MS = 850; // matches .avatar-enter in globals.css
-const HOLD_MS = 2000; // how long the landed avatars stay put before leaving again
+const HOLD_MS = 3000; // how long the landed avatars stay put before leaving again
 const EXIT_MS = 450; // matches .avatar-exit in globals.css
 const GAP_MS = 150; // empty beat between leaving and the next launch
 
