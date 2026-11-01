@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CreatorCard } from "./components/creator-card";
 import { SiteNav } from "./components/site-nav";
 import { SiteFooter } from "./components/site-footer";
+import { OrbitAvatars, type OrbitCreator } from "./components/orbit-avatars";
 import { TrackedLink, TrackView } from "./components/analytics";
 import { getPublishedProfiles } from "@/lib/data";
 import { getFaqs, getSiteContent } from "@/lib/content";
@@ -48,6 +49,12 @@ export default async function Home() {
     .slice(0, 30)
     .map((profile) => ({ avatar: profile.avatar_url, href: `/@${profile.username}` }));
   const outerCount = Math.ceil(heroCreators.length * 0.6);
+  const orbitCreators: OrbitCreator[] = heroCreators.map((creator, index) => {
+    const outer = index < outerCount;
+    const ringSize = outer ? outerCount : heroCreators.length - outerCount;
+    const ringIndex = outer ? index : index - outerCount;
+    return { ...creator, outer, angle: (360 / ringSize) * ringIndex + (outer ? 0 : 180 / ringSize) };
+  });
 
   return <main className="site-shell">
     <JsonLd data={organizationLd} />
@@ -55,13 +62,7 @@ export default async function Home() {
     <SiteNav />
     <section className="hero">
       <div><div className="eyebrow">Creator commerce ecosystem / 001</div><h1>{content.hero_title}</h1><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></div>
-      <div className="orbit">{heroCreators.map((creator, index) => {
-        const isOuter = index < outerCount;
-        const ringSize = isOuter ? outerCount : heroCreators.length - outerCount;
-        const ringIndex = isOuter ? index : index - outerCount;
-        const angle = (360 / ringSize) * ringIndex + (isOuter ? 0 : 180 / ringSize);
-        return <Link className={`avatar ${isOuter ? "avatar-outer" : "avatar-inner"}`} style={{ "--angle": `${angle}deg` } as CSSProperties} href={creator.href} key={index} aria-label="View creator profile"><Image src={creator.avatar} alt="" width={58} height={58} loading="eager" /></Link>;
-      })}<div className="orbit-center">Top Creator<br />Picnic</div></div>
+      <div className="orbit"><OrbitAvatars creators={orbitCreators} /><div className="orbit-center">Top Creator<br />Picnic</div></div>
     </section>
     <div className="band">{content.marquee_text}</div>
 

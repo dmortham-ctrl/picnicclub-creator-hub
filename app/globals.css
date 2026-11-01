@@ -55,7 +55,13 @@ h1 { font-size: clamp(48px, 7vw, 92px); line-height: .98; letter-spacing: -.075e
 .avatar img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .avatar-outer { --radius: 216px; }.avatar-inner { --radius: 144px; }.avatar-outer, .avatar-inner { transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -1)) rotate(calc(var(--angle) * -1)); }
 .avatar:hover { z-index: 5; transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -1)) rotate(calc(var(--angle) * -1)) scale(1.5); box-shadow: 0 16px 28px #17332940; filter: saturate(1.2); animation-play-state: paused; }
-/* Per-avatar --angle is set inline in app/page.tsx (outer ring first, then inner). */
+/* Hero orbit entrance: each avatar launches (random order/direction, set in orbit-avatars.tsx) to its spot. Uses the independent translate/scale properties so the ring-position transform is untouched. */
+.avatar-wait { opacity: 0; }
+@media (scripting: none) { .avatar-wait { opacity: 1; } }
+.avatar-enter { animation: avatar-in .85s cubic-bezier(.2, .9, .3, 1.12) var(--delay, 0s) backwards, float 4s ease-in-out calc(var(--delay, 0s) + .85s) infinite; }
+@keyframes avatar-in { from { opacity: 0; translate: var(--from-x, 0px) var(--from-y, 400px); scale: var(--from-s, .5); } to { opacity: 1; translate: 0 0; scale: 1; } }
+@media (prefers-reduced-motion: reduce) { .avatar-wait { opacity: 1; } .avatar-enter { animation: float 4s ease-in-out infinite; } }
+/* Per-avatar --angle is computed in app/page.tsx and set inline by app/components/orbit-avatars.tsx. */
 .band { background: var(--ink); color: white; padding: 22px 28px; overflow: hidden; white-space: nowrap; text-align: center; font: 600 22px Poppins, sans-serif; letter-spacing: .08em; text-transform: uppercase; animation: reveal .8s .25s both; }
 .band span { margin-right: 60px; color: var(--lime); }
 .section { max-width: 1240px; margin: auto; padding: 110px 28px; animation: rise-in .8s .25s both; }
