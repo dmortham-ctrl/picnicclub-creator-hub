@@ -40,9 +40,21 @@ function randomFlights(count: number): Flight[] {
   return flights;
 }
 
+/** A random permutation of 0..count-1: which slot each avatar takes this round. */
+function shuffledSlots(count: number): number[] {
+  const slots = Array.from({ length: count }, (_, i) => i);
+  for (let i = count - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [slots[i], slots[j]] = [slots[j], slots[i]];
+  }
+  return slots;
+}
+
 export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
   // flights: null = not hydrated yet (avatars held back), [] = reduced motion (shown as-is)
   const [flights, setFlights] = useState<Flight[] | null>(null);
+  // slotOf[i] = which slot (u, v) avatar i stands in; reshuffled on every launch so positions change each round.
+  const [slotOf, setSlotOf] = useState<number[] | null>(null);
   const [leaving, setLeaving] = useState(false);
   const [cycle, setCycle] = useState(0); // bumped each launch so the avatars remount and replay
   const hovering = useRef(0);
@@ -59,6 +71,7 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
       const next = randomFlights(creators.length);
       hovering.current = 0;
       setFlights(next);
+      setSlotOf(shuffledSlots(creators.length));
       setLeaving(false);
       setCycle((c) => c + 1);
       const lastLanding = Math.max(...next.map((f) => f.delay)) * 1000 + ENTER_MS;
@@ -83,9 +96,10 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
       {creators.map((creator, index) => {
         const fly = flights?.[index];
         const state = flights === null ? " avatar-wait" : !fly ? "" : leaving ? " avatar-exit" : " avatar-enter";
+        const slot = creators[slotOf?.[index] ?? index];
         const style = {
-          "--u": creator.u,
-          "--v": creator.v,
+          "--u": slot.u,
+          "--v": slot.v,
           ...(fly && {
             "--delay": `${fly.delay}s`,
             "--from-x": `${fly.x}px`,
