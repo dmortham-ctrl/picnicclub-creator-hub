@@ -1,12 +1,12 @@
 /**
- * Hero avatar layout: straight horizontal rows that alternate 4, 5, 4, 5…
+ * Hero avatar layout: straight horizontal rows that alternate 5, 6, 5, 6…
  * avatars, each row centred so the shorter rows sit in the gaps of the longer
  * ones (a brick/honeycomb stagger). Every avatar is placed — none are hidden;
  * if the count doesn't fill the last row it simply ends short, centred.
  *
- *   29 avatars -> 4, 5, 4, 5, 4, 5, 2
+ *   46 avatars -> 5, 6, 5, 6, 5, 6, 5, 6, 2
  */
-export const ORBIT_ROW_PATTERN = [4, 5];
+export const ORBIT_ROW_PATTERN = [5, 6];
 
 export function orbitRowSizes(total: number): number[] {
   const sizes: number[] = [];
