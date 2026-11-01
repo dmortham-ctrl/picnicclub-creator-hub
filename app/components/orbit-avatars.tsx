@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -8,6 +8,11 @@ export type OrbitCreator = { avatar: string; href: string; angle: number; outer:
 
 /** Where an avatar starts from, and when it launches. */
 type Flight = { delay: number; x: number; y: number; s: number };
+
+const ENTER_MS = 850; // matches .avatar-enter in globals.css
+const HOLD_MS = 2000; // how long the landed avatars stay put before leaving again
+const EXIT_MS = 450; // matches .avatar-exit in globals.css
+const GAP_MS = 150; // empty beat between leaving and the next launch
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
@@ -35,19 +40,48 @@ function randomFlights(count: number): Flight[] {
 }
 
 export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
-  // null = not hydrated yet (avatars held back), [] = reduced motion (shown as-is)
+  // flights: null = not hydrated yet (avatars held back), [] = reduced motion (shown as-is)
   const [flights, setFlights] = useState<Flight[] | null>(null);
+  const [leaving, setLeaving] = useState(false);
+  const [cycle, setCycle] = useState(0); // bumped each launch so the avatars remount and replay
+  const hovering = useRef(0);
 
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setFlights(reduce ? [] : randomFlights(creators.length));
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setFlights([]);
+      return;
+    }
+    let timer: ReturnType<typeof setTimeout>;
+
+    // Launch, wait for everyone to land + the hold, then leave and launch again.
+    const launch = () => {
+      const next = randomFlights(creators.length);
+      hovering.current = 0;
+      setFlights(next);
+      setLeaving(false);
+      setCycle((c) => c + 1);
+      const lastLanding = Math.max(...next.map((f) => f.delay)) * 1000 + ENTER_MS;
+      timer = setTimeout(leave, lastLanding + HOLD_MS);
+    };
+    const leave = () => {
+      // Don't yank an avatar away from under someone's cursor.
+      if (hovering.current > 0) {
+        timer = setTimeout(leave, 600);
+        return;
+      }
+      setLeaving(true);
+      timer = setTimeout(launch, EXIT_MS + GAP_MS);
+    };
+
+    launch();
+    return () => clearTimeout(timer);
   }, [creators.length]);
 
   return (
     <>
       {creators.map((creator, index) => {
         const fly = flights?.[index];
-        const state = flights === null ? " avatar-wait" : fly ? " avatar-enter" : "";
+        const state = flights === null ? " avatar-wait" : !fly ? "" : leaving ? " avatar-exit" : " avatar-enter";
         const style = {
           "--angle": `${creator.angle}deg`,
           ...(fly && {
@@ -62,8 +96,10 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
             className={`avatar ${creator.outer ? "avatar-outer" : "avatar-inner"}${state}`}
             style={style}
             href={creator.href}
-            key={index}
+            key={`${cycle}-${index}`}
             aria-label="View creator profile"
+            onPointerEnter={() => { hovering.current += 1; }}
+            onPointerLeave={() => { hovering.current = Math.max(0, hovering.current - 1); }}
           >
             <Image src={creator.avatar} alt="" width={58} height={58} loading="eager" />
           </Link>
