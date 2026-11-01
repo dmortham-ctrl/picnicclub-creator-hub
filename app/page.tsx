@@ -5,7 +5,7 @@ import { CreatorCard } from "./components/creator-card";
 import { SiteNav } from "./components/site-nav";
 import { SiteFooter } from "./components/site-footer";
 import { OrbitAvatars, type OrbitCreator } from "./components/orbit-avatars";
-import { lensPositions } from "@/lib/orbit-layout";
+import { orbitPositions } from "@/lib/orbit-layout";
 import { TrackedLink, TrackView } from "./components/analytics";
 import { getPublishedProfiles } from "@/lib/data";
 import { getFaqs, getSiteContent } from "@/lib/content";
@@ -49,7 +49,7 @@ export default async function Home() {
     .filter((profile) => profile.level === "All Star" && profile.avatar_url)
     .slice(0, 30)
     .map((profile) => ({ avatar: profile.avatar_url, href: `/@${profile.username}` }));
-  const slots = lensPositions(heroCreators.length);
+  const slots = orbitPositions(heroCreators.length);
   const orbitCreators: OrbitCreator[] = heroCreators.map((creator, index) => ({ ...creator, ...slots[index] }));
 
   return <main className="site-shell">
