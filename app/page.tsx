@@ -35,6 +35,25 @@ const benefits = [
   ["04", "Peluang lebih besar", "Akses campaign, sample product, dan kesempatan bersama brand."],
 ];
 
+/** Hero headline, split into words and letters so each letter can animate (rise-in, then an occasional wave). The text still comes from the CMS. */
+function HeroTitle({ text }: { text: string }) {
+  const words = text.trim().split(/\s+/);
+  let index = 0;
+  return (
+    <h1 className="hero-title" aria-label={text}>
+      {words.map((word, wordIndex) => (
+        <span key={wordIndex}>
+          <span className="ht-word" aria-hidden="true">
+            {Array.from(word).map((char, charIndex) => (
+              <span className="ht-ch" style={{ "--i": index++ } as CSSProperties} key={charIndex}>{char}</span>
+            ))}
+          </span>{" "}
+        </span>
+      ))}
+    </h1>
+  );
+}
+
 export default async function Home() {
   const profiles = await getPublishedProfiles();
   const content = await getSiteContent();
@@ -58,7 +77,7 @@ export default async function Home() {
     <TrackView />
     <SiteNav />
     <section className="hero">
-      <div><div className="eyebrow">Creator commerce ecosystem / 001</div><h1>{content.hero_title}</h1><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></div>
+      <div><div className="eyebrow">Creator commerce ecosystem / 001</div><HeroTitle text={content.hero_title} /><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></div>
       <div className="orbit" style={{ "--rows": orbitRows } as CSSProperties}><OrbitAvatars creators={orbitCreators} /></div>
     </section>
     <div className="band">{content.marquee_text}</div>

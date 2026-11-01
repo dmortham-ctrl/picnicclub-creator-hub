@@ -7,6 +7,33 @@ a { color: inherit; text-decoration: none; }
 .brand-link { display: inline-flex; align-items: center; }
 .admin-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--ink); border-radius: 12px; padding: 12px 18px; margin-bottom: 22px; }
 .admin-topbar .button-outline { background: transparent; color: #fff; border-color: #ffffff40; cursor: pointer; }
+/* Hero headline: letters rise in one by one, the last word gets a lime marker drawn under it, then every few seconds a wave runs through the letters. Hover pops a letter. */
+.hero-title { isolation: isolate; }
+.ht-word { display: inline-block; position: relative; white-space: nowrap; }
+.hero-title > span:last-child .ht-word::after { content: ""; position: absolute; left: -.04em; right: -.04em; bottom: .06em; height: .26em; z-index: -1; background: var(--lime); border-radius: 4px; transform-origin: left; animation: ht-marker .7s 1.25s cubic-bezier(.7, 0, .2, 1) backwards; }
+.ht-ch { display: inline-block; transition: translate .2s cubic-bezier(.2, .9, .3, 1.4), scale .2s cubic-bezier(.2, .9, .3, 1.4), rotate .2s, color .2s; animation: ht-in .75s calc(.15s + var(--i) * .045s) cubic-bezier(.2, .9, .3, 1.2) backwards, ht-wave 7s calc(2.4s + var(--i) * .06s) ease-in-out infinite; }
+.ht-ch:hover { translate: 0 -6px; scale: 1.07; rotate: -4deg; color: var(--accent-text); }
+@keyframes ht-in { from { opacity: 0; transform: translateY(.55em) rotate(8deg) scale(.7); filter: blur(8px); } to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes ht-wave { 0%, 14%, 100% { transform: translateY(0); } 7% { transform: translateY(-.1em); } }
+@keyframes ht-marker { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+/* Join buttons: pop in, the lime one glows and gets a gloss sweep, the outline one pings and fills with ink on hover; icons wiggle on hover. */
+.hero-actions a { position: relative; overflow: hidden; isolation: isolate; transition: transform .25s cubic-bezier(.2, .9, .3, 1.3), box-shadow .25s, color .3s, border-color .3s; }
+.hero-actions a:nth-child(1) { animation: btn-pop .7s .95s cubic-bezier(.2, .9, .3, 1.35) backwards, btn-glow 2.8s 2.2s ease-out infinite; }
+.hero-actions a:nth-child(2) { animation: btn-pop .7s 1.1s cubic-bezier(.2, .9, .3, 1.35) backwards, btn-ping 2.8s 3.6s ease-out infinite; }
+.hero-actions a:hover { transform: translateY(-3px) scale(1.05); }
+.hero-actions a:active { transform: scale(.97); }
+.hero-actions a.button-lime:hover { box-shadow: 0 10px 24px #8aa31f55; }
+.hero-actions a.button-lime::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; z-index: 1; background: linear-gradient(105deg, transparent, #ffffffb3, transparent); transform: translateX(-160%) skewX(-20deg); animation: btn-shine 3.8s 1.8s ease-in-out infinite; pointer-events: none; }
+.hero-actions a.button-outline::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .35s cubic-bezier(.7, 0, .2, 1); }
+.hero-actions a.button-outline:hover { color: #fff; border-color: var(--ink); }
+.hero-actions a.button-outline:hover::before { transform: scaleX(1); }
+.hero-actions a:hover svg { animation: icon-wiggle .55s ease-in-out; }
+@keyframes btn-pop { from { opacity: 0; transform: translateY(26px) scale(.8); } to { opacity: 1; transform: none; } }
+@keyframes btn-glow { 0% { box-shadow: 0 0 0 0 #d8f36acc; } 70%, 100% { box-shadow: 0 0 0 16px #d8f36a00; } }
+@keyframes btn-ping { 0% { box-shadow: 0 0 0 0 #162a2440; } 70%, 100% { box-shadow: 0 0 0 14px #162a2400; } }
+@keyframes btn-shine { 0% { transform: translateX(-160%) skewX(-20deg); } 35%, 100% { transform: translateX(420%) skewX(-20deg); } }
+@keyframes icon-wiggle { 0%, 100% { transform: rotate(0) scale(1); } 25% { transform: rotate(-14deg) scale(1.2); } 55% { transform: rotate(12deg) scale(1.2); } 80% { transform: rotate(-5deg); } }
+@media (prefers-reduced-motion: reduce) { .ht-ch, .hero-title .ht-word::after, .hero-actions a, .hero-actions a::after, .hero-actions a svg { animation: none !important; } }
 .admin-topbar .button-outline:hover { border-color: #ffffff80; background: #ffffff1a; }
 .admin-topbar .button-dark { background: var(--lime); color: var(--ink); }
 .admin-topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
