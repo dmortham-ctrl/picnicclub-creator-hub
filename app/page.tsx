@@ -5,7 +5,7 @@ import { CreatorCard } from "./components/creator-card";
 import { SiteNav } from "./components/site-nav";
 import { SiteFooter } from "./components/site-footer";
 import { OrbitAvatars, type OrbitCreator } from "./components/orbit-avatars";
-import { orbitPositions } from "@/lib/orbit-layout";
+import { orbitPositions, orbitRowSizes } from "@/lib/orbit-layout";
 import { TrackedLink, TrackView } from "./components/analytics";
 import { getPublishedProfiles } from "@/lib/data";
 import { getFaqs, getSiteContent } from "@/lib/content";
@@ -47,9 +47,10 @@ export default async function Home() {
   // avatar's slot are derived from the count (lib/orbit-layout.ts), so nobody is hidden.
   const heroCreators = profiles
     .filter((profile) => profile.level === "All Star" && profile.avatar_url)
-    .slice(0, 30)
+    .slice(0, 80)
     .map((profile) => ({ avatar: profile.avatar_url, href: `/@${profile.username}` }));
   const slots = orbitPositions(heroCreators.length);
+  const orbitRows = orbitRowSizes(heroCreators.length).length;
   const orbitCreators: OrbitCreator[] = heroCreators.map((creator, index) => ({ ...creator, ...slots[index] }));
 
   return <main className="site-shell">
@@ -58,7 +59,7 @@ export default async function Home() {
     <SiteNav />
     <section className="hero">
       <div><div className="eyebrow">Creator commerce ecosystem / 001</div><h1>{content.hero_title}</h1><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></div>
-      <div className="orbit"><OrbitAvatars creators={orbitCreators} /></div>
+      <div className="orbit" style={{ "--rows": orbitRows } as CSSProperties}><OrbitAvatars creators={orbitCreators} /></div>
     </section>
     <div className="band">{content.marquee_text}</div>
 
