@@ -15,7 +15,7 @@ import { TikTokPhone } from "./components/tiktok-phone";
 import { HeroTitle } from "./components/hero-title";
 
 /** Headlines that take turns in the hero (typed out, then faded). The CMS headline always plays last. */
-const HERO_PHRASES = ["Kamu jangan berjuang sendirian.", "Join circle keren Picnic Club."];
+const HERO_PHRASES = ["Kamu jangan jalan sendirian.", "Join circle keren Picnic Club."];
 import { JsonLd, organizationLd } from "./components/json-ld";
 import { TiktokIcon, ShopeeIcon } from "./components/brand-icons";
 
