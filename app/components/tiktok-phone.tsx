@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TikTokFeed } from "@/lib/tiktok";
 
 const compact = (n: number) => {
@@ -16,6 +16,23 @@ const compact = (n: number) => {
  */
 export function TikTokPhone({ feed, handle }: { feed: TikTokFeed | null; handle: string }) {
   const [playing, setPlaying] = useState<string | null>(null);
+  const player = useRef<HTMLIFrameElement>(null);
+
+  // Browsers may start an autoplaying embed muted; ask TikTok's player to switch the sound on
+  // as soon as it is ready (and once more if it reports itself muted right after).
+  useEffect(() => {
+    if (!playing) return;
+    let retries = 0;
+    const send = (type: string) => player.current?.contentWindow?.postMessage({ type, "x-tiktok-player": true }, "https://www.tiktok.com");
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== "https://www.tiktok.com" || event.source !== player.current?.contentWindow) return;
+      const data = event.data as { type?: string; value?: unknown } | null;
+      if (data?.type === "onPlayerReady") send("unMute");
+      else if (data?.type === "onMute" && data.value === true && retries < 2) { retries += 1; send("unMute"); }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [playing]);
 
   return (
     <div className="tt-phone" role="group" aria-label={`TikTok @${handle}`}>
@@ -61,7 +78,7 @@ export function TikTokPhone({ feed, handle }: { feed: TikTokFeed | null; handle:
 
         {playing && (
           <div className="tt-player">
-            <iframe src={`https://www.tiktok.com/player/v1/${playing}?autoplay=1&music_info=1&description=1&rel=0`} title="Video TikTok Picnic Club" allow="autoplay; fullscreen; encrypted-media" allowFullScreen />
+            <iframe ref={player} src={`https://www.tiktok.com/player/v1/${playing}?autoplay=1&muted=0&volume_control=1&music_info=1&description=1&rel=0`} title="Video TikTok Picnic Club" allow="autoplay; fullscreen; encrypted-media" allowFullScreen />
             <button type="button" className="tt-close" onClick={() => setPlaying(null)} aria-label="Tutup video">×</button>
           </div>
         )}
