@@ -695,3 +695,8 @@ a.bio-ratecard-cta:hover { transform: translateY(-2px); }
 @keyframes tt-in { from { opacity: 0; transform: scale(.94) translateY(14px); } }
 @media (max-width: 900px) { .tt-section { grid-template-columns: 1fr; gap: 52px; } .tt-copy { max-width: none; } .tt-stage { order: 2; } }
 @media (prefers-reduced-motion: reduce) { .tt-player { animation: none; } .tt-grid img, .tt-follow-cta { transition: none; } }
+
+/* ---- FAQ: the colourful brush from the hero, full-bleed and faded behind the section ---- */
+.faq-section { position: relative; isolation: isolate; }
+.faq-section::before { content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: 50%; width: 100vw; margin-left: -50vw; background: url("/orbit-brush.webp") center / cover no-repeat; opacity: .25; pointer-events: none; }
+body { overflow-x: clip; }
