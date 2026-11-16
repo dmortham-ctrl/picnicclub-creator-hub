@@ -641,3 +641,57 @@ a.bio-ratecard-cta:hover { transform: translateY(-2px); }
   .founder-grid > .creator-card { flex: 0 0 43%; scroll-snap-align: start; }
 }
 @media (max-width: 760px) { .brand-admin-row { grid-template-columns: 44px 1fr; }.brand-admin-row img { width: 44px; height: 44px; }.brand-admin-row button { padding: 9px 11px; }.form-actions { flex-wrap: wrap; } }
+
+/* ---- "Our TikTok": iPhone mockup + copy ---- */
+.tt-section { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; border-top: 1px solid var(--line); }
+.tt-copy { max-width: 440px; }
+.tt-copy h2 { margin-bottom: 22px; }
+.tt-copy .hero-copy { margin: 0 0 30px; }
+.tt-follow-cta { display: inline-flex; align-items: center; gap: 9px; background: var(--ink); color: #fff; border-radius: 999px; padding: 14px 22px; font-size: 12px; font-weight: 800; transition: transform .25s cubic-bezier(.2, .9, .3, 1.3), box-shadow .25s; }
+.tt-follow-cta:hover { transform: translateY(-3px); box-shadow: 0 12px 26px #162a2440; }
+.tt-follow-cta svg { width: 16px; height: 16px; }
+.tt-stage { display: flex; justify-content: center; position: relative; }
+.tt-stage::before { content: ""; position: absolute; width: 360px; height: 360px; border-radius: 50%; background: var(--lime); top: 50%; left: 50%; transform: translate(-50%, -48%); opacity: .55; filter: blur(2px); }
+.tt-phone { position: relative; width: 300px; height: 620px; flex: none; border-radius: 52px; padding: 11px; background: linear-gradient(145deg, #2b3430, #0c110f 40%, #1d2522); box-shadow: 0 0 0 2px #46524c inset, 0 40px 70px -20px #162a2477, 0 12px 24px -8px #162a2440; }
+.tt-btn { position: absolute; width: 4px; background: #1d2522; border-radius: 2px; left: -3px; }
+.tt-btn-a { top: 96px; height: 24px; }
+.tt-btn-b { top: 140px; height: 44px; }
+.tt-btn-c { top: 196px; height: 44px; }
+.tt-btn-power { left: auto; right: -3px; top: 160px; height: 70px; }
+.tt-screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 42px; background: #000; color: #fff; isolation: isolate; }
+.tt-island { position: absolute; z-index: 6; top: 10px; left: 50%; width: 88px; height: 25px; margin-left: -44px; border-radius: 20px; background: #000; box-shadow: 0 0 0 1px #ffffff14; }
+.tt-status { position: absolute; z-index: 5; top: 0; left: 0; right: 0; height: 46px; padding: 14px 26px 0; display: flex; justify-content: space-between; align-items: flex-start; font-size: 12px; background: linear-gradient(#000 55%, transparent); pointer-events: none; }
+.tt-status i { width: 24px; height: 11px; margin-top: 3px; border: 1.5px solid #fff9; border-radius: 4px; background: linear-gradient(90deg, #fff 0 78%, transparent 78%) content-box; padding: 1px; }
+.tt-scroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding-top: 44px; padding-bottom: 26px; outline-offset: -3px; }
+.tt-scroll::-webkit-scrollbar { display: none; }
+.tt-profile { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 14px 18px 12px; }
+.tt-avatar { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; background: #222; }
+.tt-profile h3 { font-size: 14px; font-weight: 700; margin: 10px 0 12px; }
+.tt-stats { display: flex; gap: 22px; }
+.tt-stats div { display: flex; flex-direction: column; gap: 1px; }
+.tt-stats strong { font-size: 15px; font-weight: 700; }
+.tt-stats span { font-size: 10px; color: #ffffff94; }
+.tt-profile .tt-follow { margin-top: 14px; min-width: 150px; padding: 9px 20px; border-radius: 4px; background: #fe2c55; color: #fff; font-size: 13px; font-weight: 700; transition: filter .2s; }
+.tt-profile .tt-follow:hover { filter: brightness(1.12); }
+.tt-bio { margin: 12px 0 0; font-size: 11px; line-height: 1.5; color: #ffffffb8; white-space: pre-line; }
+.tt-tab { border-bottom: 1px solid #ffffff22; display: flex; justify-content: center; height: 8px; }
+.tt-tab span { width: 44px; height: 2px; background: #fff; align-self: flex-end; margin-bottom: -1px; }
+.tt-grid { list-style: none; margin: 2px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.tt-grid button { position: relative; display: block; width: 100%; aspect-ratio: 3 / 4; padding: 0; border: 0; background: #1b1f1d; cursor: pointer; overflow: hidden; }
+.tt-grid img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+.tt-grid button:hover img, .tt-grid button:focus-visible img { transform: scale(1.06); }
+.tt-grid button:focus-visible { outline: 2px solid var(--lime); outline-offset: -2px; }
+.tt-grid button::after { content: ""; position: absolute; inset: auto 0 0; height: 38%; background: linear-gradient(transparent, #000b); pointer-events: none; }
+.tt-plays { position: absolute; z-index: 1; left: 6px; bottom: 5px; font-size: 10px; font-weight: 700; text-shadow: 0 1px 3px #000a; }
+.tt-plays::before { content: "\25B6"; font-size: 8px; margin-right: 4px; }
+.tt-more { display: block; text-align: center; margin: 18px 18px 0; font-size: 11px; color: #ffffff94; text-decoration: underline; text-underline-offset: 3px; }
+.tt-more:hover { color: #fff; }
+.tt-fallback { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; padding-top: 44px; background: #fff; }
+.tt-player { position: absolute; inset: 0; z-index: 4; background: #000; animation: tt-in .3s cubic-bezier(.2, .9, .3, 1) both; }
+.tt-player iframe { width: 100%; height: 100%; border: 0; }
+.tt-close { position: absolute; z-index: 2; top: 48px; left: 12px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: #000a; color: #fff; font-size: 22px; line-height: 1; cursor: pointer; }
+.tt-close:hover { background: #000; }
+.tt-home { position: absolute; z-index: 6; bottom: 7px; left: 50%; width: 104px; height: 4px; margin-left: -52px; border-radius: 3px; background: #fffc; pointer-events: none; }
+@keyframes tt-in { from { opacity: 0; transform: scale(.94) translateY(14px); } }
+@media (max-width: 900px) { .tt-section { grid-template-columns: 1fr; gap: 52px; } .tt-copy { max-width: none; } .tt-stage { order: 2; } }
+@media (prefers-reduced-motion: reduce) { .tt-player { animation: none; } .tt-grid img, .tt-follow-cta { transition: none; } }

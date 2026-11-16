@@ -10,6 +10,8 @@ import { TrackedLink, TrackView } from "./components/analytics";
 import { getPublishedProfiles } from "@/lib/data";
 import { getFaqs, getSiteContent } from "@/lib/content";
 import { getActiveBrands } from "@/lib/brand-data";
+import { getTikTokFeed, TIKTOK_HANDLE, TIKTOK_URL } from "@/lib/tiktok";
+import { TikTokPhone } from "./components/tiktok-phone";
 import { JsonLd, organizationLd } from "./components/json-ld";
 import { TiktokIcon, ShopeeIcon } from "./components/brand-icons";
 
@@ -59,6 +61,7 @@ export default async function Home() {
   const content = await getSiteContent();
   const brands = await getActiveBrands();
   const faqs = await getFaqs();
+  const tiktok = await getTikTokFeed();
   const founderUsernames = content.founder_usernames.split(",").map((name) => name.trim()).filter(Boolean);
   const founders = founderUsernames.map((username) => profiles.find((profile) => profile.username === username)).filter((profile): profile is typeof profiles[number] => Boolean(profile));
 
@@ -97,7 +100,12 @@ export default async function Home() {
 
     <section id="faq" className="section faq-section"><div className="section-head"><div><div className="eyebrow">Good to know / 007</div><h2>Questions,<br />answered.</h2></div><p className="section-note">{content.faq_intro}</p></div><div className="faq-list">{faqs.map(({ question, answer }) => <details key={question}><summary>{question}<span>+</span></summary><p>{answer}</p></details>)}</div></section>
 
-    <section className="final-cta"><div className="eyebrow">Your next chapter / 008</div><h2>Ready to grow<br /><i>together?</i></h2><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline light-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></section>
+    <section id="tiktok" className="section tt-section">
+      <div className="tt-stage"><TikTokPhone feed={tiktok} handle={TIKTOK_HANDLE} /></div>
+      <div className="tt-copy"><div className="eyebrow">Follow us / 008</div><h2>Our<br />TikTok.</h2><p className="hero-copy">Follow untuk dapet update kegiatan-kegiatan Picnic Club.</p><TrackedLink ctaKey="follow_tiktok" className="tt-follow-cta" href={TIKTOK_URL} external><TiktokIcon />Follow @{TIKTOK_HANDLE}</TrackedLink></div>
+    </section>
+
+    <section className="final-cta"><div className="eyebrow">Your next chapter / 009</div><h2>Ready to grow<br /><i>together?</i></h2><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline light-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></section>
     <SiteFooter />
   </main>;
 }

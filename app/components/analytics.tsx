@@ -22,18 +22,29 @@ export function TrackedLink({
   ctaKey,
   href,
   className,
+  external,
   children,
 }: {
   ctaKey: string;
   href: string;
   className?: string;
+  /** Opens an off-site URL in a new tab. */
+  external?: boolean;
   children: React.ReactNode;
 }) {
+  const onClick = () => track({ event_name: "cta_click", path: window.location.pathname, cta_key: ctaKey });
+  if (external) {
+    return (
+      <a href={href} className={className} target="_blank" rel="noopener noreferrer" onClick={onClick}>
+        {children}
+      </a>
+    );
+  }
   return (
     <Link
       href={href}
       className={className}
-      onClick={() => track({ event_name: "cta_click", path: window.location.pathname, cta_key: ctaKey })}
+      onClick={onClick}
     >
       {children}
     </Link>
