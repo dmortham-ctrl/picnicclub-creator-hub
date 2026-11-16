@@ -15,7 +15,7 @@ import { TikTokPhone } from "./components/tiktok-phone";
 import { HeroTitle } from "./components/hero-title";
 
 /** Headlines that take turns in the hero (typed out, then faded), in this order. */
-const HERO_PHRASES = ["Kamu Jangan Jalan Sendirian Ntar Repot Sendiri", "Join Circle Keren Disini", "Grow Up Bareng Picnic Club", "More Than An Agency"];
+const HERO_PHRASES = ["Kamu Jangan Jalan Sendirian", "Ntar Repot Sendiri", "Join Circle Keren Disini", "Grow Up Bareng Picnic Club", "More Than An Agency"];
 import { JsonLd, organizationLd } from "./components/json-ld";
 import { TiktokIcon, ShopeeIcon } from "./components/brand-icons";
 
