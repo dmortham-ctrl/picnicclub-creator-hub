@@ -70,7 +70,7 @@ export default function AboutPage() {
               <h3>When Creators Meet Business</h3>
               <div className="story-chapter-body">
                 <p>
-                  Dalam perjalanan tersebut, mereka bertemu dengan Andika Malik Maharaya dan Rommy
+                  Dalam perjalanan tersebut, mereka bertemu dengan Dhika dan Rommy
                   Arrahman, yang memiliki pengalaman di bidang Business Development — mempertemukan
                   dua perspektif yang berbeda namun saling melengkapi.
                 </p>
