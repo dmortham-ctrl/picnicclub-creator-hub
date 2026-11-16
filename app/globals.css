@@ -698,5 +698,5 @@ a.bio-ratecard-cta:hover { transform: translateY(-2px); }
 
 /* ---- FAQ: the colourful brush from the hero, full-bleed and faded behind the section ---- */
 .faq-section { position: relative; isolation: isolate; }
-.faq-section::before { content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: 50%; width: 100vw; margin-left: -50vw; background: url("/orbit-brush.webp") center / cover no-repeat; opacity: .25; pointer-events: none; }
+.faq-section::before { content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: 50%; width: 100vw; margin-left: -50vw; background: url("/orbit-brush.webp") center / cover no-repeat; opacity: .125; pointer-events: none; }
 body { overflow-x: clip; }
