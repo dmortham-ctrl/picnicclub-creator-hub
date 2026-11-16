@@ -652,13 +652,13 @@ a.bio-ratecard-cta:hover { transform: translateY(-2px); }
 .tt-follow-cta svg { width: 16px; height: 16px; }
 .tt-stage { display: flex; justify-content: center; position: relative; }
 .tt-stage::before { content: ""; position: absolute; width: 360px; height: 360px; border-radius: 50%; background: var(--lime); top: 50%; left: 50%; transform: translate(-50%, -48%); opacity: .55; filter: blur(2px); }
-.tt-phone { position: relative; width: 300px; height: 620px; flex: none; border-radius: 52px; padding: 11px; background: linear-gradient(145deg, #2b3430, #0c110f 40%, #1d2522); box-shadow: 0 0 0 2px #46524c inset, 0 40px 70px -20px #162a2477, 0 12px 24px -8px #162a2440; }
-.tt-btn { position: absolute; width: 4px; background: #1d2522; border-radius: 2px; left: -3px; }
+.tt-phone { position: relative; width: 300px; height: 620px; flex: none; border-radius: 52px; padding: 11px; background: linear-gradient(145deg, #f6f7f8 0%, #c5c9cd 28%, #eceef0 52%, #aeb3b8 78%, #d9dcdf 100%); box-shadow: 0 0 0 1.5px #fffd inset, 0 0 0 3px #9ea4a9 inset, 0 40px 70px -20px #162a2477, 0 12px 24px -8px #162a2440; }
+.tt-btn { position: absolute; width: 4px; background: linear-gradient(90deg, #8f959a, #dfe2e5);  border-radius: 2px; left: -3px; }
 .tt-btn-a { top: 96px; height: 24px; }
 .tt-btn-b { top: 140px; height: 44px; }
 .tt-btn-c { top: 196px; height: 44px; }
 .tt-btn-power { left: auto; right: -3px; top: 160px; height: 70px; }
-.tt-screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 42px; background: #000; color: #fff; isolation: isolate; }
+.tt-screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 42px; background: #000; color: #fff; isolation: isolate; box-shadow: 0 0 0 5px #050607, 0 0 0 6px #6d7378; }
 .tt-island { position: absolute; z-index: 6; top: 10px; left: 50%; width: 88px; height: 25px; margin-left: -44px; border-radius: 20px; background: #000; box-shadow: 0 0 0 1px #ffffff14; }
 .tt-status { position: absolute; z-index: 5; top: 0; left: 0; right: 0; height: 46px; padding: 14px 26px 0; display: flex; justify-content: space-between; align-items: flex-start; font-size: 12px; background: linear-gradient(#000 55%, transparent); pointer-events: none; }
 .tt-status i { width: 24px; height: 11px; margin-top: 3px; border: 1.5px solid #fff9; border-radius: 4px; background: linear-gradient(90deg, #fff 0 78%, transparent 78%) content-box; padding: 1px; }
