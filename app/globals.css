@@ -696,7 +696,9 @@ a.bio-ratecard-cta:hover { transform: translateY(-2px); }
 @media (max-width: 900px) { .tt-section { grid-template-columns: 1fr; gap: 52px; } .tt-copy { max-width: none; } .tt-stage { order: 2; } }
 @media (prefers-reduced-motion: reduce) { .tt-player { animation: none; } .tt-grid img, .tt-follow-cta { transition: none; } }
 
-/* ---- FAQ: the colourful brush from the hero, full-bleed and faded behind the section ---- */
+/* ---- FAQ: full-bleed lime band, same green as "Why Picnic Club" ---- */
 .faq-section { position: relative; isolation: isolate; }
-.faq-section::before { content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: 50%; width: 100vw; margin-left: -50vw; background: url("/orbit-brush.webp") center / cover no-repeat; opacity: .05; pointer-events: none; }
+.faq-section::before { content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: 50%; width: 100vw; margin-left: -50vw; background: var(--lime); pointer-events: none; }
+.faq-section .eyebrow, .faq-section .section-note, .faq-list p { color: var(--ink); }
+.faq-list details, .faq-list details:last-child { border-color: #162a2430; }
 body { overflow-x: clip; }
