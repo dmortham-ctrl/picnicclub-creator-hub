@@ -14,8 +14,8 @@ import { getTikTokFeed, TIKTOK_HANDLE, TIKTOK_URL } from "@/lib/tiktok";
 import { TikTokPhone } from "./components/tiktok-phone";
 import { HeroTitle } from "./components/hero-title";
 
-/** Headlines that take turns in the hero (typed out, then faded). The CMS headline always plays last. */
-const HERO_PHRASES = ["Kamu jangan jalan sendirian.", "Join circle keren Picnic Club."];
+/** Headlines that take turns in the hero (typed out, then faded), in this order. */
+const HERO_PHRASES = ["Kamu Jangan Jalan Sendirian", "Join Circle Keren Disini", "Grow Up Bareng Picnic Club", "More Than An Agency"];
 import { JsonLd, organizationLd } from "./components/json-ld";
 import { TiktokIcon, ShopeeIcon } from "./components/brand-icons";
 
@@ -65,7 +65,7 @@ export default async function Home() {
     <TrackView />
     <SiteNav />
     <section className="hero">
-      <div><div className="eyebrow">Creator commerce ecosystem / 001</div><HeroTitle label={content.hero_title} phrases={HERO_PHRASES.concat(content.hero_title)} /><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></div>
+      <div><div className="eyebrow">Creator commerce ecosystem / 001</div><HeroTitle label={content.hero_title} phrases={HERO_PHRASES} /><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></div>
       <div className="orbit" style={{ "--rows": orbitRows } as CSSProperties}><OrbitAvatars creators={orbitCreators} /></div>
     </section>
     <div className="band">{content.marquee_text}</div>
