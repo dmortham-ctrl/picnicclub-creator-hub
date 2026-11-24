@@ -14,6 +14,8 @@ const ENTER_MS = 850; // matches .avatar-enter in globals.css
 const HOLD_MS = 10000; // how long the landed avatars stay put before leaving again
 const EXIT_MS = 450; // matches .avatar-exit in globals.css
 const TITLE_MS = 3000; // the "TOP 40" title card between rounds; matches the .orbit-title timeline in globals.css
+const AWARD_MS = 5500; // the "Rising Star MCN 2026" photo after the title card; matches .orbit-award in globals.css
+const AWARD_SRC = "/rising-star-2026.jpeg";
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
@@ -57,6 +59,7 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
   const [slotOf, setSlotOf] = useState<number[] | null>(null);
   const [leaving, setLeaving] = useState(false);
   const [title, setTitle] = useState(false); // the "TOP 40" card shown after the avatars leave
+  const [award, setAward] = useState(false); // the Rising Star photo shown after the title card
   const [cycle, setCycle] = useState(0); // bumped each launch so the avatars remount and replay
   const hovering = useRef(0);
 
@@ -66,12 +69,14 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
       return;
     }
     let timer: ReturnType<typeof setTimeout>;
+    new window.Image().src = AWARD_SRC; // warm the cache so the photo doesn't pop in late
 
     // Launch, wait for everyone to land + the hold, then leave and launch again.
     const launch = () => {
       const next = randomFlights(creators.length);
       hovering.current = 0;
       setTitle(false);
+      setAward(false);
       setFlights(next);
       setSlotOf(shuffledSlots(creators.length));
       setLeaving(false);
@@ -86,10 +91,14 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
         return;
       }
       setLeaving(true);
-      // Avatars are gone -> slam the title card in -> then the next round launches.
+      // Avatars are gone -> slam the title card in -> show the award photo -> then the next round launches.
       timer = setTimeout(() => {
         setTitle(true);
-        timer = setTimeout(launch, TITLE_MS);
+        timer = setTimeout(() => {
+          setTitle(false);
+          setAward(true);
+          timer = setTimeout(launch, AWARD_MS);
+        }, TITLE_MS);
       }, EXIT_MS);
     };
 
@@ -127,6 +136,14 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
           </Link>
         );
       })}
+      {award && (
+        <div className="orbit-award">
+          <span className="oa-card">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={AWARD_SRC} alt="Picnic Club meraih penghargaan Rising Star MCN 2026 dari TikTok Shop Indonesia" width={900} height={1600} />
+          </span>
+        </div>
+      )}
       {title && (
         <div className="orbit-title" aria-hidden="true">
           <span className="ot-ring" />
