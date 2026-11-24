@@ -65,32 +65,32 @@ export default async function Home() {
     <TrackView />
     <SiteNav />
     <section className="hero">
-      <div><div className="eyebrow">Creator commerce ecosystem / 001</div><HeroTitle label={content.hero_title} phrases={HERO_PHRASES} /><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></div>
+      <div><HeroTitle label={content.hero_title} phrases={HERO_PHRASES} /><p className="hero-copy">{content.hero_description}</p><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></div>
       <div className="orbit" style={{ "--rows": orbitRows } as CSSProperties}><OrbitAvatars creators={orbitCreators} /></div>
     </section>
     <div className="band">{content.marquee_text}</div>
 
     <section id="community" className="section">
-      <div className="section-head"><div><div className="eyebrow">The founders / 002</div><h2>The<br />Founders.</h2><p className="section-note founder-note">Tujuh praktisi yang membangun Picnic Club dari pengalaman nyata sebagai creator, affiliator, dan business development.</p></div></div>
+      <div className="section-head"><div><h2>The<br />Founders.</h2><p className="section-note founder-note">Tujuh praktisi yang membangun Picnic Club dari pengalaman nyata sebagai creator, affiliator, dan business development.</p></div></div>
       <div className="creator-grid founder-grid">{founders.map((profile) => <CreatorCard key={profile.id} profile={profile} />)}</div>
     </section>
 
-    <section className="stats-section"><div className="section stats-inner"><div><div className="eyebrow">A growing movement / 003</div><h2>Small team.<br />Big energy.</h2></div><div className="stats-grid"><div><strong>2K<span>+</span></strong><small>Creators</small></div><div><strong>100<span>+</span></strong><small>Brand collaborations</small></div><div><strong>100K<span>+</span></strong><small>Videos / month</small></div><div><strong>100M<span>+</span></strong><small>Views / month</small></div></div></div></section>
+    <section className="stats-section"><div className="section stats-inner"><div><h2>Small team.<br />Big energy.</h2></div><div className="stats-grid"><div><strong>2K<span>+</span></strong><small>Creators</small></div><div><strong>100<span>+</span></strong><small>Brand collaborations</small></div><div><strong>100K<span>+</span></strong><small>Videos / month</small></div><div><strong>100M<span>+</span></strong><small>Views / month</small></div></div></div></section>
 
-    <section className="brands-section"><div className="section brands-heading"><div className="eyebrow">The good company / 004</div><h2>{content.brands_title}</h2><p className="section-note">Partner dengan brand yang percaya pada creator-led commerce.</p></div><div className="brand-marquee" aria-label="Partner brands"><div className="brand-track">{[...brands, ...brands].map((brand, index) => <div className="brand-logo" key={`${brand.name}-${index}`}><Image src={brand.logo_url} alt={brand.name} width={78} height={78} /></div>)}</div></div></section>
+    <section className="brands-section"><div className="section brands-heading"><h2>{content.brands_title}</h2><p className="section-note">Partner dengan brand yang percaya pada creator-led commerce.</p></div><div className="brand-marquee" aria-label="Partner brands"><div className="brand-track">{[...brands, ...brands].map((brand, index) => <div className="brand-logo" key={`${brand.name}-${index}`}><Image src={brand.logo_url} alt={brand.name} width={78} height={78} /></div>)}</div></div></section>
 
-    <section id="about" className="section lime-section"><div className="eyebrow">Why Picnic Club / 005</div><h2>{content.about_title}</h2><p className="hero-copy lime-copy">Dari training, mentoring, networking, sampai peluang kolaborasi dengan brand. Picnic Club hadir untuk membantu creator tumbuh dengan support yang nyata.</p><div className="benefit-grid">{benefits.map(([number, title, text]) => <div className="benefit" key={number}><span>{number}</span><h3>{title}</h3><p>{text}</p></div>)}</div></section>
+    <section id="about" className="section lime-section"><h2>{content.about_title}</h2><p className="hero-copy lime-copy">Dari training, mentoring, networking, sampai peluang kolaborasi dengan brand. Picnic Club hadir untuk membantu creator tumbuh dengan support yang nyata.</p><div className="benefit-grid">{benefits.map(([number, title, text]) => <div className="benefit" key={number}><span>{number}</span><h3>{title}</h3><p>{text}</p></div>)}</div></section>
 
-    <section id="brands" className="section split-section"><div><div className="eyebrow">For brands / 006</div><h2>Make your<br />next move.</h2></div><div><p className="hero-copy">Berkolaborasi dengan komunitas creator affiliate yang terus berkembang untuk meningkatkan visibilitas, konversi, dan penjualan brand Anda.</p><TrackedLink ctaKey="brand_contact" className="button-dark" href="https://wa.me/6282353677282">Talk to our team ↗</TrackedLink></div></section>
+    <section id="brands" className="section split-section"><div><h2>Make your<br />next move.</h2></div><div><p className="hero-copy">Berkolaborasi dengan komunitas creator affiliate yang terus berkembang untuk meningkatkan visibilitas, konversi, dan penjualan brand Anda.</p><TrackedLink ctaKey="brand_contact" className="button-dark" href="https://wa.me/6282353677282">Talk to our team ↗</TrackedLink></div></section>
 
-    <section id="faq" className="section faq-section"><div className="section-head"><div><div className="eyebrow">Good to know / 007</div><h2>Questions,<br />answered.</h2></div><p className="section-note">{content.faq_intro}</p></div><div className="faq-list">{faqs.map(({ question, answer }) => <details key={question}><summary>{question}<span>+</span></summary><p>{answer}</p></details>)}</div></section>
+    <section id="faq" className="section faq-section"><div className="section-head"><div><h2>Questions,<br />answered.</h2></div><p className="section-note">{content.faq_intro}</p></div><div className="faq-list">{faqs.map(({ question, answer }) => <details key={question}><summary>{question}<span>+</span></summary><p>{answer}</p></details>)}</div></section>
 
     <section id="tiktok" className="section tt-section">
       <div className="tt-stage"><TikTokPhone feed={tiktok} handle={TIKTOK_HANDLE} /></div>
-      <div className="tt-copy"><div className="eyebrow">Follow us / 008</div><h2>Our<br />TikTok.</h2><p className="hero-copy">Follow untuk dapet update kegiatan-kegiatan Picnic Club.</p><TrackedLink ctaKey="follow_tiktok" className="tt-follow-cta" href={TIKTOK_URL} external><TiktokIcon />Follow @{TIKTOK_HANDLE}</TrackedLink></div>
+      <div className="tt-copy"><h2>Our<br />TikTok.</h2><p className="hero-copy">Follow untuk dapet update kegiatan-kegiatan Picnic Club.</p><TrackedLink ctaKey="follow_tiktok" className="tt-follow-cta" href={TIKTOK_URL} external><TiktokIcon />Follow @{TIKTOK_HANDLE}</TrackedLink></div>
     </section>
 
-    <section className="final-cta"><div className="eyebrow">Your next chapter / 009</div><h2>Ready to grow<br /><i>together?</i></h2><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline light-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></section>
+    <section className="final-cta"><h2>Ready to grow<br /><i>together?</i></h2><div className="hero-actions"><TrackedLink ctaKey="join_tiktok" className="button-lime" href="/join"><TiktokIcon />Join Agency Tiktok</TrackedLink><TrackedLink ctaKey="join_shopee" className="button-outline light-outline" href="/join-shopee"><ShopeeIcon />Join Agency Shopee</TrackedLink></div></section>
     <SiteFooter />
   </main>;
 }
