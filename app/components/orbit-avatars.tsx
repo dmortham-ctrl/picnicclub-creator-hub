@@ -71,7 +71,13 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
     let timer: ReturnType<typeof setTimeout>;
     new window.Image().src = AWARD_SRC; // warm the cache so the photo doesn't pop in late
 
-    // Launch, wait for everyone to land + the hold, then leave and launch again.
+    // The loop: TOP 40 title card -> avatars fly in and stay -> avatars leave -> Rising Star photo -> TOP 40 again.
+    const showTitle = () => {
+      setAward(false);
+      setTitle(true);
+      timer = setTimeout(launch, TITLE_MS);
+    };
+    // Launch, wait for everyone to land + the hold, then leave.
     const launch = () => {
       const next = randomFlights(creators.length);
       hovering.current = 0;
@@ -91,18 +97,14 @@ export function OrbitAvatars({ creators }: { creators: OrbitCreator[] }) {
         return;
       }
       setLeaving(true);
-      // Avatars are gone -> slam the title card in -> show the award photo -> then the next round launches.
+      // Avatars are gone -> show the award photo -> then the title card comes round again.
       timer = setTimeout(() => {
-        setTitle(true);
-        timer = setTimeout(() => {
-          setTitle(false);
-          setAward(true);
-          timer = setTimeout(launch, AWARD_MS);
-        }, TITLE_MS);
+        setAward(true);
+        timer = setTimeout(showTitle, AWARD_MS);
       }, EXIT_MS);
     };
 
-    launch();
+    showTitle();
     return () => clearTimeout(timer);
   }, [creators.length]);
 
